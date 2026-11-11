@@ -506,7 +506,7 @@
     "inspection": "MEW Inspection",
     "addToInspection": "MEW Inspection",
     "removeFromInspection": "Remove from inspection",
-    "submitFirst": "Set both MEW AC and MEW Electricity states (not Not Submitted) before adding the villa for MEW inspection",
+    "approveFirst": "Both MEW AC and MEW Electricity states must be Approved before adding the villa for MEW inspection",
     "onInspection": "On MEW inspection",
     "addedToInspection": "Villa {{name}} was added for MEW inspection.",
     "removedFromInspection": "Villa {{name}} was removed from MEW inspection.",
