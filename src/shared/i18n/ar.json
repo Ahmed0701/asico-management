@@ -790,6 +790,7 @@
     "inspection": "معاينة الوزارة",
     "addToInspection": "معاينة الوزارة",
     "removeFromInspection": "إزالة من المعاينة",
+    "submitFirst": "حدّد حالتي التكييف والكهرباء في الوزارة (MEW) بقيمة غير «لم يُقدَّم» قبل إضافة الفيلا للمعاينة",
     "onInspection": "في معاينة الوزارة",
     "addedToInspection": "تمت إضافة الفيلا {{name}} لمعاينة الوزارة.",
     "removedFromInspection": "تمت إزالة الفيلا {{name}} من معاينة الوزارة.",

@@ -151,6 +151,10 @@ export default function MewFollowUpPage() {
     }
   }
 
+  // MEW inspects a villa only after both files went in; the server refuses it otherwise.
+  const filesSubmitted = (row: VillaListItem) =>
+    row.mewAcState !== "NOT_SUBMITTED" && row.mewElecState !== "NOT_SUBMITTED"
+
   const rows = data?.data ?? []
   const meta = data?.meta
   const apiError = isError ? toApiError(error) : null
@@ -335,7 +339,15 @@ export default function MewFollowUpPage() {
                         size="sm"
                         icon={row.mewInspection ? "x" : "check"}
                         variant={row.mewInspection ? "secondary" : "primary"}
-                        disabled={busyId === row.id}
+                        disabled={
+                          busyId === row.id ||
+                          (!row.mewInspection && !filesSubmitted(row))
+                        }
+                        title={
+                          !row.mewInspection && !filesSubmitted(row)
+                            ? t("mewFollowUp.submitFirst")
+                            : undefined
+                        }
                         onClick={() => void toggleInspection(row)}
                       >
                         {row.mewInspection
