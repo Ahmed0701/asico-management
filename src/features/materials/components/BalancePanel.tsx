@@ -1,4 +1,4 @@
-import { useMemo } from "react"
+import { useEffect, useMemo } from "react"
 import { Link, useSearchParams } from "react-router"
 import { useTranslation } from "react-i18next"
 import VillasListFooter from "@/features/villas/components/VillasListFooter"
@@ -34,7 +34,16 @@ const COLUMNS = 6
  * The balance list: every villa and material it needs, against what its delivery notes brought. It opens on what is still
  * to come; the totals above add the missing quantities up per material, over every page.
  */
-export default function BalancePanel() {
+export type ListState = {
+  total: number | undefined
+  loading: boolean
+}
+
+export default function BalancePanel({
+  onListState,
+}: {
+  onListState?: (state: ListState) => void
+}) {
   const { t } = useTranslation()
   const [searchParams, setSearchParams] = useSearchParams()
   const setParam = (key: string, value: string | undefined) =>
@@ -62,6 +71,11 @@ export default function BalancePanel() {
   }, [searchParams])
   const { data, isLoading, isError, error } = useBalanceQuery(params)
   const catalog = useItemsQuery()
+
+  // The page's Export button needs the number of rows the filters match.
+  useEffect(() => {
+    onListState?.({ total: data?.meta.total, loading: isLoading })
+  }, [onListState, data?.meta.total, isLoading])
   const { searchDraft, setSearchDraft } = useDebouncedSearchParam(
     params.search,
     setParam,

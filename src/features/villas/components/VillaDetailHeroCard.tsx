@@ -3,7 +3,7 @@ import type { VillaDetail } from "../api"
 import { buildVillaContextLine } from "../lib/villaDetailDisplay"
 import { formatDateTime } from "@/shared/lib/format"
 import { Card } from "@/shared/ui/PageHeader"
-import { IconButton } from "@/shared/ui/Button"
+import Button, { IconButton } from "@/shared/ui/Button"
 import { formatVillaProgressLabel } from "@/shared/lib/progressDisplay"
 import { Progress } from "@/shared/ui/progress"
 
@@ -13,6 +13,9 @@ type VillaDetailHeroCardProps = {
   canDelete: boolean
   onEdit: () => void
   onDelete: () => void
+  canMewFollowUp: boolean
+  mewFollowUpPending: boolean
+  onToggleMewFollowUp: () => void
 }
 
 export default function VillaDetailHeroCard({
@@ -21,6 +24,9 @@ export default function VillaDetailHeroCard({
   canDelete,
   onEdit,
   onDelete,
+  canMewFollowUp,
+  mewFollowUpPending,
+  onToggleMewFollowUp,
 }: VillaDetailHeroCardProps) {
   const { t } = useTranslation()
   const blockPlotLine =
@@ -43,6 +49,18 @@ export default function VillaDetailHeroCard({
           )}
         </div>
         <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+          {canMewFollowUp && (
+            <Button
+              size="sm"
+              variant={villa.mewFollowUp ? "secondary" : "primary"}
+              icon={villa.mewFollowUp ? "x" : "plus"}
+              aria-pressed={!!villa.mewFollowUp}
+              disabled={mewFollowUpPending}
+              onClick={onToggleMewFollowUp}
+            >
+              {t(villa.mewFollowUp ? "mewFollowUp.remove" : "mewFollowUp.add")}
+            </Button>
+          )}
           {canUpdate && (
             <IconButton icon="edit" label={t("common.edit")} onClick={onEdit} />
           )}

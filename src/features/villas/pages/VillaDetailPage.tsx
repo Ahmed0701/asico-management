@@ -3,10 +3,15 @@ import { Link, useNavigate, useParams } from "react-router"
 import { useTranslation } from "react-i18next"
 import { usePermissions } from "@/features/auth/api"
 import { toApiError } from "@/shared/api/errors"
+import { toast } from "@/shared/lib/toast"
 import { ConfirmModal } from "@/shared/ui/Modal"
 import { Card } from "@/shared/ui/PageHeader"
 import { VillaDetailSkeleton } from "@/shared/ui/loading-skeletons"
-import { useDeleteVillaMutation, useVillaQuery } from "../api"
+import {
+  useDeleteVillaMutation,
+  useVillaMewFollowUpMutation,
+  useVillaQuery,
+} from "../api"
 import VillaDetailHeroCard from "../components/VillaDetailHeroCard"
 import VillaDetailPhasesCard from "../components/VillaDetailPhasesCard"
 import VillaDetailRegistryCard from "../components/VillaDetailRegistryCard"
@@ -24,10 +29,13 @@ export default function VillaDetailPage() {
   const [deleteOpen, setDeleteOpen] = useState(false)
   const { data: villa, isLoading, isError, error, refetch } = useVillaQuery(id)
   const remove = useDeleteVillaMutation()
+  const mewFollowUp = useVillaMewFollowUpMutation()
 
   const canUpdate = can("villas:update")
   const canDelete = can("villas:delete")
   const canMaterials = can("materials:read")
+  // The same permission the MEW follow-up page uses to add and remove villas.
+  const canMewFollowUp = can("villas:inspection")
 
   if (isLoading && !villa) {
     return <VillaDetailSkeleton />
@@ -72,6 +80,27 @@ export default function VillaDetailPage() {
     }
   }
 
+  // Puts the villa on the MEW follow-up list, or takes it off.
+  const toggleMewFollowUp = async () => {
+    const marked = !villa.mewFollowUp
+    try {
+      await mewFollowUp.mutateAsync({
+        id: villa.id,
+        marked,
+        write: { ifMatch: villa.version },
+      })
+      toast.success(
+        t(marked ? "mewFollowUp.added" : "mewFollowUp.removed", {
+          name: villa.villaNumber,
+        }),
+      )
+    } catch (err) {
+      // Someone else changed the villa first: say so and show it as it is now.
+      toast.error(toApiError(err).message)
+      void refetch()
+    }
+  }
+
   return (
     <>
       <Link
@@ -86,6 +115,9 @@ export default function VillaDetailPage() {
         canDelete={canDelete}
         onEdit={() => setEditOpen(true)}
         onDelete={() => setDeleteOpen(true)}
+        canMewFollowUp={canMewFollowUp}
+        mewFollowUpPending={mewFollowUp.isPending}
+        onToggleMewFollowUp={() => void toggleMewFollowUp()}
       />
       <VillaDetailPhasesCard phases={villa.phases} />
       <VillaDetailRegistryCard villa={villa} />

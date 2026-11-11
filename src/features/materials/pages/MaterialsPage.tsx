@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { useQueryClient } from "@tanstack/react-query"
 import { useSearchParams } from "react-router"
 import { useTranslation } from "react-i18next"
@@ -32,7 +32,7 @@ import {
   type FactoryType,
   type MaterialDelivery,
 } from "../api"
-import BalancePanel from "../components/BalancePanel"
+import BalancePanel, { type ListState } from "../components/BalancePanel"
 import CatalogModal from "../components/CatalogModal"
 import DeliveriesTable from "../components/DeliveriesTable"
 import DeliveryFormModal from "../components/DeliveryFormModal"
@@ -53,6 +53,10 @@ export default function MaterialsPage() {
   const [catalogOpen, setCatalogOpen] = useState(false)
   const [formOpen, setFormOpen] = useState(false)
   const [importOpen, setImportOpen] = useState(false)
+  const [listState, setListState] = useState<ListState>({
+    total: undefined,
+    loading: true,
+  })
   const qc = useQueryClient()
 
   // The file holds what the open tab lists, with its filters (no paging): the deliveries one row per material, or the balance.
@@ -132,7 +136,12 @@ export default function MaterialsPage() {
                     }
                   : undefined
               }
-              exportAction={{ kind: "menu", listLoading: false, onExport }}
+              exportAction={{
+                kind: "menu",
+                total: listState.total,
+                listLoading: listState.loading,
+                onExport,
+              }}
             />
             <Button
               type="button"
@@ -174,7 +183,11 @@ export default function MaterialsPage() {
           ]}
         />
       </div>
-      {tab === "deliveries" ? <DeliveriesTab /> : <BalancePanel />}
+      {tab === "deliveries" ? (
+        <DeliveriesTab onListState={setListState} />
+      ) : (
+        <BalancePanel onListState={setListState} />
+      )}
       <DeliveryFormModal open={formOpen} onClose={() => setFormOpen(false)} />
       <FactoriesModal
         open={factoriesOpen}
@@ -198,7 +211,11 @@ export default function MaterialsPage() {
   )
 }
 
-function DeliveriesTab() {
+function DeliveriesTab({
+  onListState,
+}: {
+  onListState?: (state: ListState) => void
+}) {
   const { t } = useTranslation()
   const { can } = usePermissions()
   const canUpdate = can("materials:update")
@@ -226,6 +243,11 @@ function DeliveriesTab() {
   const { data, isLoading, isError, error, refetch } =
     useDeliveriesQuery(params)
   const factories = useFactoriesQuery()
+
+  // The page's Export button needs the number of rows the filters match.
+  useEffect(() => {
+    onListState?.({ total: data?.meta.total, loading: isLoading })
+  }, [onListState, data?.meta.total, isLoading])
   const catalog = useItemsQuery()
   const { searchDraft, setSearchDraft } = useDebouncedSearchParam(
     params.search,

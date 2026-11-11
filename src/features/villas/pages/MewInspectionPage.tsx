@@ -11,6 +11,7 @@ import { SearchInput } from "@/shared/ui/Field"
 import { Badge } from "@/shared/ui/Badge"
 import Button from "@/shared/ui/Button"
 import { Checkbox } from "@/shared/ui/checkbox"
+import { Input } from "@/shared/ui/input"
 import {
   Table,
   TableBody,
@@ -24,6 +25,7 @@ import { toApiError } from "@/shared/api/errors"
 import {
   useMewInspectionListParams,
   useMewInspectionListQuery,
+  useSetVillaMewStatesMutation,
   useVillaMewInspectionMutation,
   useVillaMewInspectionPassedMutation,
   type VillaListItem,
@@ -32,7 +34,7 @@ import MewStateSelect from "../components/MewStateSelect"
 import VillasListErrorBanner from "../components/VillasListErrorBanner"
 import VillasListFooter from "../components/VillasListFooter"
 
-const COLUMN_COUNT = 8
+const COLUMN_COUNT = 9
 
 // Villas someone added for MEW inspection from the MEW follow-up page and that have not passed yet.
 // Checking "Passed" moves a villa to the MEW Inspection Passed page.
@@ -51,6 +53,7 @@ export default function MewInspectionPage() {
   )
   const inspection = useVillaMewInspectionMutation()
   const passing = useVillaMewInspectionPassedMutation()
+  const setStates = useSetVillaMewStatesMutation()
   const [busyId, setBusyId] = useState<string | null>(null)
 
   // Checked: the villa passed the MEW inspection, so it leaves this list for the passed one.
@@ -63,6 +66,23 @@ export default function MewInspectionPage() {
         write: { ifMatch: row.version },
       })
       toast.success(t("mewInspection.movedToPassed", { name: row.villaNumber }))
+    } catch (err) {
+      toast.error(toApiError(err).message)
+      void refetch()
+    } finally {
+      setBusyId(null)
+    }
+  }
+
+  // The villa's one MEW inspection day: the same value the MEW follow-up page shows and sets.
+  const saveInspectionDate = async (row: VillaListItem, day: string) => {
+    setBusyId(row.id)
+    try {
+      await setStates.mutateAsync({
+        id: row.id,
+        input: { mewInspectionDate: day || null },
+        write: { ifMatch: row.version },
+      })
     } catch (err) {
       toast.error(toApiError(err).message)
       void refetch()
@@ -144,6 +164,9 @@ export default function MewInspectionPage() {
                 {t("mewFollowUp.elecState")}
               </TableHead>
               <TableHead className="px-4 py-2.5">
+                {t("mewFollowUp.inspectionDate")}
+              </TableHead>
+              <TableHead className="px-4 py-2.5">
                 {t("mewInspection.since")}
               </TableHead>
               <TableHead className="px-4 py-2.5">
@@ -196,6 +219,24 @@ export default function MewInspectionPage() {
                       canEdit={false}
                       onChange={() => {}}
                     />
+                  </TableCell>
+                  <TableCell className="px-4 py-3">
+                    {canEdit ? (
+                      <Input
+                        type="date"
+                        className="h-8 w-40 text-xs"
+                        aria-label={t("mewFollowUp.inspectionDate")}
+                        value={row.mewInspectionDate ?? ""}
+                        disabled={busyId === row.id}
+                        onChange={(e) =>
+                          void saveInspectionDate(row, e.target.value)
+                        }
+                      />
+                    ) : (
+                      <span className="text-sm tabular-nums">
+                        {row.mewInspectionDate ?? t("common.none")}
+                      </span>
+                    )}
                   </TableCell>
                   <TableCell className="px-4 py-3">
                     {row.mewInspection ? (
