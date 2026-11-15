@@ -190,6 +190,21 @@ export default function VillasPage() {
         canLinkDetail={canLinkDetail}
         onEdit={openEdit}
         onDelete={setDeleting}
+        villaNumberSort={
+          params.sort === "villaNumber:desc"
+            ? "desc"
+            : params.sort === "villaNumber" || params.sort === "villaNumber:asc"
+              ? "asc"
+              : "none"
+        }
+        onToggleVillaNumberSort={() =>
+          setParam(
+            "sort",
+            params.sort === "villaNumber:asc" || params.sort === "villaNumber"
+              ? "villaNumber:desc"
+              : "villaNumber:asc",
+          )
+        }
       />
       {meta && (
         <VillasListFooter

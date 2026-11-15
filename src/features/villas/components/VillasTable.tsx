@@ -1,7 +1,8 @@
 import { Link } from "react-router"
 import { useTranslation } from "react-i18next"
 import i18n from "@/shared/i18n"
-import { IconButton } from "@/shared/ui/Button"
+import Button, { IconButton } from "@/shared/ui/Button"
+import Icon from "@/shared/ui/Icon"
 import { RowActions } from "@/shared/ui/DataTable"
 import ProgressCell from "@/shared/list/ProgressCell"
 import { Badge } from "@/shared/ui/Badge"
@@ -32,6 +33,8 @@ export default function VillasTable({
   canLinkDetail,
   onEdit,
   onDelete,
+  villaNumberSort,
+  onToggleVillaNumberSort,
 }: {
   rows: VillaListItem[]
   isLoading: boolean
@@ -40,6 +43,8 @@ export default function VillasTable({
   canLinkDetail: boolean
   onEdit: (row: VillaListItem) => void
   onDelete: (row: VillaListItem) => void
+  villaNumberSort: "asc" | "desc" | "none"
+  onToggleVillaNumberSort: () => void
 }) {
   const { t } = useTranslation()
   const colCount = 9 + (canUpdate || canDelete ? 1 : 0)
@@ -50,8 +55,36 @@ export default function VillasTable({
       <Table>
         <TableHeader>
           <TableRow className="bg-muted/60 text-xs uppercase tracking-wide text-muted-foreground">
-            <TableHead className="px-4 py-2.5">
-              {t("villas.villaNumber")}
+            <TableHead
+              className="px-4 py-2.5"
+              aria-sort={
+                villaNumberSort === "desc"
+                  ? "descending"
+                  : villaNumberSort === "asc"
+                    ? "ascending"
+                    : "none"
+              }
+            >
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-auto px-0 py-0 text-xs uppercase tracking-wide hover:bg-transparent"
+                onClick={onToggleVillaNumberSort}
+                title={t("villas.sortByNumber")}
+              >
+                {t("villas.villaNumber")}
+                <Icon
+                  name={
+                    villaNumberSort === "desc"
+                      ? "sortDesc"
+                      : villaNumberSort === "asc"
+                        ? "sortAsc"
+                        : "sort"
+                  }
+                  size={14}
+                />
+              </Button>
             </TableHead>
             <TableHead className="px-4 py-2.5">{t("villas.owner")}</TableHead>
             <TableHead className="px-4 py-2.5">

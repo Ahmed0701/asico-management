@@ -3,8 +3,8 @@ import { ALL_PERMISSION_CODES, NAV_ITEM_PERMISSIONS } from "./permissions"
 
 describe("permissions catalog", () => {
   it("lists every backend permission code", () => {
-    expect(ALL_PERMISSION_CODES).toHaveLength(80)
-    expect(new Set(ALL_PERMISSION_CODES).size).toBe(80)
+    expect(ALL_PERMISSION_CODES).toHaveLength(92)
+    expect(new Set(ALL_PERMISSION_CODES).size).toBe(92)
   })
 
   it("maps sidebar items to :read permissions", () => {

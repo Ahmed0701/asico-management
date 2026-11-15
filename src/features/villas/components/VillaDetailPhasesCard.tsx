@@ -5,6 +5,7 @@ import { clampProgressPercent } from "@/shared/lib/progressDisplay"
 import { Progress } from "@/shared/ui/progress"
 import Icon from "@/shared/ui/Icon"
 import { cn } from "@/shared/lib/cn"
+import { formatDateTime } from "@/shared/lib/format"
 
 // Colors for each state: done is green, under way uses the progress color, not started is grey.
 const STATE_STYLES: Record<VillaPhaseProgress["state"], {
@@ -91,6 +92,29 @@ export default function VillaDetailPhasesCard({
                     {clampProgressPercent(phase.progress)}%
                   </span>
                 </div>
+                {phase.lastChange && (
+                  <p
+                    className="-mt-1 mb-2 truncate text-[11px] text-muted-foreground"
+                    title={t("villas.phaseChangedBy", {
+                      name:
+                        phase.lastChange.by?.name ??
+                        t("villas.phaseChangedUnknown"),
+                      at: formatDateTime(phase.lastChange.at),
+                    })}
+                  >
+                    <span dir="auto">
+                      {phase.lastChange.by?.name ??
+                        t("villas.phaseChangedUnknown")}
+                    </span>
+                    {" · "}
+                    <time
+                      dateTime={phase.lastChange.at}
+                      className="tabular-nums"
+                    >
+                      {formatDateTime(phase.lastChange.at)}
+                    </time>
+                  </p>
+                )}
                 <Progress value={phase.progress} className="h-1.5" />
               </li>
             )

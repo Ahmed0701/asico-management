@@ -5,6 +5,9 @@ import type {
   DashboardContractorRow,
   DashboardDailyFigures,
   DashboardMaintenance,
+  DashboardOwnerNotes,
+  DashboardForemanMissions,
+  DashboardPayments,
   DashboardOpenWorks,
   DashboardProgress,
   DashboardSiteReports,
@@ -23,6 +26,9 @@ export type DashboardSummaryApi = {
   mewFollowUp?: { count: number } | null
   mewInspection?: { count: number } | null
   maintenance?: DashboardMaintenance | null
+  ownerNotes?: DashboardOwnerNotes | null
+  foremanMissions?: DashboardForemanMissions | null
+  payments?: DashboardPayments | null
   byArea?: DashboardAreaRow[] | null
   topContractors?: DashboardContractorRow[] | null
   openWorks?: DashboardOpenWorks | null
@@ -93,7 +99,7 @@ function normalizeSmallWorks(
 function normalizeTotalLabour(
   raw: NonNullable<DashboardSummaryApi["totalLabour"]>,
 ): DashboardTotalLabour {
-  return { total: raw.total ?? 0 }
+  return { today: raw.today ?? 0, yesterday: raw.yesterday ?? 0 }
 }
 
 function normalizeDelayedSmallWorks(
@@ -129,6 +135,9 @@ export function mapDashboardSummary(
       ? normalizeDelayedSmallWorks(raw.delayedSmallWorks)
       : null,
     maintenance: raw.maintenance ?? null,
+    ownerNotes: raw.ownerNotes ?? null,
+    foremanMissions: raw.foremanMissions ?? null,
+    payments: raw.payments ?? null,
     generatedAt: raw.generatedAt ?? new Date(0).toISOString(),
   }
 }

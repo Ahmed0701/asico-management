@@ -16,6 +16,7 @@ import VillaDetailHeroCard from "../components/VillaDetailHeroCard"
 import VillaDetailPhasesCard from "../components/VillaDetailPhasesCard"
 import VillaDetailRegistryCard from "../components/VillaDetailRegistryCard"
 import VillaDetailMewCard from "../components/VillaDetailMewCard"
+import VariationOrdersCard from "@/features/variation-orders/components/VariationOrdersCard"
 import VillaMaterialsCard from "@/features/materials/components/VillaMaterialsCard"
 import VillaDetailTabbedPanel from "../components/VillaDetailTabbedPanel"
 import VillaFormModal from "../components/VillaFormModal"
@@ -122,6 +123,7 @@ export default function VillaDetailPage() {
       <VillaDetailPhasesCard phases={villa.phases} />
       <VillaDetailRegistryCard villa={villa} />
       <VillaDetailMewCard villa={villa} />
+      <VariationOrdersCard villaId={villa.id} canEdit={canUpdate} />
       {canMaterials && <VillaMaterialsCard villaId={villa.id} />}
       <VillaDetailTabbedPanel villa={villa} />
       <VillaFormModal

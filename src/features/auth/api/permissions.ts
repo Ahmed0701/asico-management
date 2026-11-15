@@ -1,6 +1,6 @@
 import type { MeDto } from "./auth.types"
 
-/** Every permission code from docs/permissions.md (80). */
+/** Every permission code from docs/permissions.md (92). */
 export const ALL_PERMISSION_CODES = [
   "villas:read",
   "villas:detail",
@@ -67,6 +67,18 @@ export const ALL_PERMISSION_CODES = [
   "maintenance:create",
   "maintenance:update",
   "maintenance:delete",
+  "owner-notes:read",
+  "owner-notes:create",
+  "owner-notes:update",
+  "owner-notes:delete",
+  "foreman-missions:read",
+  "foreman-missions:create",
+  "foreman-missions:update",
+  "foreman-missions:delete",
+  "payments:read",
+  "payments:create",
+  "payments:update",
+  "payments:delete",
   "materials:read",
   "materials:create",
   "materials:update",
@@ -99,6 +111,9 @@ export const NAV_ITEM_PERMISSIONS: Record<string, PermissionCode | undefined> =
     mewFollowUp: "villas:read",
     mewInspection: "villas:read",
     maintenance: "maintenance:read",
+    ownerNotes: "owner-notes:read",
+    foremanMissions: "foreman-missions:read",
+    payments: "payments:read",
     materials: "materials:read",
     contractors: "contractors:read",
     civilEngineers: "civil-engineers:read",

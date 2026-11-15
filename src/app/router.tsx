@@ -30,6 +30,11 @@ import MewInspectionPassedRoute from "@/features/villas/pages/MewInspectionPasse
 import MaintenanceRoute from "@/features/maintenance/pages/MaintenanceRoute"
 import MaterialsRoute from "@/features/materials/pages/MaterialsRoute"
 import MaintenanceSolvedRoute from "@/features/maintenance/pages/MaintenanceSolvedRoute"
+import OwnerNotesRoute from "@/features/owner-notes/pages/OwnerNotesRoute"
+import PaymentsRoute from "@/features/payments/pages/PaymentsRoute"
+import ForemanMissionsRoute from "@/features/foreman-missions/pages/ForemanMissionsRoute"
+import OwnerNotesDoneRoute from "@/features/owner-notes/pages/OwnerNotesDoneRoute"
+import ForemanMissionsDoneRoute from "@/features/foreman-missions/pages/ForemanMissionsDoneRoute"
 import OpenWorksPage from "@/features/open-works/pages/OpenWorksPage"
 import DailyReportsPage from "@/features/daily-reports/pages/DailyReportsPage"
 import SmallWorksPage from "@/features/small-works/pages/SmallWorksPage"
@@ -75,6 +80,14 @@ export const router = createBrowserRouter([
               },
               { path: "villas/open-works", Component: OpenWorksPage },
               { path: "maintenance", Component: MaintenanceRoute },
+              { path: "owner-notes", Component: OwnerNotesRoute },
+              { path: "payments", Component: PaymentsRoute },
+              { path: "foreman-missions", Component: ForemanMissionsRoute },
+              { path: "owner-notes/done", Component: OwnerNotesDoneRoute },
+              {
+                path: "foreman-missions/done",
+                Component: ForemanMissionsDoneRoute,
+              },
               { path: "materials", Component: MaterialsRoute },
               {
                 path: "maintenance/solved",

@@ -31,6 +31,7 @@ import {
   type MaintenanceVilla,
 } from "../api"
 import MaintenanceFormModal from "../components/MaintenanceFormModal"
+import MaintenanceIssueViewModal from "../components/MaintenanceIssueViewModal"
 
 const day = (value: string) => formatCalendarDateUtc(`${value}T00:00:00.000Z`)
 
@@ -60,6 +61,7 @@ export default function MaintenanceListPage({ solved }: { solved: boolean }) {
   const [formOpen, setFormOpen] = useState(false)
   const [editing, setEditing] = useState<MaintenanceVilla | undefined>()
   const [deleting, setDeleting] = useState<MaintenanceVilla | null>(null)
+  const [viewing, setViewing] = useState<MaintenanceVilla | null>(null)
 
   const columnCount = (solved ? 7 : 6) + (canUpdate || canDelete ? 1 : 0)
 
@@ -222,11 +224,22 @@ export default function MaintenanceListPage({ solved }: { solved: boolean }) {
                   <TableCell className="px-4 py-3 text-sm tabular-nums">
                     {day(row.handoverDate)}
                   </TableCell>
-                  <TableCell
-                    className="max-w-xs whitespace-pre-wrap px-4 py-3 text-sm"
-                    dir="auto"
-                  >
-                    {row.issue}
+                  <TableCell className="max-w-xs px-4 py-3">
+                    <Button
+                      type="button"
+                      size="sm"
+                      icon="eye"
+                      className="max-w-full"
+                      title={t("maintenance.viewIssue")}
+                      aria-label={t("maintenance.viewIssueOf", {
+                        name: row.villaNumber,
+                      })}
+                      onClick={() => setViewing(row)}
+                    >
+                      <span className="min-w-0 truncate" dir="auto">
+                        {row.issue}
+                      </span>
+                    </Button>
                   </TableCell>
                   <TableCell className="px-4 py-3">
                     <Checkbox
@@ -293,6 +306,10 @@ export default function MaintenanceListPage({ solved }: { solved: boolean }) {
           })}
         </p>
       )}
+      <MaintenanceIssueViewModal
+        item={viewing}
+        onClose={() => setViewing(null)}
+      />
       <MaintenanceFormModal
         open={formOpen}
         item={editing}

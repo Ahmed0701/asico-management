@@ -81,12 +81,16 @@ function pickVillaType(searchParams: URLSearchParams): VillaType | undefined {
   return VILLA_TYPES.find((type) => type === v)
 }
 
+/** The villa list's order when the URL names none. */
+export const DEFAULT_VILLA_SORT = "villaNumber:asc"
+
 export function villasListParamsFromSearch(
   searchParams: URLSearchParams,
 ): VillasListParams {
   const base = parseListParams(searchParams, { limit: DEFAULT_LIMIT })
   const sortRaw = searchParams.get("sort")
-  let sort: string | undefined
+  // Villa number by default (natural order: V-2 before V-10); the header arrow switches it.
+  let sort: string = DEFAULT_VILLA_SORT
   if (sortRaw && isValidVillaListSort(sortRaw)) sort = sortRaw
   return {
     page: base.page,

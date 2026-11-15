@@ -34,6 +34,9 @@ import {
   type VillaListItem,
 } from "../api"
 import MewStateSelect from "../components/MewStateSelect"
+import VariationOrdersPendingModal, {
+  type PendingVariationOrders,
+} from "@/features/variation-orders/components/VariationOrdersPendingModal"
 import VillasListErrorBanner from "../components/VillasListErrorBanner"
 import VillasListFooter from "../components/VillasListFooter"
 import Button, { IconButton } from "@/shared/ui/Button"
@@ -74,6 +77,9 @@ export default function MewFollowUpPage() {
   const setStates = useSetVillaMewStatesMutation()
   const inspection = useVillaMewInspectionMutation()
   const [busyId, setBusyId] = useState<string | null>(null)
+  const [pendingVos, setPendingVos] = useState<PendingVariationOrders | null>(
+    null,
+  )
 
   // A write that someone else got to first: say so and show the villa as it is now.
   const onWriteError = (err: unknown) => {
@@ -145,7 +151,18 @@ export default function MewFollowUpPage() {
           : t("mewFollowUp.removedFromInspection", { name: row.villaNumber }),
       )
     } catch (err) {
-      onWriteError(err)
+      const apiErr = toApiError(err)
+      // Some variation orders of the villa are not paid: a dialog that leads to them, not a toast.
+      if (apiErr.code === "VILLA_VARIATION_ORDERS_PENDING") {
+        const count = apiErr.details?.[0]?.value
+        setPendingVos({
+          villaId: row.id,
+          villaNumber: row.villaNumber,
+          count: typeof count === "number" ? count : null,
+        })
+      } else {
+        onWriteError(err)
+      }
     } finally {
       setBusyId(null)
     }
@@ -390,6 +407,10 @@ export default function MewFollowUpPage() {
           {t("mewFollowUp.count", { count: meta.total })}
         </p>
       )}
+      <VariationOrdersPendingModal
+        pending={pendingVos}
+        onClose={() => setPendingVos(null)}
+      />
     </>
   )
 }

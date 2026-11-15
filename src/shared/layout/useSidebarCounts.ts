@@ -8,7 +8,7 @@ import type { PaginatedMeta } from "@/shared/api/types"
 /**
  * The counts shown next to some sidebar entries, each with the same filters as its page, so the number is what the page lists:
  * open works not done, small works still pending, every area, villas on MEW follow up, villas on MEW inspection that have not
- * passed, maintenance villas still open.
+ * passed, maintenance villas still open, owner notes and foreman missions still open, payments overdue.
  */
 const COUNTS = [
   {
@@ -46,6 +46,24 @@ const COUNTS = [
     permission: "maintenance:read",
     path: "/maintenance",
     params: { solved: "false" },
+  },
+  {
+    key: "ownerNotes",
+    permission: "owner-notes:read",
+    path: "/owner-notes",
+    params: { done: "false" },
+  },
+  {
+    key: "foremanMissions",
+    permission: "foreman-missions:read",
+    path: "/foreman-missions",
+    params: { done: "false" },
+  },
+  {
+    key: "payments",
+    permission: "payments:read",
+    path: "/payments",
+    params: { overdue: "true" },
   },
 ] as const satisfies readonly {
   key: string

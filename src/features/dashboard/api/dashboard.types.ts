@@ -84,8 +84,10 @@ export type DashboardSmallWorks = {
   urgent: UrgentSmallWork[]
 }
 
+/** Workers on the labour daily reports of today, and of yesterday (UTC days). */
 export type DashboardTotalLabour = {
-  total: number
+  today: number
+  yesterday: number
 }
 
 export type DashboardDelayedSmallWorks = {
@@ -97,6 +99,27 @@ export type DashboardDelayedSmallWorks = {
 export type DashboardMaintenance = {
   open: number
   solved: number
+}
+
+/** Owner notes still open (reminded every day), and the ones checked as done. */
+export type DashboardOwnerNotes = {
+  open: number
+  done: number
+}
+
+/** Foreman missions still open (reminded every day), and the ones checked as done. */
+export type DashboardForemanMissions = {
+  open: number
+  done: number
+}
+
+/** Payments to contractors, KWD fils: still to pay (how many), overdue, and paid this month. */
+export type DashboardPayments = {
+  pendingCount: number
+  pendingMinor: number
+  overdueCount: number
+  overdueMinor: number
+  paidThisMonthMinor: number
 }
 
 export type DashboardSummary = {
@@ -116,6 +139,9 @@ export type DashboardSummary = {
   totalLabour: DashboardTotalLabour | null
   delayedSmallWorks: DashboardDelayedSmallWorks | null
   maintenance: DashboardMaintenance | null
+  ownerNotes: DashboardOwnerNotes | null
+  foremanMissions: DashboardForemanMissions | null
+  payments: DashboardPayments | null
   generatedAt: string
 }
 
@@ -128,6 +154,9 @@ export function dashboardHasAnySection(summary: DashboardSummary): boolean {
     summary.mewFollowUp !== null ||
     summary.mewInspection !== null ||
     summary.maintenance !== null ||
+    summary.ownerNotes !== null ||
+    summary.foremanMissions !== null ||
+    summary.payments !== null ||
     summary.byArea !== null ||
     summary.topContractors !== null ||
     summary.openWorks !== null ||

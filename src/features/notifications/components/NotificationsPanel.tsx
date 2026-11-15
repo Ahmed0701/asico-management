@@ -44,9 +44,15 @@ export default function NotificationsPanel({
     }
     onClose()
     navigate(
-      item.entity.type === "OPEN_WORK"
-        ? `/villas/${item.entity.villaId}?tab=openWorks`
-        : `/villas/${item.entity.villaId}?tab=smallWorks&highlightSmallWork=${encodeURIComponent(item.entity.id)}`,
+      item.entity.type === "PAYMENT"
+        ? "/payments?overdue=true"
+        : item.entity.type === "OWNER_NOTE"
+          ? "/owner-notes"
+          : item.entity.type === "FOREMAN_MISSION"
+            ? "/foreman-missions"
+            : item.entity.type === "OPEN_WORK"
+              ? `/villas/${item.entity.villaId}?tab=openWorks`
+              : `/villas/${item.entity.villaId}?tab=smallWorks&highlightSmallWork=${encodeURIComponent(item.entity.id)}`,
     )
   }
 

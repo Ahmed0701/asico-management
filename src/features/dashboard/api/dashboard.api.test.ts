@@ -46,7 +46,7 @@ describe("mapDashboardSummary", () => {
       },
       siteReports: { count: 64, averageRating: 4.2 },
       labour: { today: 412, last7Days: 2810 },
-      totalLabour: { total: 125_400 },
+      totalLabour: { today: 412, yesterday: 388 },
       delayedSmallWorks: { overdue: 3, dueSoon: 5 },
       generatedAt: "2026-03-01T09:30:00.000Z",
     })
@@ -60,7 +60,7 @@ describe("mapDashboardSummary", () => {
     expect(mapped.siteReports?.averageRating).toBe(4.2)
     expect(mapped.smallWorks?.overdue).toBe(1)
     expect(mapped.smallWorks?.dueSoon).toBe(2)
-    expect(mapped.totalLabour?.total).toBe(125_400)
+    expect(mapped.totalLabour).toEqual({ today: 412, yesterday: 388 })
     expect(mapped.delayedSmallWorks?.overdue).toBe(3)
     expect(mapped.delayedSmallWorks?.dueSoon).toBe(5)
   })
@@ -101,6 +101,9 @@ describe("mapDashboardSummary", () => {
       mewFollowUp: null,
       mewInspection: null,
       maintenance: null,
+      ownerNotes: null,
+      foremanMissions: null,
+      payments: null,
       byArea: null,
       topContractors: null,
       openWorks: null,
@@ -124,6 +127,9 @@ describe("mapDashboardSummary", () => {
       mewFollowUp: null,
       mewInspection: null,
       maintenance: null,
+      ownerNotes: null,
+      foremanMissions: null,
+      payments: null,
       byArea: null,
       topContractors: null,
       openWorks: null,
@@ -131,7 +137,7 @@ describe("mapDashboardSummary", () => {
       smallWorks: null,
       siteReports: null,
       labour: null,
-      totalLabour: { total: 100 },
+      totalLabour: { today: 100, yesterday: 80 },
       delayedSmallWorks: { overdue: 0, dueSoon: 0 },
       generatedAt: "2026-03-01T09:30:00.000Z",
     })

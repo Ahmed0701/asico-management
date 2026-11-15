@@ -22,7 +22,7 @@ describe("villaDocument error messages", () => {
         code: "VILLA_DOCUMENT_LIMIT",
         message: "x",
       }),
-    ).toContain("10")
+    ).toContain("20")
     expect(
       villaDocumentApiErrorMessage(t, {
         status: 403,

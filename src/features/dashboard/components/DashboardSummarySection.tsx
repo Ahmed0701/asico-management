@@ -1,3 +1,4 @@
+import { formatBudgetDisplay } from "@/features/villas/api/budget"
 import { Link } from "react-router"
 import { useTranslation } from "react-i18next"
 import type { UseQueryResult } from "@tanstack/react-query"
@@ -38,7 +39,7 @@ export default function DashboardSummarySection({
   canVillasRead: boolean
   canContractorsRead: boolean
 }) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const { data, isLoading, isError, error, refetch, isFetching } = query
 
   if (isLoading && !data) {
@@ -198,12 +199,14 @@ export default function DashboardSummarySection({
         )}
         {data.totalLabour && (
           <DashboardLinkCard
-            to={dashboardLinks.dailyReports()}
+            to={dashboardLinks.dailyReportsToday()}
             label={t("dashboard.totalLabourTitle")}
             tone="orange"
             icon="hardhat"
-            value={formatDashboardCount(data.totalLabour.total)}
-            help={t("dashboard.totalLabourCaption")}
+            value={formatDashboardCount(data.totalLabour.today)}
+            help={t("dashboard.totalLabourCaption", {
+              yesterday: formatDashboardCount(data.totalLabour.yesterday),
+            })}
           />
         )}
         {data.mewFollowUp && (
@@ -235,6 +238,56 @@ export default function DashboardSummarySection({
             value={formatDashboardCount(data.maintenance.open)}
             help={t("dashboard.maintenanceHelp", {
               solved: formatDashboardCount(data.maintenance.solved),
+            })}
+          />
+        )}
+        {data.ownerNotes && (
+          <DashboardLinkCard
+            to={dashboardLinks.ownerNotes()}
+            label={t("dashboard.ownerNotes")}
+            tone="amber"
+            icon="file"
+            value={formatDashboardCount(data.ownerNotes.open)}
+            help={t("dashboard.ownerNotesHelp", {
+              done: formatDashboardCount(data.ownerNotes.done),
+            })}
+          />
+        )}
+        {data.foremanMissions && (
+          <DashboardLinkCard
+            to={dashboardLinks.foremanMissions()}
+            label={t("dashboard.foremanMissions")}
+            tone="indigo"
+            icon="hardhat"
+            value={formatDashboardCount(data.foremanMissions.open)}
+            help={t("dashboard.foremanMissionsHelp", {
+              done: formatDashboardCount(data.foremanMissions.done),
+            })}
+          />
+        )}
+        {data.payments && (
+          <DashboardLinkCard
+            to={
+              data.payments.overdueCount > 0
+                ? dashboardLinks.paymentsOverdue()
+                : dashboardLinks.payments()
+            }
+            label={t("dashboard.payments")}
+            tone={data.payments.overdueCount > 0 ? "red" : "green"}
+            icon="file"
+            value={formatBudgetDisplay(
+              data.payments.pendingMinor,
+              "KWD",
+              i18n.language === "ar" ? "ar-EG-u-nu-latn" : "en-GB",
+            )}
+            help={t("dashboard.paymentsHelp", {
+              count: data.payments.pendingCount,
+              overdue: data.payments.overdueCount,
+              paid: formatBudgetDisplay(
+                data.payments.paidThisMonthMinor,
+                "KWD",
+                i18n.language === "ar" ? "ar-EG-u-nu-latn" : "en-GB",
+              ),
             })}
           />
         )}

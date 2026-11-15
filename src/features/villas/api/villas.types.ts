@@ -11,6 +11,17 @@ export type VillaMarkDto = {
   by: VillaParty | null
 }
 
+/** The latest progress change of the open works of a villa under one phase: when, and by whom (null: the user is gone). */
+export type PhaseChangeUser = {
+  id: string
+  name: string
+}
+
+export type PhaseLastChange = {
+  at: string
+  by: PhaseChangeUser | null
+}
+
 export type VillaPhaseProgress = {
   elecPhaseId: string
   name: string
@@ -18,6 +29,8 @@ export type VillaPhaseProgress = {
   order: number
   state: "NOT_STARTED" | "IN_PROGRESS" | "DONE"
   version: number
+  // In the villa detail only (null: the phase has no open work).
+  lastChange?: PhaseLastChange | null
 }
 
 export type PhaseProgressUpdateDto = VillaPhaseProgress & {
