@@ -52,7 +52,7 @@ export default function VillaDocumentsTable({
     <div className="overflow-hidden rounded-lg border border-border">
       <Table>
         <TableHeader>
-          <TableRow className="bg-muted/60 text-xs uppercase tracking-wide text-muted-foreground hover:bg-muted/60">
+          <TableRow className="list-head-row">
             <TableHead className="px-4 py-2.5">
               {t("villaDocuments.colName")}
             </TableHead>

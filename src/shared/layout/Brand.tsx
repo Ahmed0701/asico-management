@@ -1,13 +1,18 @@
 import { useTranslation } from "react-i18next"
 
-export default function Brand({ compact = false }: { compact?: boolean }) {
+type Props = {
+  compact?: boolean
+  withTagline?: boolean
+}
+
+export default function Brand({ compact = false, withTagline = false }: Props) {
   const { t } = useTranslation()
   return (
     <div className="flex items-center gap-2.5">
-      <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-primary text-primary-foreground">
+      <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-primary text-primary-foreground shadow-sm ring-1 ring-black/5">
         <svg
-          width="18"
-          height="18"
+          width="19"
+          height="19"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
@@ -24,8 +29,15 @@ export default function Brand({ compact = false }: { compact?: boolean }) {
         </svg>
       </span>
       {!compact && (
-        <span className="text-lg font-semibold tracking-tight">
-          {t("app.name")}
+        <span className="flex min-w-0 flex-col leading-tight">
+          <span className="text-[17px] font-semibold tracking-tight">
+            {t("app.name")}
+          </span>
+          {withTagline && (
+            <span className="truncate text-[11px] text-muted-foreground">
+              {t("app.tagline")}
+            </span>
+          )}
         </span>
       )}
     </div>

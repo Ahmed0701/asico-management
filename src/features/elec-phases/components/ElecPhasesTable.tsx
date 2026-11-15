@@ -54,7 +54,7 @@ export default function ElecPhasesTable({
   const colCount = 4 + (showReorder ? 1 : 0) + (showActions ? 1 : 0)
 
   return (
-    <div className="overflow-hidden rounded-lg border border-border bg-card">
+    <div className="list-surface overflow-hidden">
       {reorderBlockedReason && canUpdate && (
         <p className="border-b border-border bg-muted/40 px-4 py-2 text-xs text-muted-foreground">
           {reorderBlockedReason}
@@ -62,7 +62,7 @@ export default function ElecPhasesTable({
       )}
       <Table>
         <TableHeader>
-          <TableRow className="bg-muted/60 text-xs uppercase tracking-wide text-muted-foreground hover:bg-muted/60">
+          <TableRow className="list-head-row">
             <TableHead className="px-4 py-2.5 font-medium">
               {t("elecPhases.name")}
             </TableHead>

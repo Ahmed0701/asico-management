@@ -24,7 +24,7 @@ export default function DailyReportsListFooter({
   const pastEnd = page > safeTotalPages && total > 0
 
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3 border border-t-0 border-border bg-muted/30 px-4 py-2.5 text-xs text-muted-foreground">
+    <div className="list-footer flex flex-wrap items-center justify-between gap-3 px-4 py-2.5 text-xs text-muted-foreground">
       <div className="flex flex-wrap items-center gap-2">
         <span>{t("common.rowsPerPage")}</span>
         <PageSizeSelect

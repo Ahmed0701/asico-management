@@ -176,11 +176,11 @@ export default function BalancePanel({
           {toApiError(error).message}
         </p>
       )}
-      <div className="overflow-hidden rounded-lg border border-border bg-card">
+      <div className="list-surface overflow-hidden">
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
-              <TableRow className="bg-muted/60 text-xs uppercase tracking-wide text-muted-foreground">
+              <TableRow className="list-head-row">
                 <TableHead className="px-4 py-2.5">
                   {t("materials.villa")}
                 </TableHead>

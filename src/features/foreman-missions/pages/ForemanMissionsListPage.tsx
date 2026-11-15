@@ -165,10 +165,10 @@ export default function ForemanMissionsListPage({ done }: { done: boolean }) {
           {apiError.message}
         </p>
       )}
-      <div className="overflow-hidden rounded-lg border border-border bg-card">
+      <div className="list-surface overflow-hidden">
         <Table>
           <TableHeader>
-            <TableRow className="bg-muted/60 text-xs uppercase tracking-wide text-muted-foreground">
+            <TableRow className="list-head-row">
               <TableHead className="px-4 py-2.5">
                 {t("foremanMissions.villaNumber")}
               </TableHead>

@@ -1,29 +1,7 @@
-import { NavLink, useMatch } from "react-router"
+import { useState } from "react"
+import { NavLink, useMatch, useLocation, matchPath } from "react-router"
 import { useTranslation } from "react-i18next"
-import {
-  BellRing,
-  Building2,
-  ClipboardCheck,
-  ClipboardList,
-  Hammer,
-  HardHat,
-  LayoutDashboard,
-  Map,
-  NotebookPen,
-  Package,
-  Shield,
-  ShieldCheck,
-  Toolbox,
-  StickyNote,
-  ListTodo,
-  Banknote,
-  TrendingUp,
-  UserCog,
-  Users,
-  Wrench,
-  Zap,
-  type LucideIcon,
-} from "lucide-react"
+import { ChevronDown } from "lucide-react"
 import { usePermissions, NAV_ITEM_PERMISSIONS } from "@/features/auth/api"
 import { cn } from "../lib/cn"
 import { useUiDirection } from "../lib/useUiDirection"
@@ -32,88 +10,36 @@ import Icon from "../ui/Icon"
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip"
 import Brand from "./Brand"
 import SidebarVillasExportButton from "./SidebarVillasExportButton"
+import { NAV_GROUPS, NAV_ICONS, type NavGroup, type NavItem } from "./navItems"
 import { useSidebarCounts } from "./useSidebarCounts"
 
-interface Item {
-  to: string
-  key: string
-  end?: boolean
+type Item = NavItem
+type Group = NavGroup
+
+const NAV_ICON_SIZE = 17
+const NAV_ICON_STROKE = 1.9
+// Which groups are folded, kept in this browser only (a convenience: the menu works the same without it).
+const FOLDED_KEY = "asico-sidebar-folded"
+
+function readFolded(): string[] {
+  try {
+    const raw = localStorage.getItem(FOLDED_KEY)
+    const value: unknown = raw ? JSON.parse(raw) : []
+    return Array.isArray(value)
+      ? value.filter((v): v is string => typeof v === "string")
+      : []
+  } catch {
+    return []
+  }
 }
 
-const NAV_ICONS: Record<string, LucideIcon> = {
-  dashboard: LayoutDashboard,
-  villas: Building2,
-  villaOpenWorks: ClipboardList,
-  dailyReports: NotebookPen,
-  smallWorks: Hammer,
-  siteReports: ShieldCheck,
-  areas: Map,
-  elecPhases: Zap,
-  mewFollowUp: BellRing,
-  mewInspection: ClipboardCheck,
-  maintenance: Toolbox,
-  ownerNotes: StickyNote,
-  foremanMissions: ListTodo,
-  payments: Banknote,
-  monthlyProgress: TrendingUp,
-  materials: Package,
-  contractors: HardHat,
-  civilEngineers: Wrench,
-  electricalEngineers: UserCog,
-  users: Users,
-  permissions: Shield,
+function writeFolded(keys: string[]): void {
+  try {
+    localStorage.setItem(FOLDED_KEY, JSON.stringify(keys))
+  } catch {
+    // Private window or blocked storage: the fold is just not remembered.
+  }
 }
-
-const groups: {
-  key: string
-  items: Item[]
-}[] = [
-  {
-    key: "workspace",
-    items: [
-      { to: "/", key: "dashboard", end: true },
-      { to: "/villas", key: "villas", end: true },
-      { to: "/monthly-progress", key: "monthlyProgress" },
-    ],
-  },
-  {
-    key: "sitePreview",
-    items: [
-      { to: "/villas/open-works", key: "villaOpenWorks" },
-      { to: "/daily-reports", key: "dailyReports" },
-      { to: "/small-works", key: "smallWorks" },
-      { to: "/site-reports", key: "siteReports" },
-      { to: "/villas/mew-follow-up", key: "mewFollowUp" },
-      { to: "/villas/mew-inspection", key: "mewInspection" },
-      { to: "/maintenance", key: "maintenance" },
-      { to: "/owner-notes", key: "ownerNotes" },
-      { to: "/foreman-missions", key: "foremanMissions" },
-      { to: "/materials", key: "materials" },
-    ],
-  },
-  {
-    key: "directory",
-    items: [
-      { to: "/contractors", key: "contractors" },
-      { to: "/electrical-engineers", key: "electricalEngineers" },
-      { to: "/civil-engineers", key: "civilEngineers" },
-      { to: "/areas", key: "areas" },
-      { to: "/elec-phases", key: "elecPhases" },
-      { to: "/payments", key: "payments" },
-    ],
-  },
-  {
-    key: "administration",
-    items: [
-      { to: "/users", key: "users" },
-      { to: "/permissions", key: "permissions" },
-      { to: "/audit", key: "auditLog" },
-    ],
-  },
-]
-
-const NAV_ICON_SIZE = 19
-const NAV_ICON_STROKE = 1.75
 
 function SidebarNavIcon({ itemKey }: { itemKey: string }) {
   const Lucide = NAV_ICONS[itemKey]
@@ -134,44 +60,65 @@ function SidebarNavIcon({ itemKey }: { itemKey: string }) {
 const countText = (count: number): string =>
   count > 99 ? "99+" : String(count)
 
+type NavItemProps = {
+  item: Item
+  collapsed: boolean
+  label: string
+  count?: number
+  onNavigate: () => void
+}
+
 function SidebarNavItem({
   item,
   collapsed,
   label,
   count,
   onNavigate,
-}: {
-  item: Item
-  collapsed: boolean
-  label: string
-  count?: number
-  onNavigate: () => void
-}) {
+}: NavItemProps) {
   const direction = useUiDirection()
   const tooltipSide = direction === "rtl" ? "left" : "right"
   const isActive = Boolean(useMatch({ path: item.to, end: item.end ?? false }))
-
-  const linkClassName = cn(
-    "flex h-9 w-full items-center gap-3 rounded-lg px-3 text-sm font-medium transition-colors",
-    collapsed &&
-      "lg:!grid lg:size-9 lg:shrink-0 lg:place-items-center lg:gap-0 lg:p-0",
-    isActive
-      ? "bg-accent text-accent-foreground hover:bg-accent/90 hover:text-accent-foreground"
-      : "text-muted-foreground hover:bg-muted hover:text-foreground",
-  )
+  const hasCount = count !== undefined && count > 0
 
   const link = (
     <NavLink
       to={item.to}
       end={item.end}
       onClick={onNavigate}
-      className={linkClassName}
       aria-current={isActive ? "page" : undefined}
+      className={cn(
+        "group/item relative flex h-10 w-full items-center gap-3 rounded-xl ps-2 pe-2.5 text-sm font-medium outline-none transition-all duration-200",
+        "focus-visible:ring-2 focus-visible:ring-accent/60 focus-visible:ring-offset-2 focus-visible:ring-offset-card",
+        collapsed &&
+          "lg:!grid lg:size-11 lg:shrink-0 lg:place-items-center lg:gap-0 lg:p-0",
+        isActive
+          ? "bg-accent/10 text-foreground shadow-[inset_0_0_0_1px_color-mix(in_oklab,var(--accent)_22%,transparent)]"
+          : "text-muted-foreground hover:bg-muted/80 hover:text-foreground",
+      )}
     >
-      <span className="relative">
-        <SidebarNavIcon itemKey={item.key} />
-        {collapsed && count !== undefined && count > 0 && (
-          <span className="absolute -end-2 -top-1.5 hidden min-w-4 rounded-full bg-danger px-1 text-center text-[10px] font-semibold leading-4 text-white tabular-nums lg:block">
+      {/* The bar on the inline-start edge of the page you are on. */}
+      <span
+        aria-hidden
+        className={cn(
+          "absolute inset-y-2 -start-3 w-1 rounded-e-full bg-accent transition-all duration-200",
+          isActive ? "opacity-100" : "scale-y-0 opacity-0",
+          collapsed && "lg:-start-2",
+        )}
+      />
+      <span
+        className={cn(
+          "relative grid size-7 shrink-0 place-items-center rounded-lg transition-all duration-200",
+          isActive
+            ? "bg-accent text-accent-foreground shadow-sm shadow-accent/30"
+            : "bg-muted/70 text-muted-foreground group-hover/item:bg-card group-hover/item:text-accent group-hover/item:shadow-sm",
+          collapsed && "lg:size-9 lg:rounded-xl",
+        )}
+      >
+        <span className="transition-transform duration-200 group-hover/item:scale-110">
+          <SidebarNavIcon itemKey={item.key} />
+        </span>
+        {collapsed && hasCount && (
+          <span className="absolute -end-1.5 -top-1.5 hidden min-w-4 rounded-full bg-accent px-1 text-center text-[10px] font-bold leading-4 text-accent-foreground ring-2 ring-card tabular-nums lg:block">
             {countText(count)}
           </span>
         )}
@@ -179,6 +126,7 @@ function SidebarNavItem({
       <span
         className={cn(
           "min-w-0 flex-1 truncate text-start",
+          isActive && "font-semibold",
           collapsed && "lg:hidden",
         )}
       >
@@ -187,12 +135,12 @@ function SidebarNavItem({
       {count !== undefined && (
         <span
           className={cn(
-            "ms-auto min-w-6 shrink-0 rounded-full px-1.5 text-center text-xs font-semibold leading-5 tabular-nums",
+            "ms-auto min-w-6 shrink-0 rounded-full px-1.5 text-center text-[11px] font-semibold leading-5 tabular-nums transition-colors",
             isActive
-              ? "bg-accent-foreground/20 text-accent-foreground"
-              : count > 0
-                ? "bg-accent/15 text-accent"
-                : "bg-muted text-muted-foreground",
+              ? "bg-accent text-accent-foreground"
+              : hasCount
+                ? "bg-accent/12 text-accent"
+                : "bg-muted text-muted-foreground/80",
             collapsed && "lg:hidden",
           )}
           aria-label={`${count}`}
@@ -213,48 +161,161 @@ function SidebarNavItem({
         align="center"
         className="max-lg:hidden"
       >
-        {label}
+        {hasCount ? `${label} (${countText(count)})` : label}
       </TooltipContent>
     </Tooltip>
   )
 }
 
-export default function Sidebar() {
+type NavGroupProps = {
+  group: Group
+  items: Item[]
+  collapsed: boolean
+  folded: boolean
+  holdsCurrentPage: boolean
+  counts: Record<string, number | undefined>
+  onToggle: () => void
+  onNavigate: () => void
+}
+
+function SidebarNavGroup({
+  group,
+  items,
+  collapsed,
+  folded,
+  holdsCurrentPage,
+  counts,
+  onToggle,
+  onNavigate,
+}: NavGroupProps) {
   const { t } = useTranslation()
+  // The group of the page you are on stays open; a collapsed menu shows every icon.
+  const open = collapsed || holdsCurrentPage || !folded
+  const waiting = items.reduce((sum, item) => sum + (counts[item.key] ?? 0), 0)
+  const listId = `nav-group-${group.key}`
+
+  return (
+    <div className="mb-3">
+      <button
+        type="button"
+        onClick={onToggle}
+        disabled={holdsCurrentPage}
+        aria-expanded={open}
+        aria-controls={listId}
+        className={cn(
+          "group/head mb-1 flex w-full items-center gap-2 rounded-md px-2 py-1 text-start outline-none",
+          "focus-visible:ring-2 focus-visible:ring-accent/60",
+          !holdsCurrentPage && "cursor-pointer hover:text-foreground",
+          collapsed && "lg:hidden",
+        )}
+      >
+        <span className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/90 group-hover/head:text-foreground">
+          {t(`nav.${group.key}`)}
+        </span>
+        <span
+          aria-hidden
+          className="h-px flex-1 bg-gradient-to-r from-border to-transparent rtl:bg-gradient-to-l"
+        />
+        {!open && waiting > 0 && (
+          <span className="rounded-full bg-accent/12 px-1.5 text-[10px] font-semibold leading-4 text-accent tabular-nums">
+            {countText(waiting)}
+          </span>
+        )}
+        {!holdsCurrentPage && (
+          <ChevronDown
+            size={14}
+            strokeWidth={2}
+            aria-hidden
+            className={cn(
+              "shrink-0 text-muted-foreground/70 transition-transform duration-200",
+              !open && "-rotate-90 rtl:rotate-90",
+            )}
+          />
+        )}
+      </button>
+      {collapsed && (
+        <div className="mx-auto mb-2 hidden h-px w-6 bg-border lg:block" />
+      )}
+      <div
+        id={listId}
+        className={cn(
+          "grid transition-[grid-template-rows,opacity] duration-200 ease-out",
+          open ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0",
+        )}
+      >
+        <ul className="min-h-0 space-y-0.5 overflow-hidden ps-0.5">
+          {items.map((item) => (
+            <li
+              key={item.to}
+              className={cn(collapsed && "lg:flex lg:justify-center")}
+            >
+              <SidebarNavItem
+                item={item}
+                collapsed={collapsed}
+                label={t(`nav.${item.key}`)}
+                count={counts[item.key]}
+                onNavigate={onNavigate}
+              />
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  )
+}
+
+export default function Sidebar() {
   const counts = useSidebarCounts()
   const { can } = usePermissions()
   const direction = useUiDirection()
+  const { pathname } = useLocation()
   const collapsed = useUiStore((s) => s.sidebarCollapsed)
   /** Scrollbar on the viewport-adjacent edge (right in AR, left in EN). */
   const navScrollDir = direction === "rtl" ? "ltr" : "rtl"
   const mobileOpen = useUiStore((s) => s.mobileOpen)
   const setMobileOpen = useUiStore((s) => s.setMobileOpen)
+  const [folded, setFolded] = useState<string[]>(readFolded)
+
+  const toggle = (key: string) =>
+    setFolded((current) => {
+      const next = current.includes(key)
+        ? current.filter((k) => k !== key)
+        : [...current, key]
+      writeFolded(next)
+      return next
+    })
 
   return (
     <>
       {mobileOpen && (
         <div
-          className="fixed inset-0 z-30 bg-black/50 lg:hidden [animate-[fade-in_.15s]"
+          className="fixed inset-0 z-30 bg-black/50 backdrop-blur-[2px] lg:hidden [animate-[fade-in_.15s]"
           onClick={() => setMobileOpen(false)}
         />
       )}
       <aside
         className={cn(
-          "fixed inset-y-0 inset-s-0 z-40 flex w-60 flex-col border-e border-border bg-card transition-all duration-200 lg:sticky lg:top-0 lg:z-10 lg:h-screen lg:translate-x-0",
+          "fixed inset-y-0 inset-s-0 z-40 flex w-64 flex-col overflow-hidden border-e border-border bg-card transition-all duration-200 lg:sticky lg:top-0 lg:z-10 lg:h-screen lg:translate-x-0",
+          "bg-[linear-gradient(180deg,var(--card)_0%,color-mix(in_oklab,var(--card)_86%,var(--background))_100%)]",
           mobileOpen
-            ? "translate-x-0"
+            ? "translate-x-0 shadow-2xl"
             : "max-lg:-translate-x-full max-lg:rtl:translate-x-full",
-          collapsed && "lg:w-17",
+          collapsed && "lg:w-[76px]",
         )}
       >
+        {/* A soft glow of the accent behind the brand. */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -top-24 start-[-30%] size-64 rounded-full bg-accent/10 blur-3xl"
+        />
         <div
           className={cn(
-            "flex h-14 items-center border-b border-border px-4",
+            "relative flex h-16 shrink-0 items-center border-b border-border/70 px-4",
             collapsed && "lg:justify-center lg:px-0",
           )}
         >
           <span className={cn(collapsed && "lg:hidden")}>
-            <Brand />
+            <Brand withTagline />
           </span>
           {collapsed && (
             <span className="hidden lg:block">
@@ -262,65 +323,64 @@ export default function Sidebar() {
             </span>
           )}
         </div>
-        <nav className="flex min-h-0 flex-1 flex-col" aria-label="Main">
+        <nav
+          className="relative flex min-h-0 flex-1 flex-col"
+          aria-label="Main"
+        >
           <div
             dir={navScrollDir}
             className={cn(
-              "min-h-0 flex-1 overflow-y-auto py-4",
-              direction === "rtl" ? "ps-3 pe-3" : "ps-3 pe-3",
+              "min-h-0 flex-1 overflow-y-auto px-3 py-4 [scrollbar-color:var(--border)_transparent] [scrollbar-width:thin]",
+              "[mask-image:linear-gradient(to_bottom,transparent,black_14px,black_calc(100%-18px),transparent)]",
               collapsed && "lg:px-2",
             )}
           >
             <div dir={direction}>
-              {groups.map((g) => {
+              {NAV_GROUPS.map((g) => {
                 const visibleItems = g.items.filter((item) => {
                   const perm = NAV_ITEM_PERMISSIONS[item.key]
                   return !perm || can(perm)
                 })
                 if (visibleItems.length === 0) return null
+                const holdsCurrentPage = visibleItems.some((item) =>
+                  Boolean(
+                    matchPath(
+                      { path: item.to, end: item.end ?? false },
+                      pathname,
+                    ),
+                  ),
+                )
                 return (
-                  <div key={g.key} className="mb-5">
-                    <p
-                      className={cn(
-                        "mb-1.5 px-3 text-start text-[11px] font-medium uppercase tracking-wider text-muted-foreground",
-                        collapsed && "lg:hidden",
-                      )}
-                    >
-                      {t(`nav.${g.key}`)}
-                    </p>
-                    {collapsed && (
-                      <div className="mb-2 hidden border-t border-border lg:mx-2 lg:block" />
-                    )}
-                    <ul className="space-y-0.5">
-                      {visibleItems.map((item) => (
-                        <li
-                          key={item.to}
-                          className={cn(
-                            collapsed && "lg:flex lg:justify-center",
-                          )}
-                        >
-                          <SidebarNavItem
-                            item={item}
-                            collapsed={collapsed}
-                            label={t(`nav.${item.key}`)}
-                            count={counts[item.key]}
-                            onNavigate={() => setMobileOpen(false)}
-                          />
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
+                  <SidebarNavGroup
+                    key={g.key}
+                    group={g}
+                    items={visibleItems}
+                    collapsed={collapsed}
+                    folded={folded.includes(g.key)}
+                    holdsCurrentPage={holdsCurrentPage}
+                    counts={counts}
+                    onToggle={() => toggle(g.key)}
+                    onNavigate={() => setMobileOpen(false)}
+                  />
                 )
               })}
             </div>
           </div>
           <div
             className={cn(
-              "shrink-0 border-t border-border p-3",
+              "shrink-0 border-t border-border/70 p-3",
               collapsed && "lg:px-2",
             )}
           >
-            <SidebarVillasExportButton collapsed={collapsed} />
+            <div
+              className={cn(
+                "rounded-xl border border-border/80 bg-muted/40 p-1 shadow-xs",
+                collapsed &&
+                  "lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none",
+              )}
+            >
+              <SidebarVillasExportButton collapsed={collapsed} />
+            </div>
           </div>
         </nav>
       </aside>

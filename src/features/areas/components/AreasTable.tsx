@@ -65,10 +65,10 @@ export default function AreasTable({
         : "sort"
 
   return (
-    <div className="overflow-hidden rounded-lg border border-border bg-card">
+    <div className="list-surface overflow-hidden">
       <Table>
         <TableHeader>
-          <TableRow className="bg-muted/60 text-xs uppercase tracking-wide text-muted-foreground hover:bg-muted/60">
+          <TableRow className="list-head-row">
             <TableHead className="px-4 py-2.5 font-medium">
               <Button
                 type="button"

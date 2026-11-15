@@ -11,11 +11,19 @@ export default function PageHeader({
 }) {
   return (
     <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
-        {subtitle && (
-          <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>
-        )}
+      <div className="flex min-w-0 items-start gap-3">
+        <span
+          aria-hidden
+          className="mt-1 h-8 w-1.5 shrink-0 rounded-full bg-gradient-to-b from-accent to-accent/25"
+        />
+        <div className="min-w-0">
+          <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
+          {subtitle && (
+            <p className="mt-1 max-w-3xl text-sm leading-relaxed text-muted-foreground">
+              {subtitle}
+            </p>
+          )}
+        </div>
       </div>
       {actions && (
         <div className="flex flex-wrap items-center gap-2">{actions}</div>

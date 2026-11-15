@@ -218,7 +218,7 @@ export default function EngineersPage() {
         }
       />
       {emptyCatalog && (
-        <div className="border border-t-0 border-border px-6 py-14 text-center">
+        <div className="list-empty px-6 py-14 text-center">
           <p className="font-medium">{t("engineers.emptyTitle")}</p>
           <p className="mt-1 text-sm text-muted-foreground">
             {t("engineers.emptyBody")}
@@ -236,7 +236,7 @@ export default function EngineersPage() {
         </div>
       )}
       {emptySearch && (
-        <div className="border border-t-0 border-border px-6 py-14 text-center">
+        <div className="list-empty px-6 py-14 text-center">
           <p className="font-medium">{t("engineers.emptySearchTitle")}</p>
           <p className="mt-1 text-sm text-muted-foreground">
             {t("engineers.emptySearchBody")}

@@ -297,10 +297,10 @@ export default function PaymentsPage() {
         </p>
       )}
 
-      <div className="overflow-x-auto rounded-lg border border-border bg-card">
+      <div className="list-surface overflow-x-auto">
         <Table>
           <TableHeader>
-            <TableRow className="bg-muted/60 text-xs uppercase tracking-wide text-muted-foreground">
+            <TableRow className="list-head-row">
               <TableHead className="px-4 py-2.5">
                 {t("payments.contractor")}
               </TableHead>

@@ -81,10 +81,10 @@ export default function SiteReportsTable({
   const colCount = 7 + (showVillaColumn ? 1 : 0) + (showActions ? 1 : 0)
 
   return (
-    <div className="overflow-x-auto rounded-lg border border-border bg-card">
+    <div className="list-surface overflow-x-auto">
       <Table className="min-w-240">
         <TableHeader>
-          <TableRow className="bg-muted/60 text-xs text-muted-foreground">
+          <TableRow className="list-head-row">
             {showVillaColumn && (
               <SortHead
                 label={t("siteReports.colLocation")}

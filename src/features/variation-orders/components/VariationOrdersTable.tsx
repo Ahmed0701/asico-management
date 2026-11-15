@@ -43,10 +43,10 @@ export default function VariationOrdersTable({
   const columnCount = canEdit ? 7 : 6
 
   return (
-    <div className="overflow-x-auto rounded-lg border border-border">
+    <div className="list-surface overflow-x-auto">
       <Table>
         <TableHeader>
-          <TableRow className="bg-muted/60 text-xs uppercase tracking-wide text-muted-foreground">
+          <TableRow className="list-head-row">
             <TableHead className="px-4 py-2.5">
               {t("variationOrders.voNumber")}
             </TableHead>

@@ -237,7 +237,7 @@ export default function ContractorsPage() {
         }
       />
       {emptyCatalog && (
-        <div className="border border-t-0 border-border px-6 py-14 text-center">
+        <div className="list-empty px-6 py-14 text-center">
           <p className="font-medium">{t("contractors.emptyTitle")}</p>
           <p className="mt-1 text-sm text-muted-foreground">
             {t("contractors.emptyBody")}
@@ -255,7 +255,7 @@ export default function ContractorsPage() {
         </div>
       )}
       {emptySearch && (
-        <div className="border border-t-0 border-border px-6 py-14 text-center">
+        <div className="list-empty px-6 py-14 text-center">
           <p className="font-medium">{t("contractors.emptySearchTitle")}</p>
           <p className="mt-1 text-sm text-muted-foreground">
             {t("contractors.emptySearchBody")}

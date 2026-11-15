@@ -120,7 +120,7 @@ export default function AuditLogPage() {
         onActorFilter={(id) => setParam("actorId", id)}
       />
       {showEmpty && (
-        <div className="border border-t-0 border-border px-6 py-14 text-center">
+        <div className="list-empty px-6 py-14 text-center">
           <p className="font-medium">{t("audit.emptyTitle")}</p>
           <p className="mt-1 text-sm text-muted-foreground">
             {t("audit.emptyBody")}

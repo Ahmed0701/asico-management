@@ -14,7 +14,12 @@ function formatUnreadBadge(count: number): string | null {
   return String(count)
 }
 
-export default function NotificationBell() {
+type Props = {
+  // Extra classes for the bell button (the header gives it its tile look).
+  buttonClassName?: string
+}
+
+export default function NotificationBell({ buttonClassName }: Props = {}) {
   const { t } = useTranslation()
   const { data: user } = useMeQuery()
   const [open, setOpen] = useState(false)
@@ -50,13 +55,13 @@ export default function NotificationBell() {
         label={t("notifications.bellLabel")}
         aria-expanded={open}
         onClick={() => setOpen((o) => !o)}
-        className="relative"
+        className={cn("relative", buttonClassName)}
       />
       {badge && (
         <span
           className={cn(
-            "pointer-events-none absolute top-0.5 min-w-[1.1rem] rounded-full bg-danger px-1 py-px text-center text-[10px] font-semibold leading-none text-white",
-            "end-0.5",
+            "pointer-events-none absolute -top-1 min-w-[1.1rem] rounded-full bg-danger px-1 py-0.5 text-center text-[10px] font-bold leading-none text-white shadow-sm ring-2 ring-card",
+            "-end-1",
           )}
           aria-hidden
         >

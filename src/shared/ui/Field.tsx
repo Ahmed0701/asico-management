@@ -148,11 +148,11 @@ export function SearchInput({
   id?: string
 }) {
   return (
-    <div className={cn("relative min-w-0 w-full", className)}>
+    <div className={cn("group/search relative min-w-0 w-full", className)}>
       <Icon
         name="search"
         size={16}
-        className="pointer-events-none absolute inset-s-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+        className="pointer-events-none absolute inset-s-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within/search:text-accent"
       />
       <UiInput
         id={id}
@@ -160,7 +160,7 @@ export function SearchInput({
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         aria-label={placeholder}
-        className="h-9 w-full bg-card ps-9"
+        className="h-9 w-full rounded-xl bg-card ps-9 shadow-xs focus-visible:border-accent/50 focus-visible:ring-accent/20"
       />
     </div>
   )

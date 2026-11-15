@@ -87,10 +87,10 @@ export default function MonthlyProgressTable({
   const sort = { sortOf, onSort }
 
   return (
-    <div className="overflow-x-auto rounded-lg border border-border bg-card">
+    <div className="list-surface overflow-x-auto">
       <Table>
         <TableHeader>
-          <TableRow className="bg-muted/60 text-xs uppercase tracking-wide text-muted-foreground">
+          <TableRow className="list-head-row">
             <SortHead
               field="villaNumber"
               label={t("monthlyProgress.villaNumber")}

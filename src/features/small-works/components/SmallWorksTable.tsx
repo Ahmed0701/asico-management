@@ -91,10 +91,10 @@ export default function SmallWorksTable({
   }, [highlightRowId, rows])
 
   return (
-    <div className="overflow-x-auto rounded-lg border border-border bg-card">
+    <div className="list-surface overflow-x-auto">
       <Table className="min-w-200">
         <TableHeader>
-          <TableRow className="bg-muted/60 text-xs text-muted-foreground">
+          <TableRow className="list-head-row">
             {showVillaColumn && (
               <SortHead
                 label={t("smallWorks.colLocation")}

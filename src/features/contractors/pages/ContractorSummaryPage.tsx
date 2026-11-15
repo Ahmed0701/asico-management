@@ -320,7 +320,7 @@ export default function ContractorSummaryPage() {
         }
         onRetry={() => void refetch()}
       />
-      <div className="overflow-hidden rounded-lg border border-border bg-card">
+      <div className="list-surface overflow-hidden">
         <div className="border-b border-border px-4 py-3">
           <h2 className="text-sm font-semibold">
             {t("contractors.summaryVillasTitle")}
@@ -328,7 +328,7 @@ export default function ContractorSummaryPage() {
         </div>
         <Table className="min-w-180">
           <TableHeader>
-            <TableRow className="bg-muted/60 text-xs uppercase tracking-wide text-muted-foreground hover:bg-muted/60">
+            <TableRow className="list-head-row">
               <TableHead className="px-4 py-2.5 font-medium">
                 <Button
                   type="button"
@@ -500,7 +500,7 @@ export default function ContractorSummaryPage() {
         </Table>
       </div>
       {pastEnd && meta && (
-        <div className="border border-t-0 border-border px-6 py-10 text-center print:hidden">
+        <div className="list-empty px-6 py-10 text-center print:hidden">
           <p className="text-sm text-muted-foreground">
             {t("contractors.summaryPagePastEnd")}
           </p>

@@ -227,7 +227,7 @@ export default function ElectricalEngineersPage() {
         }
       />
       {emptyCatalog && (
-        <div className="border border-t-0 border-border px-6 py-14 text-center">
+        <div className="list-empty px-6 py-14 text-center">
           <p className="font-medium">{t("electricalEngineers.emptyTitle")}</p>
           <p className="mt-1 text-sm text-muted-foreground">
             {t("electricalEngineers.emptyBody")}
@@ -245,7 +245,7 @@ export default function ElectricalEngineersPage() {
         </div>
       )}
       {emptySearch && (
-        <div className="border border-t-0 border-border px-6 py-14 text-center">
+        <div className="list-empty px-6 py-14 text-center">
           <p className="font-medium">
             {t("electricalEngineers.emptySearchTitle")}
           </p>
