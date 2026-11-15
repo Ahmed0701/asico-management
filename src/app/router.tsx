@@ -32,6 +32,7 @@ import MaterialsRoute from "@/features/materials/pages/MaterialsRoute"
 import MaintenanceSolvedRoute from "@/features/maintenance/pages/MaintenanceSolvedRoute"
 import OwnerNotesRoute from "@/features/owner-notes/pages/OwnerNotesRoute"
 import PaymentsRoute from "@/features/payments/pages/PaymentsRoute"
+import MonthlyProgressRoute from "@/features/monthly-progress/pages/MonthlyProgressRoute"
 import ForemanMissionsRoute from "@/features/foreman-missions/pages/ForemanMissionsRoute"
 import OwnerNotesDoneRoute from "@/features/owner-notes/pages/OwnerNotesDoneRoute"
 import ForemanMissionsDoneRoute from "@/features/foreman-missions/pages/ForemanMissionsDoneRoute"
@@ -82,6 +83,7 @@ export const router = createBrowserRouter([
               { path: "maintenance", Component: MaintenanceRoute },
               { path: "owner-notes", Component: OwnerNotesRoute },
               { path: "payments", Component: PaymentsRoute },
+              { path: "monthly-progress", Component: MonthlyProgressRoute },
               { path: "foreman-missions", Component: ForemanMissionsRoute },
               { path: "owner-notes/done", Component: OwnerNotesDoneRoute },
               {

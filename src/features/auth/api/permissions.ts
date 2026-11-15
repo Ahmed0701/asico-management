@@ -114,6 +114,7 @@ export const NAV_ITEM_PERMISSIONS: Record<string, PermissionCode | undefined> =
     ownerNotes: "owner-notes:read",
     foremanMissions: "foreman-missions:read",
     payments: "payments:read",
+    monthlyProgress: "villas:read",
     materials: "materials:read",
     contractors: "contractors:read",
     civilEngineers: "civil-engineers:read",

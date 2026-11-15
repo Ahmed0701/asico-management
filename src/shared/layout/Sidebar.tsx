@@ -17,6 +17,7 @@ import {
   StickyNote,
   ListTodo,
   Banknote,
+  TrendingUp,
   UserCog,
   Users,
   Wrench,
@@ -54,6 +55,7 @@ const NAV_ICONS: Record<string, LucideIcon> = {
   ownerNotes: StickyNote,
   foremanMissions: ListTodo,
   payments: Banknote,
+  monthlyProgress: TrendingUp,
   materials: Package,
   contractors: HardHat,
   civilEngineers: Wrench,
@@ -71,6 +73,7 @@ const groups: {
     items: [
       { to: "/", key: "dashboard", end: true },
       { to: "/villas", key: "villas", end: true },
+      { to: "/monthly-progress", key: "monthlyProgress" },
     ],
   },
   {

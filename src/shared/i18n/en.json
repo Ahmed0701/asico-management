@@ -74,7 +74,8 @@
     "collapse": "Collapse sidebar",
     "expand": "Expand sidebar",
     "openMenu": "Open menu",
-    "payments": "Payments"
+    "payments": "Payments",
+    "monthlyProgress": "Monthly Progress"
   },
   "directory": {
     "email": "Email",
@@ -886,6 +887,27 @@
     "pendingBody": "Villa {{name}} has variation orders that are not paid yet. Mark all of them as paid, then add the villa for MEW inspection.",
     "pendingBodyCount": "Villa {{name}} has {{count}} variation orders that are not paid yet. Mark all of them as paid, then add the villa for MEW inspection.",
     "pendingView": "View variation orders"
+  },
+  "monthlyProgress": {
+    "title": "Monthly Progress",
+    "subtitle": "Every villa's progress at the end of last month and this month, and how far it moved. Pick a month to see an earlier one.",
+    "month": "Month",
+    "searchPlaceholder": "Search villa number, location or contractor…",
+    "villaNumber": "Villa Number",
+    "location": "Location",
+    "contractor": "Contractor",
+    "lastMonth": "Last month",
+    "thisMonth": "This month",
+    "thisMonthNow": "{{month}} (now)",
+    "change": "Change",
+    "notAddedYet": "Not added yet",
+    "empty": "No villas.",
+    "averageOf": "Average progress, {{month}}",
+    "averageNow": "Average progress now, {{month}}",
+    "averageChange": "Average change",
+    "improved": "Villas that moved forward",
+    "unchanged": "{{count}} did not move",
+    "howItWorks": "Past figures are rebuilt from the history of the open works, with the electrical phases and their ratios as they are now."
   },
   "ownerNotes": {
     "title": "Owner Notes",
