@@ -117,10 +117,15 @@ export function useSetRequirementsMutation() {
   })
 }
 
-export function useDeliveriesQuery(params: DeliveriesListParams) {
+/** `enabled` false waits (the villa's vendors load when their card is opened). */
+export function useDeliveriesQuery(
+  params: DeliveriesListParams,
+  enabled = true,
+) {
   return useQuery({
     queryKey: materialsKeys.deliveries(params),
     queryFn: ({ signal }) => api.listDeliveries(params, signal),
+    enabled,
     placeholderData: keepPreviousData,
     retry: 1,
   })

@@ -297,7 +297,41 @@
     "siteReportsNoRating": "لا تقارير بعد، لا متوسط تقييم.",
     "siteReportsRatingHelp": "متوسط التقييم {{rating}} / 5 (كل الفترات).",
     "payments": "مدفوعات مستحقة",
-    "paymentsHelp": "{{count}} معلقة، {{overdue}} متأخرة · {{paid}} مدفوعة هذا الشهر"
+    "paymentsHelp": "{{count}} معلقة، {{overdue}} متأخرة · {{paid}} مدفوعة هذا الشهر",
+    "charts": {
+      "sectionTitle": "الاتجاهات",
+      "progressTitle": "متوسط تقدم الفلل",
+      "progressCaption": "في نهاية كل شهر من آخر 6 أشهر (هذا الشهر حتى الآن).",
+      "openMonthly": "التقدم الشهري",
+      "month": "الشهر",
+      "average": "متوسط التقدم",
+      "doneVillas": "الفلل المكتملة",
+      "changeOverPeriod": "{{change}} نقطة خلال 6 أشهر",
+      "averageLine": "المتوسط {{value}}%",
+      "doneLine": "{{done}} من {{villas}} فيلا مكتملة",
+      "phaseTitle": "الأعمال المفتوحة حسب مرحلة الكهرباء",
+      "phaseCaption": "وضع العمل في كل مرحلة. الشريط الأطول هو المرحلة الأكثر عملاً.",
+      "openWorksLink": "الأعمال المفتوحة",
+      "phase": "المرحلة",
+      "noPhases": "لا توجد مراحل كهرباء فعالة.",
+      "labourTitle": "العمال في الموقع",
+      "labourCaption": "آخر 14 يوماً، كل الفلل. {{average}} يومياً في أيام العمل.",
+      "labourLink": "العمالة اليومية",
+      "day": "اليوم",
+      "workers": "العمال",
+      "workersLine_zero": "لا يوجد عمال",
+      "workersLine_one": "عامل واحد",
+      "workersLine_two": "عاملان",
+      "workersLine_few": "{{count}} عمال",
+      "workersLine_many": "{{count}} عاملاً",
+      "workersLine_other": "{{count}} عامل",
+      "noLabour": "لا توجد عمالة يومية في آخر 14 يوماً.",
+      "paymentsTitle": "المدفوع للمقاولين",
+      "paymentsCaption": "حسب الشهر، آخر 6 أشهر: {{total}} إجمالاً.",
+      "paymentsLink": "المدفوعات",
+      "paid": "المدفوع",
+      "noPayments": "لم تتم أي دفعة في آخر 6 أشهر."
+    }
   },
   "contractors": {
     "title": "المقاولون",
@@ -737,7 +771,16 @@
     "addNoteFiles": "إضافة ملفات",
     "notesUploaded": "تم رفع {{count}} ملفات أذونات تسليم للفيلا {{name}}.",
     "removeNote": "حذف {{name}}",
-    "moreNotesHint": "لهذا التوريد {{count}} ملفات. الملفات المختارة هنا تُضاف إليها (حتى 10 إجمالًا)."
+    "moreNotesHint": "لهذا التوريد {{count}} ملفات. الملفات المختارة هنا تُضاف إليها (حتى 10 إجمالًا).",
+    "vendors": {
+      "title": "الموردون",
+      "switchgear": "مصنع لوحات الفيلا",
+      "cable": "مصنع الكابلات",
+      "none": "لا يوجد توريد من هذا النوع من المصانع بعد.",
+      "lastDelivery": "آخر توريد {{date}}",
+      "latest": "الأحدث",
+      "openInMaterials": "فتح في المواد"
+    }
   },
   "foremanMissions": {
     "title": "مهام الفورمن",

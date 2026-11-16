@@ -45,6 +45,11 @@
   --closed: #0f9d75;
   --closed-soft: #dcf3e8;
   --radius: 0.5rem;
+  /* Dashboard chart colours, checked for colour-blind separation and contrast on the card (light and dark). */
+  --chart-not-started: #8a867d;
+  --chart-in-progress: #1d4ed8;
+  --chart-delayed: #d95f32;
+  --chart-done: #0f9d75;
 }
 
 .dark {
@@ -80,6 +85,10 @@
   --progress-soft: #3b2a0e;
   --closed: #34c997;
   --closed-soft: #123028;
+  --chart-not-started: #77736b;
+  --chart-in-progress: #6c8ff0;
+  --chart-delayed: #e07042;
+  --chart-done: #22a37a;
 }
 
 @theme inline {

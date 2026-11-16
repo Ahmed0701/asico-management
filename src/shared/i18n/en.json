@@ -297,7 +297,41 @@
     "siteReportsNoRating": "No reports yet, no average rating.",
     "siteReportsRatingHelp": "Average rating {{rating}} / 5 (all time).",
     "payments": "Payments to pay",
-    "paymentsHelp": "{{count}} pending, {{overdue}} overdue · {{paid}} paid this month"
+    "paymentsHelp": "{{count}} pending, {{overdue}} overdue · {{paid}} paid this month",
+    "charts": {
+      "sectionTitle": "Trends",
+      "progressTitle": "Average villa progress",
+      "progressCaption": "At the end of each of the last 6 months (this month as of now).",
+      "openMonthly": "Monthly progress",
+      "month": "Month",
+      "average": "Average progress",
+      "doneVillas": "Villas done",
+      "changeOverPeriod": "{{change}} points over 6 months",
+      "averageLine": "Average {{value}}%",
+      "doneLine": "{{done}} of {{villas}} villas done",
+      "phaseTitle": "Open works by electrical phase",
+      "phaseCaption": "Where the work stands in each phase. The longest bar is the busiest phase.",
+      "openWorksLink": "Open works",
+      "phase": "Phase",
+      "noPhases": "No active electrical phases.",
+      "labourTitle": "Workers on site",
+      "labourCaption": "The last 14 days, all villas. {{average}} a day on the days with labour.",
+      "labourLink": "Daily labour",
+      "day": "Day",
+      "workers": "Workers",
+      "workersLine_zero": "{{count}} workers",
+      "workersLine_one": "{{count}} worker",
+      "workersLine_two": "{{count}} workers",
+      "workersLine_few": "{{count}} workers",
+      "workersLine_many": "{{count}} workers",
+      "workersLine_other": "{{count}} workers",
+      "noLabour": "No daily labour in the last 14 days.",
+      "paymentsTitle": "Paid to contractors",
+      "paymentsCaption": "By month, the last 6 months: {{total}} in all.",
+      "paymentsLink": "Payments",
+      "paid": "Paid",
+      "noPayments": "No payment was made in the last 6 months."
+    }
   },
   "contractors": {
     "title": "Contractors",
@@ -737,7 +771,16 @@
     "addNoteFiles": "Add files",
     "notesUploaded": "{{count}} delivery note files uploaded for villa {{name}}.",
     "removeNote": "Remove {{name}}",
-    "moreNotesHint": "This delivery has {{count}} files. Files chosen here are added to them (up to 10 in all)."
+    "moreNotesHint": "This delivery has {{count}} files. Files chosen here are added to them (up to 10 in all).",
+    "vendors": {
+      "title": "Vendors",
+      "switchgear": "Villa Switchgear Factory",
+      "cable": "Cable Factory",
+      "none": "No delivery from this kind of factory yet.",
+      "lastDelivery": "last delivery {{date}}",
+      "latest": "Latest",
+      "openInMaterials": "Open in Materials"
+    }
   },
   "foremanMissions": {
     "title": "Foreman Missions",

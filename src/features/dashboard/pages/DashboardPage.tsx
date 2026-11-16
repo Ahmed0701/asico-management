@@ -1,18 +1,33 @@
 import { useTranslation } from "react-i18next"
+
 import { usePermissions } from "@/features/auth/api"
+
 import { formatDateTime } from "@/shared/lib/format"
+
 import Button from "@/shared/ui/Button"
+
 import PageHeader from "@/shared/ui/PageHeader"
+
 import { useDashboardSummaryQuery } from "../api"
+
+import { useDashboardChartsQuery } from "../api/dashboard-charts.api"
+
+import DashboardChartsSection from "../components/DashboardChartsSection"
+
 import DashboardSummarySection from "../components/DashboardSummarySection"
 
 export default function DashboardPage() {
   const { t } = useTranslation()
+
   const { can } = usePermissions()
+
   const canVillasRead = can("villas:read")
+
   const canContractorsRead = can("contractors:read")
 
   const summaryQuery = useDashboardSummaryQuery()
+
+  const chartsQuery = useDashboardChartsQuery()
 
   const updatedLabel =
     summaryQuery.data?.generatedAt &&
@@ -32,8 +47,12 @@ export default function DashboardPage() {
               size="sm"
               variant="secondary"
               className="shrink-0"
-              disabled={summaryQuery.isFetching}
-              onClick={() => void summaryQuery.refetch()}
+              disabled={summaryQuery.isFetching || chartsQuery.isFetching}
+              onClick={() => {
+                void summaryQuery.refetch()
+
+                void chartsQuery.refetch()
+              }}
             >
               {t("dashboard.refresh")}
             </Button>
@@ -51,6 +70,8 @@ export default function DashboardPage() {
         canVillasRead={canVillasRead}
         canContractorsRead={canContractorsRead}
       />
+
+      <DashboardChartsSection />
     </>
   )
 }
