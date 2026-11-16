@@ -1,3 +1,4 @@
+import { Zap } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import type { VillaPhaseProgress } from "../api"
 import { Card } from "@/shared/ui/PageHeader"
@@ -34,15 +35,17 @@ export default function VillaDetailPhasesCard({
 
   return (
     <Card className="mb-4 p-4 sm:p-5">
-      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-        <div>
-          <h2 className="flex items-center gap-2 text-sm font-semibold">
-            <Icon name="pipe" size={18} className="text-progress" />
-            {t("villas.phasesTitle")}
-          </h2>
-          <p className="mt-0.5 text-xs text-muted-foreground">
-            {t("villas.phasesFromOpenWorks")}
-          </p>
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+        <div className="flex items-center gap-3">
+          <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-accent/10 text-accent">
+            <Zap size={17} strokeWidth={1.9} aria-hidden />
+          </span>
+          <div>
+            <h2 className="text-sm font-semibold">{t("villas.phasesTitle")}</h2>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              {t("villas.phasesFromOpenWorks")}
+            </p>
+          </div>
         </div>
         {sorted.length > 0 && (
           <span className="rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium tabular-nums text-muted-foreground">

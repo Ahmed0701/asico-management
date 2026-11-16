@@ -1,15 +1,14 @@
+import { FileText } from "lucide-react"
+import CollapsibleCard from "@/shared/ui/CollapsibleCard"
 import { useEffect, useRef, useState } from "react"
 import { useSearchParams } from "react-router"
 import { useTranslation } from "react-i18next"
 import { formatBudgetDisplay } from "@/features/villas/api/budget"
 import { toApiError } from "@/shared/api/errors"
-import { cn } from "@/shared/lib/cn"
 import { toast } from "@/shared/lib/toast"
 import { Badge } from "@/shared/ui/Badge"
 import Button from "@/shared/ui/Button"
-import Icon from "@/shared/ui/Icon"
 import { ConfirmModal } from "@/shared/ui/Modal"
-import { Card } from "@/shared/ui/PageHeader"
 import {
   useDeleteVariationOrderMutation,
   useUpdateVariationOrderMutation,
@@ -102,117 +101,103 @@ export default function VariationOrdersCard({ villaId, canEdit }: Props) {
 
   return (
     <div ref={cardRef} className="scroll-mt-4">
-      <Card className="mb-4 overflow-hidden">
-        <button
-          type="button"
-          className="flex w-full items-center justify-between gap-2 px-4 py-3 text-start text-sm font-medium hover:bg-muted/40"
-          aria-expanded={open}
-          onClick={() => setOpen((v) => !v)}
-        >
-          <span className="flex items-center gap-2">
-            {t("variationOrders.title")}
-            {query.data && rows.length > 0 && (
-              <Badge tone="neutral">{rows.length}</Badge>
-            )}
-          </span>
-          <Icon
-            name="chevronDown"
-            size={18}
-            className={cn(
-              "shrink-0 text-muted-foreground transition",
-              open && "rotate-180",
-            )}
-          />
-        </button>
-        {open && (
-          <div className="grid gap-4 border-t border-border p-4 sm:p-5">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm">
-                <span>
-                  <span className="text-muted-foreground">
-                    {t("variationOrders.totalPending")}:{" "}
-                  </span>
-                  <span className="font-medium tabular-nums text-progress">
-                    {kwd(totals?.pendingMinor ?? 0)}
-                  </span>
+      <CollapsibleCard
+        title={t("variationOrders.title")}
+        icon={FileText}
+        open={open}
+        onOpenChange={setOpen}
+        badges={
+          query.data &&
+          rows.length > 0 && <Badge tone="neutral">{rows.length}</Badge>
+        }
+      >
+        <div className="grid gap-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm">
+              <span>
+                <span className="text-muted-foreground">
+                  {t("variationOrders.totalPending")}:{" "}
                 </span>
-                <span>
-                  <span className="text-muted-foreground">
-                    {t("variationOrders.totalPaid")}:{" "}
-                  </span>
-                  <span className="font-medium tabular-nums text-success">
-                    {kwd(totals?.paidMinor ?? 0)}
-                  </span>
+                <span className="font-medium tabular-nums text-progress">
+                  {kwd(totals?.pendingMinor ?? 0)}
                 </span>
-              </div>
-              {canEdit && (
-                <Button
-                  type="button"
-                  variant="primary"
-                  size="sm"
-                  icon="plus"
-                  onClick={() => {
-                    setEditing(undefined)
-                    setFormOpen(true)
-                  }}
-                >
-                  {t("variationOrders.add")}
-                </Button>
-              )}
+              </span>
+              <span>
+                <span className="text-muted-foreground">
+                  {t("variationOrders.totalPaid")}:{" "}
+                </span>
+                <span className="font-medium tabular-nums text-success">
+                  {kwd(totals?.paidMinor ?? 0)}
+                </span>
+              </span>
             </div>
-            {query.isError ? (
-              <p role="alert" className="text-sm text-danger">
-                {toApiError(query.error).message}
-              </p>
-            ) : (
-              <VariationOrdersTable
-                rows={rows}
-                loading={query.isLoading}
-                canEdit={canEdit}
-                busyId={busyId}
-                kwd={kwd}
-                onStatus={(row, next) => void changeStatus(row, next)}
-                onNotes={(row) => setViewingId(row.id)}
-                onFiles={(row) => setFilesId(row.id)}
-                onEdit={(row) => {
-                  setEditing(row)
+            {canEdit && (
+              <Button
+                type="button"
+                variant="primary"
+                size="sm"
+                icon="plus"
+                onClick={() => {
+                  setEditing(undefined)
                   setFormOpen(true)
                 }}
-                onDelete={setDeleting}
-              />
+              >
+                {t("variationOrders.add")}
+              </Button>
             )}
           </div>
-        )}
+          {query.isError ? (
+            <p role="alert" className="text-sm text-danger">
+              {toApiError(query.error).message}
+            </p>
+          ) : (
+            <VariationOrdersTable
+              rows={rows}
+              loading={query.isLoading}
+              canEdit={canEdit}
+              busyId={busyId}
+              kwd={kwd}
+              onStatus={(row, next) => void changeStatus(row, next)}
+              onNotes={(row) => setViewingId(row.id)}
+              onFiles={(row) => setFilesId(row.id)}
+              onEdit={(row) => {
+                setEditing(row)
+                setFormOpen(true)
+              }}
+              onDelete={setDeleting}
+            />
+          )}
+        </div>
+      </CollapsibleCard>
 
-        <VariationOrderFormModal
-          open={formOpen}
-          villaId={villaId}
-          item={editing}
-          onClose={() => setFormOpen(false)}
-        />
-        <VariationOrderNotesModal
-          item={viewing}
-          amount={viewing ? kwd(viewing.amountMinor) : ""}
-          onClose={() => setViewingId(null)}
-        />
-        <VariationOrderFilesModal
-          item={filesOf}
-          canEdit={canEdit}
-          onClose={() => setFilesId(null)}
-        />
-        <ConfirmModal
-          open={deleting !== null}
-          onClose={() => setDeleting(null)}
-          onConfirm={confirmDelete}
-          title={t("variationOrders.deleteTitle")}
-          message={t("variationOrders.deleteBody", {
-            name: deleting?.voNumber ?? "",
-            amount: deleting ? kwd(deleting.amountMinor) : "",
-          })}
-          confirmLabel={t("common.delete")}
-          confirmPending={remove.isPending}
-        />
-      </Card>
+      <VariationOrderFormModal
+        open={formOpen}
+        villaId={villaId}
+        item={editing}
+        onClose={() => setFormOpen(false)}
+      />
+      <VariationOrderNotesModal
+        item={viewing}
+        amount={viewing ? kwd(viewing.amountMinor) : ""}
+        onClose={() => setViewingId(null)}
+      />
+      <VariationOrderFilesModal
+        item={filesOf}
+        canEdit={canEdit}
+        onClose={() => setFilesId(null)}
+      />
+      <ConfirmModal
+        open={deleting !== null}
+        onClose={() => setDeleting(null)}
+        onConfirm={confirmDelete}
+        title={t("variationOrders.deleteTitle")}
+        message={t("variationOrders.deleteBody", {
+          name: deleting?.voNumber ?? "",
+          amount: deleting ? kwd(deleting.amountMinor) : "",
+        })}
+        confirmLabel={t("common.delete")}
+        confirmPending={remove.isPending}
+      />
     </div>
   )
 }

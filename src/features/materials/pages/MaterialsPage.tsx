@@ -238,6 +238,9 @@ function DeliveriesTab({
         : undefined,
       hasNote:
         hasNote === "true" ? true : hasNote === "false" ? false : undefined,
+      sort: /^villaNumber(:(asc|desc))?$/.test(searchParams.get("sort") ?? "")
+        ? (searchParams.get("sort") ?? undefined)
+        : undefined,
     }
   }, [searchParams])
   const { data, isLoading, isError, error, refetch } =
@@ -338,6 +341,8 @@ function DeliveriesTab({
         rows={rows}
         isLoading={isLoading}
         showVilla
+        sort={params.sort}
+        onSort={(next) => setParam("sort", next)}
         canUpdate={canUpdate}
         canDelete={canDelete}
         emptyText={t("materials.empty")}

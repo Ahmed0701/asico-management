@@ -23,7 +23,8 @@ export function buildOwnerNotesQueryParams(
   }
   if (params.search) out.search = params.search
   // The done list shows the most recently finished first.
-  if (params.done) out.sort = "doneAt:desc"
+  if (params.sort) out.sort = params.sort
+  else if (params.done) out.sort = "doneAt:desc"
   return out
 }
 

@@ -1,3 +1,4 @@
+import { Avatar } from "@/shared/list/cells"
 import { useTranslation } from "react-i18next"
 import { Link, useLocation } from "react-router"
 import i18n from "@/shared/i18n"
@@ -103,9 +104,17 @@ export default function AuditLogTable({
                       className="h-auto flex-col items-start px-0 py-0 text-start hover:bg-transparent"
                       onClick={() => onActorFilter(row.actor!.id)}
                     >
-                      <span className="font-medium">{row.actor.name}</span>
-                      <span dir="ltr" className="text-xs text-muted-foreground">
-                        {row.actor.email}
+                      <span className="flex items-center gap-2">
+                        <Avatar name={row.actor!.name} />
+                        <span className="flex flex-col items-start">
+                          <span className="font-medium">{row.actor!.name}</span>
+                          <span
+                            dir="ltr"
+                            className="text-xs text-muted-foreground"
+                          >
+                            {row.actor!.email}
+                          </span>
+                        </span>
                       </span>
                     </Button>
                   ) : (

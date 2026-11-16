@@ -1,3 +1,5 @@
+import type { ReactNode } from "react"
+import { ArrowLeft } from "lucide-react"
 import { useState } from "react"
 import { Link, useNavigate, useParams } from "react-router"
 import { useTranslation } from "react-i18next"
@@ -14,13 +16,27 @@ import {
 } from "../api"
 import VillaDetailHeroCard from "../components/VillaDetailHeroCard"
 import VillaDetailPhasesCard from "../components/VillaDetailPhasesCard"
-import VillaDetailRegistryCard from "../components/VillaDetailRegistryCard"
 import VillaDetailMewCard from "../components/VillaDetailMewCard"
 import VariationOrdersCard from "@/features/variation-orders/components/VariationOrdersCard"
 import VillaMaterialsCard from "@/features/materials/components/VillaMaterialsCard"
 import VillaVendorsCard from "@/features/materials/components/VillaVendorsCard"
 import VillaDetailTabbedPanel from "../components/VillaDetailTabbedPanel"
 import VillaFormModal from "../components/VillaFormModal"
+
+// A small title between the groups of the villa page, with a line that fades out.
+function SectionHeading({ children }: { children: ReactNode }) {
+  return (
+    <div className="mb-3 mt-6 flex items-center gap-3">
+      <h2 className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+        {children}
+      </h2>
+      <span
+        aria-hidden
+        className="h-px flex-1 bg-gradient-to-r from-border to-transparent rtl:bg-gradient-to-l"
+      />
+    </div>
+  )
+}
 
 export default function VillaDetailPage() {
   const { t } = useTranslation()
@@ -107,8 +123,13 @@ export default function VillaDetailPage() {
     <>
       <Link
         to="/villas"
-        className="mb-4 inline-block text-sm text-accent hover:underline"
+        className="group mb-4 inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-accent"
       >
+        <ArrowLeft
+          size={15}
+          aria-hidden
+          className="transition-transform group-hover:-translate-x-0.5 rtl:rotate-180 rtl:group-hover:translate-x-0.5"
+        />
         {t("villas.backToList")}
       </Link>
       <VillaDetailHeroCard
@@ -122,13 +143,14 @@ export default function VillaDetailPage() {
         onToggleMewFollowUp={() => void toggleMewFollowUp()}
       />
       <VillaDetailPhasesCard phases={villa.phases} />
-      <VillaDetailRegistryCard villa={villa} />
+      <SectionHeading>{t("villas.sections.records")}</SectionHeading>
       <VillaDetailMewCard villa={villa} />
       <VariationOrdersCard villaId={villa.id} canEdit={canUpdate} />
       {canMaterials && (
         <VillaVendorsCard villaId={villa.id} villaNumber={villa.villaNumber} />
       )}
       {canMaterials && <VillaMaterialsCard villaId={villa.id} />}
+      <SectionHeading>{t("villas.sections.activity")}</SectionHeading>
       <VillaDetailTabbedPanel villa={villa} />
       <VillaFormModal
         open={editOpen}

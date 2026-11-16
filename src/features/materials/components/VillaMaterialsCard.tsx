@@ -1,10 +1,10 @@
+import { Package } from "lucide-react"
+import CollapsibleCard from "@/shared/ui/CollapsibleCard"
 import { useState } from "react"
 import { useNavigate } from "react-router"
 import { useTranslation } from "react-i18next"
 import { cn } from "@/shared/lib/cn"
 import { Badge } from "@/shared/ui/Badge"
-import Icon from "@/shared/ui/Icon"
-import { Card } from "@/shared/ui/PageHeader"
 import { useMaterialsSummaryQuery, type MaterialTotal } from "../api"
 import { formatQuantity } from "./DeliveriesTable"
 
@@ -23,87 +23,72 @@ export default function VillaMaterialsCard({ villaId }: { villaId: string }) {
   const missing = (s?.materials ?? []).filter((m) => m.status === "PENDING")
 
   return (
-    <Card className="mb-4 overflow-hidden">
-      <button
-        type="button"
-        className="flex w-full items-center justify-between gap-2 px-4 py-3 text-start text-sm font-medium hover:bg-muted/40"
-        aria-expanded={open}
-        onClick={() => setOpen((v) => !v)}
-      >
-        <span className="flex flex-wrap items-center gap-2">
-          {t("materials.deliveredTitle")}
-          {s && (
-            <>
-              <Badge tone="neutral">
-                {t("materials.deliveryCount", { count: s.deliveries })}
-              </Badge>
-              <Badge tone={missing.length > 0 ? "danger" : "success"}>
-                {missing.length > 0
-                  ? t("materials.materialsPending", { count: missing.length })
-                  : t("materials.allMaterialsIn")}
-              </Badge>
-            </>
-          )}
-        </span>
-        <Icon
-          name="chevronDown"
-          size={18}
-          className={cn(
-            "shrink-0 text-muted-foreground transition",
-            open && "rotate-180",
-          )}
-        />
-      </button>
-      {open && (
-        <div className="grid gap-4 border-t border-border p-4 sm:p-5">
-          {summary.isLoading ? (
-            <p className="text-sm text-muted-foreground">
-              {t("common.loading")}
-            </p>
-          ) : (
-            <div className="grid gap-4 md:grid-cols-2">
-              <MaterialsColumn
-                title={t("materials.deliveredList")}
-                tone="success"
-                empty={t("materials.villaEmpty")}
-                rows={delivered}
-                quantity={(m) => m.delivered}
-                note={(m) =>
-                  t("materials.fromNotes", {
-                    count: m.deliveries,
-                    withNote: m.withNote,
-                  })
-                }
-              />
-              <MaterialsColumn
-                title={t("materials.notDeliveredList")}
-                tone="danger"
-                empty={t("materials.allMaterialsIn")}
-                rows={missing}
-                quantity={(m) => m.balance}
-                note={(m) =>
-                  t("materials.ofRequired", {
-                    quantity: formatQuantity(m.required, m.unit),
-                  })
-                }
-              />
-            </div>
-          )}
-          <button
-            type="button"
-            className="justify-self-start text-sm text-accent hover:underline"
-            onClick={() =>
-              navigate(`/villas/${villaId}?tab=materials`, {
-                replace: true,
-                state: { scrollToTabs: Date.now() },
-              })
-            }
-          >
-            {t("materials.openMaterialsTab")}
-          </button>
-        </div>
-      )}
-    </Card>
+    <CollapsibleCard
+      title={t("materials.deliveredTitle")}
+      icon={Package}
+      open={open}
+      onOpenChange={setOpen}
+      badges={
+        s && (
+          <>
+            <Badge tone="neutral">
+              {t("materials.deliveryCount", { count: s.deliveries })}
+            </Badge>
+            <Badge tone={missing.length > 0 ? "danger" : "success"}>
+              {missing.length > 0
+                ? t("materials.materialsPending", { count: missing.length })
+                : t("materials.allMaterialsIn")}
+            </Badge>
+          </>
+        )
+      }
+    >
+      <div className="grid gap-4">
+        {summary.isLoading ? (
+          <p className="text-sm text-muted-foreground">{t("common.loading")}</p>
+        ) : (
+          <div className="grid gap-4 md:grid-cols-2">
+            <MaterialsColumn
+              title={t("materials.deliveredList")}
+              tone="success"
+              empty={t("materials.villaEmpty")}
+              rows={delivered}
+              quantity={(m) => m.delivered}
+              note={(m) =>
+                t("materials.fromNotes", {
+                  count: m.deliveries,
+                  withNote: m.withNote,
+                })
+              }
+            />
+            <MaterialsColumn
+              title={t("materials.notDeliveredList")}
+              tone="danger"
+              empty={t("materials.allMaterialsIn")}
+              rows={missing}
+              quantity={(m) => m.balance}
+              note={(m) =>
+                t("materials.ofRequired", {
+                  quantity: formatQuantity(m.required, m.unit),
+                })
+              }
+            />
+          </div>
+        )}
+        <button
+          type="button"
+          className="justify-self-start text-sm text-accent hover:underline"
+          onClick={() =>
+            navigate(`/villas/${villaId}?tab=materials`, {
+              replace: true,
+              state: { scrollToTabs: Date.now() },
+            })
+          }
+        >
+          {t("materials.openMaterialsTab")}
+        </button>
+      </div>
+    </CollapsibleCard>
   )
 }
 

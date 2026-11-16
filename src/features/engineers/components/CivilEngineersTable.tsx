@@ -1,3 +1,4 @@
+import { Avatar } from "@/shared/list/cells"
 import { useTranslation } from "react-i18next"
 import { Link, useLocation } from "react-router"
 import { usePermissions } from "@/features/auth/api"
@@ -175,14 +176,17 @@ export default function CivilEngineersTable({
             rows.map((row) => (
               <TableRow key={row.id} className="hover:bg-muted/40">
                 <TableCell className="px-4 py-3">
-                  <Link
-                    to={`/civil-engineers/${row.id}`}
-                    state={{ listSearch: location.search }}
-                    dir="auto"
-                    className="font-medium hover:underline"
-                  >
-                    {row.name}
-                  </Link>
+                  <span className="flex min-w-0 items-center gap-2">
+                    <Avatar name={row.name} />
+                    <Link
+                      to={`/civil-engineers/${row.id}`}
+                      state={{ listSearch: location.search }}
+                      dir="auto"
+                      className="font-medium hover:underline"
+                    >
+                      {row.name}
+                    </Link>
+                  </span>
                 </TableCell>
                 <TableCell className="px-4 py-3">
                   <PhoneDisplay phone={row.phone} />

@@ -1,3 +1,5 @@
+import { VillaCell } from "@/shared/list/cells"
+import SortableHead from "@/shared/list/SortableHead"
 import { useState } from "react"
 import { useNavigate } from "react-router"
 import { useTranslation } from "react-i18next"
@@ -170,9 +172,12 @@ export default function MaintenanceListPage({ solved }: { solved: boolean }) {
         <Table>
           <TableHeader>
             <TableRow className="list-head-row">
-              <TableHead className="px-4 py-2.5">
-                {t("maintenance.villaNumber")}
-              </TableHead>
+              <SortableHead
+                label={t("maintenance.villaNumber")}
+                field="villaNumber"
+                sort={params.sort}
+                onSort={(next) => setParam("sort", next)}
+              />
               <TableHead className="px-4 py-2.5">
                 {t("maintenance.location")}
               </TableHead>
@@ -215,8 +220,8 @@ export default function MaintenanceListPage({ solved }: { solved: boolean }) {
             ) : (
               rows.map((row) => (
                 <TableRow key={row.id} className="hover:bg-muted/40">
-                  <TableCell className="px-4 py-3 font-medium tabular-nums">
-                    {row.villaNumber}
+                  <TableCell className="px-4 py-3">
+                    <VillaCell villaNumber={row.villaNumber} />
                   </TableCell>
                   <TableCell className="px-4 py-3 text-sm" dir="auto">
                     {row.location}

@@ -41,7 +41,8 @@
     "listEmptyTitle": "لا توجد نتائج",
     "listEmptyBody": "جرّب بحثًا مختلفًا أو امسح التصفية.",
     "requestId": "معرّف الطلب: {{id}}",
-    "notAvailableYet": "غير متاح حتى يجهز الخادم"
+    "notAvailableYet": "غير متاح حتى يجهز الخادم",
+    "sortBy": "ترتيب حسب {{column}}"
   },
   "nav": {
     "ownerNotes": "ملاحظات الملاك",
@@ -614,6 +615,46 @@
       "documents": "المستندات",
       "contractors": "المقاولون",
       "hint": "راجع القائمة الكاملة تحت {{link}}."
+    },
+    "hero": {
+      "overall": "الإجمالي",
+      "phasesDone": "{{done}} من {{total}} مراحل مكتملة",
+      "complete": "مكتملة",
+      "mewFollowUp": "متابعة الوزارة",
+      "mewInspection": "معاينة الوزارة",
+      "mewPassed": "اجتازت المعاينة",
+      "dueToday": "الموعد اليوم",
+      "call": "اتصال بـ {{name}} على {{phone}}",
+      "daysLeft_zero": "لا أيام متبقية",
+      "daysLeft_one": "يوم واحد متبقٍ",
+      "daysLeft_two": "يومان متبقيان",
+      "daysLeft_few": "{{count}} أيام متبقية",
+      "daysLeft_many": "{{count}} يوماً متبقياً",
+      "daysLeft_other": "{{count}} يوم متبقٍ",
+      "overdueBy_zero": "متأخرة",
+      "overdueBy_one": "متأخرة يوماً واحداً",
+      "overdueBy_two": "متأخرة يومين",
+      "overdueBy_few": "متأخرة {{count}} أيام",
+      "overdueBy_many": "متأخرة {{count}} يوماً",
+      "overdueBy_other": "متأخرة {{count}} يوم"
+    },
+    "sections": {
+      "records": "التفاصيل والسجلات",
+      "activity": "الأعمال والتقارير"
+    },
+    "noOwner": "بدون اسم مالك",
+    "filtersTitle": "البحث والتصفية",
+    "resultCount_zero": "لا توجد فلل",
+    "resultCount_one": "فيلا واحدة",
+    "resultCount_two": "فيلتان",
+    "resultCount_few": "{{count}} فلل",
+    "resultCount_many": "{{count}} فيلا",
+    "resultCount_other": "{{count}} فيلا",
+    "summary": {
+      "total": "الفلل",
+      "average": "متوسط التقدم",
+      "done": "مكتملة",
+      "overdue": "تجاوزت موعدها"
     }
   },
   "villaDocuments": {

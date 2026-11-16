@@ -26,3 +26,11 @@ export function buildVillaContextLine(
     .filter(Boolean)
     .join(" · ")
 }
+
+const DAY_MS = 24 * 60 * 60 * 1000
+
+// Whole days from today (this computer's calendar day) to `day` (YYYY-MM-DD): negative once it has passed.
+export function daysUntil(day: string, now = new Date()): number {
+  const today = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate())
+  return Math.round((Date.parse(`${day}T00:00:00.000Z`) - today) / DAY_MS)
+}

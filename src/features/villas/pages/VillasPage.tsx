@@ -1,3 +1,5 @@
+import { SlidersHorizontal, X } from "lucide-react"
+import VillasSummaryStrip from "../components/VillasSummaryStrip"
 import { useQueryClient } from "@tanstack/react-query"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -7,7 +9,7 @@ import { useDebouncedSearchParam } from "@/shared/hooks/useDebouncedSearchParam"
 import { normalizeSearchInput } from "@/shared/lib/phone/phoneNormalize"
 import { SearchInput } from "@/shared/ui/Field"
 import { ConfirmModal } from "@/shared/ui/Modal"
-import PageHeader from "@/shared/ui/PageHeader"
+import PageHeader, { Card } from "@/shared/ui/PageHeader"
 import { downloadExport } from "@/shared/export/downloadExport"
 import { ImportWizardModal, IMPORT_RESOURCES } from "@/shared/import"
 import ListPageHeaderActions from "@/shared/list/ListPageHeaderActions"
@@ -158,26 +160,38 @@ export default function VillasPage() {
           {deleteNotice}
         </p>
       )}
-      {activeFilters && (
-        <p className="mb-3 text-sm text-muted-foreground">
-          {t("villas.filteredListHint")}{" "}
-          <button
-            type="button"
-            className="text-accent hover:underline"
-            onClick={clearFilters}
-          >
-            {t("common.clearFilters")}
-          </button>
-        </p>
-      )}
-      <div className="mb-3">
-        <SearchInput
-          value={searchDraft}
-          onChange={setSearchDraft}
-          placeholder={t("villas.searchPlaceholder")}
-        />
-      </div>
-      <VillaListFiltersBar params={params} setParam={setParam} />
+      <VillasSummaryStrip />
+      <Card className="mb-4 p-4">
+        <div className="mb-3 flex flex-wrap items-center gap-3">
+          <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-accent/10 text-accent">
+            <SlidersHorizontal size={15} strokeWidth={1.9} aria-hidden />
+          </span>
+          <h2 className="text-sm font-semibold">{t("villas.filtersTitle")}</h2>
+          {meta && (
+            <span className="rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium tabular-nums text-muted-foreground">
+              {t("villas.resultCount", { count: meta.total })}
+            </span>
+          )}
+          {activeFilters && (
+            <button
+              type="button"
+              className="ms-auto inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-accent hover:bg-accent/10"
+              onClick={clearFilters}
+            >
+              <X size={13} aria-hidden />
+              {t("common.clearFilters")}
+            </button>
+          )}
+        </div>
+        <div className="mb-3">
+          <SearchInput
+            value={searchDraft}
+            onChange={setSearchDraft}
+            placeholder={t("villas.searchPlaceholder")}
+          />
+        </div>
+        <VillaListFiltersBar params={params} setParam={setParam} />
+      </Card>
       <VillasListErrorBanner
         error={showGlobalError ? apiError : null}
         onRetry={() => void refetch()}
@@ -190,21 +204,8 @@ export default function VillasPage() {
         canLinkDetail={canLinkDetail}
         onEdit={openEdit}
         onDelete={setDeleting}
-        villaNumberSort={
-          params.sort === "villaNumber:desc"
-            ? "desc"
-            : params.sort === "villaNumber" || params.sort === "villaNumber:asc"
-              ? "asc"
-              : "none"
-        }
-        onToggleVillaNumberSort={() =>
-          setParam(
-            "sort",
-            params.sort === "villaNumber:asc" || params.sort === "villaNumber"
-              ? "villaNumber:desc"
-              : "villaNumber:asc",
-          )
-        }
+        sort={params.sort}
+        onSort={(next) => setParam("sort", next)}
       />
       {meta && (
         <VillasListFooter

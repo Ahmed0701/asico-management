@@ -1,5 +1,7 @@
+import { VillaCell } from "@/shared/list/cells"
+import SortableHead from "@/shared/list/SortableHead"
 import { useState } from "react"
-import { Link, useNavigate } from "react-router"
+import { useNavigate } from "react-router"
 import { useTranslation } from "react-i18next"
 import { usePermissions } from "@/features/auth/api"
 import VillasListFooter from "@/features/villas/components/VillasListFooter"
@@ -169,9 +171,12 @@ export default function ForemanMissionsListPage({ done }: { done: boolean }) {
         <Table>
           <TableHeader>
             <TableRow className="list-head-row">
-              <TableHead className="px-4 py-2.5">
-                {t("foremanMissions.villaNumber")}
-              </TableHead>
+              <SortableHead
+                label={t("foremanMissions.villaNumber")}
+                field="villaNumber"
+                sort={params.sort}
+                onSort={(next) => setParam("sort", next)}
+              />
               <TableHead className="px-4 py-2.5">
                 {t("foremanMissions.location")}
               </TableHead>
@@ -219,12 +224,10 @@ export default function ForemanMissionsListPage({ done }: { done: boolean }) {
               rows.map((row) => (
                 <TableRow key={row.id} className="hover:bg-muted/40">
                   <TableCell className="px-4 py-3 font-medium tabular-nums">
-                    <Link
-                      to={`/villas/${row.villa.id}`}
-                      className="hover:underline"
-                    >
-                      {row.villa.villaNumber}
-                    </Link>
+                    <VillaCell
+                      id={row.villa.id}
+                      villaNumber={row.villa.villaNumber}
+                    />
                   </TableCell>
                   <TableCell className="px-4 py-3 text-sm" dir="auto">
                     {row.villa.location}

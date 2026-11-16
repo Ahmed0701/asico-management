@@ -13,6 +13,7 @@ export type PriorityValue = typeof PRIORITIES[number]
 
 export const OPEN_WORK_SORT_FIELDS = [
   "location",
+  "villaNumber",
   "elecPhaseName",
   "status",
   "priority",

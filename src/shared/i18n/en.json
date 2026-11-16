@@ -41,7 +41,8 @@
     "listEmptyTitle": "No results",
     "listEmptyBody": "Try a different search or clear the filters.",
     "requestId": "Request ID: {{id}}",
-    "notAvailableYet": "Not available until the backend is ready"
+    "notAvailableYet": "Not available until the backend is ready",
+    "sortBy": "Sort by {{column}}"
   },
   "nav": {
     "ownerNotes": "Owner Notes",
@@ -614,6 +615,46 @@
       "documents": "Documents",
       "contractors": "Contractors",
       "hint": "See full list under {{link}}."
+    },
+    "hero": {
+      "overall": "Overall",
+      "phasesDone": "{{done}} of {{total}} phases done",
+      "complete": "Complete",
+      "mewFollowUp": "MEW follow-up",
+      "mewInspection": "MEW inspection",
+      "mewPassed": "MEW passed",
+      "dueToday": "Due today",
+      "call": "Call {{name}} on {{phone}}",
+      "daysLeft_zero": "{{count}} days left",
+      "daysLeft_one": "{{count}} day left",
+      "daysLeft_two": "{{count}} days left",
+      "daysLeft_few": "{{count}} days left",
+      "daysLeft_many": "{{count}} days left",
+      "daysLeft_other": "{{count}} days left",
+      "overdueBy_zero": "Overdue by {{count}} days",
+      "overdueBy_one": "Overdue by {{count}} day",
+      "overdueBy_two": "Overdue by {{count}} days",
+      "overdueBy_few": "Overdue by {{count}} days",
+      "overdueBy_many": "Overdue by {{count}} days",
+      "overdueBy_other": "Overdue by {{count}} days"
+    },
+    "sections": {
+      "records": "Details and records",
+      "activity": "Works and reports"
+    },
+    "noOwner": "No owner name",
+    "filtersTitle": "Search and filters",
+    "resultCount_zero": "{{count}} villas",
+    "resultCount_one": "{{count}} villa",
+    "resultCount_two": "{{count}} villas",
+    "resultCount_few": "{{count}} villas",
+    "resultCount_many": "{{count}} villas",
+    "resultCount_other": "{{count}} villas",
+    "summary": {
+      "total": "Villas",
+      "average": "Average progress",
+      "done": "Completed",
+      "overdue": "Past their target date"
     }
   },
   "villaDocuments": {

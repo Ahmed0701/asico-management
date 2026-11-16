@@ -30,6 +30,9 @@ function invalidateForemanMissions(qc: QueryClient): void {
 }
 
 /** Page, page size and search from the URL; `done` picks the list. */
+// The one sort the list offers: by villa number.
+const VILLA_SORT = /^villaNumber(:(asc|desc))?$/
+
 export function useForemanMissionsListParams(done: boolean) {
   const [searchParams, setSearchParams] = useSearchParams()
   const params = useMemo<ForemanMissionsListParams>(() => {
@@ -38,6 +41,9 @@ export function useForemanMissionsListParams(done: boolean) {
       page: base.page,
       limit: base.limit,
       search: base.search || undefined,
+      sort: VILLA_SORT.test(searchParams.get("sort") ?? "")
+        ? (searchParams.get("sort") ?? undefined)
+        : undefined,
       done,
     }
   }, [searchParams, done])

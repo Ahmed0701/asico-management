@@ -1,6 +1,6 @@
+import { PersonCell, VillaCell } from "@/shared/list/cells"
 import { useCallback, useState } from "react"
 import { useQueryClient } from "@tanstack/react-query"
-import { Link } from "react-router"
 import { useTranslation } from "react-i18next"
 import { usePermissions } from "@/features/auth/api"
 import ContractorSelect from "@/features/contractors/components/ContractorSelect"
@@ -348,16 +348,14 @@ export default function PaymentsPage() {
               rows.map((row) => (
                 <TableRow key={row.id} className="hover:bg-muted/40">
                   <TableCell className="px-4 py-3 font-medium" dir="auto">
-                    {row.contractor.name}
+                    <PersonCell name={row.contractor.name} />
                   </TableCell>
                   <TableCell className="px-4 py-3 tabular-nums">
                     {row.villa ? (
-                      <Link
-                        to={`/villas/${row.villa.id}`}
-                        className="hover:underline"
-                      >
-                        {row.villa.villaNumber}
-                      </Link>
+                      <VillaCell
+                        id={row.villa.id}
+                        villaNumber={row.villa.villaNumber}
+                      />
                     ) : (
                       <span className="text-muted-foreground">
                         {t("payments.general")}

@@ -1,13 +1,11 @@
+import CollapsibleCard from "@/shared/ui/CollapsibleCard"
 import { useState } from "react"
 import { Link } from "react-router"
 import { useTranslation } from "react-i18next"
 import { Cable, Factory as FactoryIcon, Zap } from "lucide-react"
 import { toApiError } from "@/shared/api/errors"
-import { cn } from "@/shared/lib/cn"
 import { formatCalendarDateUtc } from "@/shared/lib/formatCalendarDateUtc"
 import { Badge } from "@/shared/ui/Badge"
-import Icon from "@/shared/ui/Icon"
-import { Card } from "@/shared/ui/PageHeader"
 import {
   useDeliveriesQuery,
   type FactoryType,
@@ -84,116 +82,101 @@ export default function VillaVendorsCard({ villaId, villaNumber }: Props) {
   const deliveries = query.data?.data ?? []
 
   return (
-    <Card className="mb-4 overflow-hidden">
-      <button
-        type="button"
-        className="flex w-full items-center justify-between gap-2 px-4 py-3 text-start text-sm font-medium hover:bg-muted/40"
-        aria-expanded={open}
-        onClick={() => setOpen((v) => !v)}
-      >
-        <span className="flex items-center gap-2">
-          {t("materials.vendors.title")}
-          {query.data && (
-            <Badge tone="neutral">
-              {t("materials.deliveryCount", { count: deliveries.length })}
-            </Badge>
-          )}
-        </span>
-        <Icon
-          name="chevronDown"
-          size={18}
-          className={cn(
-            "shrink-0 text-muted-foreground transition",
-            open && "rotate-180",
-          )}
-        />
-      </button>
-      {open && (
-        <div className="border-t border-border p-4 sm:p-5">
-          {query.isError ? (
-            <p role="alert" className="text-sm text-danger">
-              {toApiError(query.error).message}
-            </p>
-          ) : query.isLoading ? (
-            <p className="text-sm text-muted-foreground">
-              {t("common.loading")}
-            </p>
-          ) : (
-            <div className="grid gap-3 sm:grid-cols-2">
-              {SECTIONS.map(({ type, labelKey, icon: SectionIcon }) => {
-                const vendors = vendorsOf(deliveries, type)
-                return (
-                  <section
-                    key={type}
-                    aria-label={t(labelKey)}
-                    className="rounded-xl border border-border bg-muted/20 p-3"
-                  >
-                    <div className="mb-2 flex items-center justify-between gap-2">
-                      <h3 className="flex items-center gap-2 text-sm font-semibold">
-                        <span className="grid size-7 place-items-center rounded-lg bg-accent/10 text-accent">
-                          <SectionIcon size={15} strokeWidth={2} aria-hidden />
-                        </span>
-                        {t(labelKey)}
-                      </h3>
-                      <Link
-                        to={`/materials?search=${encodeURIComponent(villaNumber)}&type=${type}`}
-                        className="text-xs font-medium text-accent hover:underline"
-                      >
-                        {t("materials.vendors.openInMaterials")}
-                      </Link>
-                    </div>
-                    {vendors.length === 0 ? (
-                      <p className="py-2 text-sm text-muted-foreground">
-                        {t("materials.vendors.none")}
-                      </p>
-                    ) : (
-                      <ul className="grid gap-1.5">
-                        {vendors.map((vendor, index) => (
-                          <li
-                            key={vendor.id}
-                            className="flex items-center gap-2.5 rounded-lg bg-card px-2.5 py-2 shadow-xs"
-                          >
-                            <FactoryIcon
-                              size={16}
-                              strokeWidth={1.9}
-                              className="shrink-0 text-muted-foreground"
-                              aria-hidden
-                            />
-                            <div className="min-w-0 flex-1">
-                              <p
-                                className="truncate text-sm font-medium"
-                                dir="auto"
-                              >
-                                {vendor.name}
-                              </p>
-                              <p className="text-xs text-muted-foreground tabular-nums">
-                                {t("materials.deliveryCount", {
-                                  count: vendor.deliveries,
-                                })}
-                                {" · "}
-                                {t("materials.vendors.lastDelivery", {
-                                  date: formatCalendarDateUtc(
-                                    `${vendor.lastDate}T00:00:00.000Z`,
-                                  ),
-                                })}
-                              </p>
-                            </div>
-                            {index === 0 && vendors.length > 1 && (
-                              <Badge tone="info">
-                                {t("materials.vendors.latest")}
-                              </Badge>
-                            )}
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </section>
-                )
-              })}
-            </div>
-          )}
-        </div>
-      )}
-    </Card>
+    <CollapsibleCard
+      title={t("materials.vendors.title")}
+      icon={FactoryIcon}
+      open={open}
+      onOpenChange={setOpen}
+      badges={
+        query.data && (
+          <Badge tone="neutral">
+            {t("materials.deliveryCount", { count: deliveries.length })}
+          </Badge>
+        )
+      }
+    >
+      <div>
+        {query.isError ? (
+          <p role="alert" className="text-sm text-danger">
+            {toApiError(query.error).message}
+          </p>
+        ) : query.isLoading ? (
+          <p className="text-sm text-muted-foreground">{t("common.loading")}</p>
+        ) : (
+          <div className="grid gap-3 sm:grid-cols-2">
+            {SECTIONS.map(({ type, labelKey, icon: SectionIcon }) => {
+              const vendors = vendorsOf(deliveries, type)
+              return (
+                <section
+                  key={type}
+                  aria-label={t(labelKey)}
+                  className="rounded-xl border border-border bg-muted/20 p-3"
+                >
+                  <div className="mb-2 flex items-center justify-between gap-2">
+                    <h3 className="flex items-center gap-2 text-sm font-semibold">
+                      <span className="grid size-7 place-items-center rounded-lg bg-accent/10 text-accent">
+                        <SectionIcon size={15} strokeWidth={2} aria-hidden />
+                      </span>
+                      {t(labelKey)}
+                    </h3>
+                    <Link
+                      to={`/materials?search=${encodeURIComponent(villaNumber)}&type=${type}`}
+                      className="text-xs font-medium text-accent hover:underline"
+                    >
+                      {t("materials.vendors.openInMaterials")}
+                    </Link>
+                  </div>
+                  {vendors.length === 0 ? (
+                    <p className="py-2 text-sm text-muted-foreground">
+                      {t("materials.vendors.none")}
+                    </p>
+                  ) : (
+                    <ul className="grid gap-1.5">
+                      {vendors.map((vendor, index) => (
+                        <li
+                          key={vendor.id}
+                          className="flex items-center gap-2.5 rounded-lg bg-card px-2.5 py-2 shadow-xs"
+                        >
+                          <FactoryIcon
+                            size={16}
+                            strokeWidth={1.9}
+                            className="shrink-0 text-muted-foreground"
+                            aria-hidden
+                          />
+                          <div className="min-w-0 flex-1">
+                            <p
+                              className="truncate text-sm font-medium"
+                              dir="auto"
+                            >
+                              {vendor.name}
+                            </p>
+                            <p className="text-xs text-muted-foreground tabular-nums">
+                              {t("materials.deliveryCount", {
+                                count: vendor.deliveries,
+                              })}
+                              {" · "}
+                              {t("materials.vendors.lastDelivery", {
+                                date: formatCalendarDateUtc(
+                                  `${vendor.lastDate}T00:00:00.000Z`,
+                                ),
+                              })}
+                            </p>
+                          </div>
+                          {index === 0 && vendors.length > 1 && (
+                            <Badge tone="info">
+                              {t("materials.vendors.latest")}
+                            </Badge>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </section>
+              )
+            })}
+          </div>
+        )}
+      </div>
+    </CollapsibleCard>
   )
 }

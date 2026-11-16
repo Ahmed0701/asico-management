@@ -9,10 +9,11 @@ export const dashboardKeys = {
   summary: () => [...dashboardKeys.all, "summary"] as const,
 }
 
-export function useDashboardSummaryQuery() {
+export function useDashboardSummaryQuery(enabled = true) {
   return useQuery({
     queryKey: dashboardKeys.summary(),
     queryFn: ({ signal }) => getDashboardSummary(signal),
+    enabled,
     staleTime: DASHBOARD_STALE_MS,
     refetchOnWindowFocus: true,
   })

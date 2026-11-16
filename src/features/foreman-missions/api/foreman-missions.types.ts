@@ -26,6 +26,8 @@ export type ForemanMissionsListParams = {
   page: number
   limit: number
   search?: string
+  /** "villaNumber", "villaNumber:asc" or "villaNumber:desc"; the list's own order when absent. */
+  sort?: string
   /** true: the done list; false: the open list. */
   done: boolean
 }

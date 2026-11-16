@@ -1,4 +1,5 @@
-import { Link } from "react-router"
+import { PersonCell, VillaCell } from "@/shared/list/cells"
+import SortableHead from "@/shared/list/SortableHead"
 import { useTranslation } from "react-i18next"
 import { IconButton } from "@/shared/ui/Button"
 import { RowActions } from "@/shared/ui/DataTable"
@@ -33,24 +34,13 @@ function SortHead({
   sort: string
   onToggle: (field: OpenWorkSortField) => void
 }) {
-  const asc = `${field}:asc`
-  const desc = `${field}:desc`
-  const active = sort === asc || sort === desc
   return (
-    <TableHead className="px-4 py-2.5">
-      <button
-        type="button"
-        className="inline-flex items-center gap-1 uppercase tracking-wide hover:text-foreground"
-        onClick={() => onToggle(field)}
-      >
-        {label}
-        {active && (
-          <span aria-hidden className="text-[10px]">
-            {sort === desc ? "↓" : "↑"}
-          </span>
-        )}
-      </button>
-    </TableHead>
+    <SortableHead
+      label={label}
+      field={field}
+      sort={sort}
+      onSort={() => onToggle(field)}
+    />
   )
 }
 
@@ -89,7 +79,7 @@ export default function OpenWorksTable({
             {showVillaColumn && (
               <SortHead
                 label={t("openWorks.colLocation")}
-                field="location"
+                field="villaNumber"
                 sort={sort}
                 onToggle={onToggleSort}
               />
@@ -157,15 +147,11 @@ export default function OpenWorksTable({
               <TableRow key={row.id} className="hover:bg-muted/40">
                 {showVillaColumn && (
                   <TableCell className="px-4 py-3" dir="auto">
-                    <Link
-                      to={`/villas/${row.villa.id}`}
-                      className="font-medium tabular-nums hover:underline"
-                    >
-                      {row.villa.villaNumber}
-                    </Link>
-                    <p className="text-xs text-muted-foreground">
-                      {row.villa.location}
-                    </p>
+                    <VillaCell
+                      id={row.villa.id}
+                      villaNumber={row.villa.villaNumber}
+                      sub={row.villa.location}
+                    />
                   </TableCell>
                 )}
                 <TableCell className="px-4 py-3 font-medium" dir="auto">
@@ -190,7 +176,7 @@ export default function OpenWorksTable({
                   <ProgressCell value={row.progress} />
                 </TableCell>
                 <TableCell className="px-4 py-3" dir="auto">
-                  {row.contractor?.name ?? "-"}
+                  <PersonCell name={row.contractor?.name} />
                 </TableCell>
                 <TableCell className="px-4 py-3 tabular-nums">
                   {formatWorkDate(row.startDate)}

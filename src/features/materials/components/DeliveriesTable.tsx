@@ -1,5 +1,6 @@
+import { VillaCell } from "@/shared/list/cells"
+import SortableHead from "@/shared/list/SortableHead"
 import { useRef, useState } from "react"
-import { Link } from "react-router"
 import { useTranslation } from "react-i18next"
 import { toApiError } from "@/shared/api/errors"
 import { formatCalendarDateUtc } from "@/shared/lib/formatCalendarDateUtc"
@@ -34,6 +35,8 @@ export default function DeliveriesTable({
   rows,
   isLoading,
   showVilla,
+  sort,
+  onSort,
   canUpdate,
   canDelete,
   emptyText,
@@ -43,6 +46,8 @@ export default function DeliveriesTable({
   rows: MaterialDelivery[]
   isLoading: boolean
   showVilla: boolean
+  sort?: string
+  onSort?: (next: string) => void
   canUpdate: boolean
   canDelete: boolean
   emptyText: string
@@ -122,11 +127,19 @@ export default function DeliveriesTable({
               <TableHead className="px-4 py-2.5">
                 {t("materials.deliveryDate")}
               </TableHead>
-              {showVilla && (
-                <TableHead className="px-4 py-2.5">
-                  {t("materials.villa")}
-                </TableHead>
-              )}
+              {showVilla &&
+                (onSort ? (
+                  <SortableHead
+                    label={t("materials.villa")}
+                    field="villaNumber"
+                    sort={sort}
+                    onSort={onSort}
+                  />
+                ) : (
+                  <TableHead className="px-4 py-2.5">
+                    {t("materials.villa")}
+                  </TableHead>
+                ))}
               <TableHead className="px-4 py-2.5">
                 {t("materials.type")}
               </TableHead>
@@ -169,12 +182,11 @@ export default function DeliveriesTable({
                   </TableCell>
                   {showVilla && (
                     <TableCell className="px-4 py-3 font-medium tabular-nums">
-                      <Link
+                      <VillaCell
+                        id={row.villa.id}
+                        villaNumber={row.villa.villaNumber}
                         to={`/villas/${row.villa.id}?tab=materials`}
-                        className="hover:underline"
-                      >
-                        {row.villa.villaNumber}
-                      </Link>
+                      />
                     </TableCell>
                   )}
                   <TableCell className="px-4 py-3">

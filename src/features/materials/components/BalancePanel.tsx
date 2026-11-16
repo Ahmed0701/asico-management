@@ -1,5 +1,6 @@
+import { VillaCell } from "@/shared/list/cells"
 import { useEffect, useMemo } from "react"
-import { Link, useSearchParams } from "react-router"
+import { useSearchParams } from "react-router"
 import { useTranslation } from "react-i18next"
 import VillasListFooter from "@/features/villas/components/VillasListFooter"
 import { toApiError } from "@/shared/api/errors"
@@ -222,12 +223,11 @@ export default function BalancePanel({
                     className="hover:bg-muted/40"
                   >
                     <TableCell className="px-4 py-3 font-medium tabular-nums">
-                      <Link
+                      <VillaCell
+                        id={row.villa.id}
+                        villaNumber={row.villa.villaNumber}
                         to={`/villas/${row.villa.id}?tab=materials`}
-                        className="hover:underline"
-                      >
-                        {row.villa.villaNumber}
-                      </Link>
+                      />
                     </TableCell>
                     <TableCell className="px-4 py-3 text-sm" dir="auto">
                       {row.item.name}

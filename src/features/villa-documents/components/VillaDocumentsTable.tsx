@@ -1,3 +1,4 @@
+import { PersonCell } from "@/shared/list/cells"
 import { useTranslation } from "react-i18next"
 import i18n from "@/shared/i18n"
 import Button from "@/shared/ui/Button"
@@ -90,7 +91,7 @@ export default function VillaDocumentsTable({
                 {row.mimeType}
               </TableCell>
               <TableCell className="px-4 py-3" dir="auto">
-                {row.uploadedBy.name}
+                <PersonCell name={row.uploadedBy.name} />
               </TableCell>
               <TableCell className="px-4 py-3 whitespace-nowrap tabular-nums">
                 <time dateTime={row.createdAt}>

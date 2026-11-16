@@ -1,3 +1,4 @@
+import { PersonCell } from "@/shared/list/cells"
 import { useTranslation } from "react-i18next"
 import TruncatedText from "@/features/audit/components/TruncatedText"
 import { IconButton } from "@/shared/ui/Button"
@@ -142,10 +143,10 @@ export default function DailyReportsTable({
                   {row.workersCount}
                 </TableCell>
                 <TableCell className="px-4 py-3" dir="auto">
-                  {row.contractor.name}
+                  <PersonCell name={row.contractor.name} />
                 </TableCell>
                 <TableCell className="px-4 py-3" dir="auto">
-                  {row.preparedBy.name}
+                  <PersonCell name={row.preparedBy.name} />
                 </TableCell>
                 <TableCell className="px-4 py-3" dir="auto">
                   {row.notes ? (

@@ -20,6 +20,8 @@ export type MaintenanceListParams = {
   page: number
   limit: number
   search?: string
+  /** "villaNumber", "villaNumber:asc" or "villaNumber:desc"; the list's own order when absent. */
+  sort?: string
   /** true: the solved list; false: the open list. */
   solved: boolean
 }

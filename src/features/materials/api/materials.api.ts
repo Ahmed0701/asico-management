@@ -168,6 +168,7 @@ export function buildDeliveriesQueryParams(
   if (params.type) out.type = params.type
   if (params.hasNote !== undefined)
     out.hasNote = params.hasNote ? "true" : "false"
+  if (params.sort) out.sort = params.sort
   return out
 }
 

@@ -1,5 +1,7 @@
+import { VillaCell } from "@/shared/list/cells"
+import SortableHead from "@/shared/list/SortableHead"
 import { useState } from "react"
-import { Link, useNavigate } from "react-router"
+import { useNavigate } from "react-router"
 import { useTranslation } from "react-i18next"
 import { usePermissions } from "@/features/auth/api"
 import { useDebouncedSearchParam } from "@/shared/hooks/useDebouncedSearchParam"
@@ -150,9 +152,12 @@ export default function MewInspectionPage() {
         <Table>
           <TableHeader>
             <TableRow className="list-head-row">
-              <TableHead className="px-4 py-2.5">
-                {t("villas.villaNumber")}
-              </TableHead>
+              <SortableHead
+                label={t("villas.villaNumber")}
+                field="villaNumber"
+                sort={params.sort}
+                onSort={(next) => setParam("sort", next)}
+              />
               <TableHead className="px-4 py-2.5">{t("villas.owner")}</TableHead>
               <TableHead className="px-4 py-2.5">
                 {t("villas.location")}
@@ -193,9 +198,7 @@ export default function MewInspectionPage() {
               rows.map((row) => (
                 <TableRow key={row.id} className="hover:bg-muted/40">
                   <TableCell className="px-4 py-3 font-medium">
-                    <Link to={`/villas/${row.id}`} className="hover:underline">
-                      {row.villaNumber}
-                    </Link>
+                    <VillaCell id={row.id} villaNumber={row.villaNumber} />
                   </TableCell>
                   <TableCell className="px-4 py-3" dir="auto">
                     {row.ownerName ?? "-"}

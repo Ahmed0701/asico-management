@@ -84,6 +84,8 @@ export type DeliveriesListParams = {
   type?: FactoryType
   /** true: with a delivery note; false: still missing it. */
   hasNote?: boolean
+  /** "villaNumber:asc" or "villaNumber:desc"; the latest delivery first when absent. */
+  sort?: string
 }
 
 export type DeliveriesListResponse = {

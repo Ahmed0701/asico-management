@@ -23,7 +23,8 @@ export function buildMaintenanceQueryParams(
   }
   if (params.search) out.search = params.search
   // The solved list shows the most recently solved first.
-  if (params.solved) out.sort = "solvedAt:desc"
+  if (params.sort) out.sort = params.sort
+  else if (params.solved) out.sort = "solvedAt:desc"
   return out
 }
 

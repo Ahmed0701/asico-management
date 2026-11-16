@@ -1,5 +1,5 @@
+import { PersonCell, VillaCell } from "@/shared/list/cells"
 import { useTranslation } from "react-i18next"
-import { Link } from "react-router"
 import { cn } from "@/shared/lib/cn"
 import Button from "@/shared/ui/Button"
 import Icon from "@/shared/ui/Icon"
@@ -127,18 +127,16 @@ export default function MonthlyProgressTable({
             rows.map((row) => (
               <TableRow key={row.villa.id}>
                 <TableCell className="px-4 py-3 text-sm font-medium">
-                  <Link
-                    to={`/villas/${row.villa.id}`}
-                    className="text-accent hover:underline"
-                  >
-                    {row.villa.villaNumber}
-                  </Link>
+                  <VillaCell
+                    id={row.villa.id}
+                    villaNumber={row.villa.villaNumber}
+                  />
                 </TableCell>
                 <TableCell className="px-4 py-3 text-sm" dir="auto">
                   {row.villa.location}
                 </TableCell>
                 <TableCell className="px-4 py-3 text-sm" dir="auto">
-                  {row.contractor?.name ?? "-"}
+                  <PersonCell name={row.contractor?.name} />
                 </TableCell>
                 <TableCell className="px-4 py-3">
                   {row.previousProgress === null ? (
