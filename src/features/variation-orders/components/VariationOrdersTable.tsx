@@ -86,7 +86,10 @@ export default function VariationOrdersTable({
             </TableRow>
           ) : (
             rows.map((row) => (
-              <TableRow key={row.id}>
+              <TableRow
+                key={row.id}
+                tone={row.status === "PAID" ? "success" : "warn"}
+              >
                 <TableCell className="px-4 py-3 text-sm font-medium" dir="auto">
                   {row.voNumber}
                 </TableCell>
@@ -143,7 +146,7 @@ export default function VariationOrdersTable({
                 </TableCell>
                 {canEdit && (
                   <TableCell className="px-4 py-3">
-                    <div className="flex justify-end gap-1">
+                    <div className="row-actions flex justify-end gap-1">
                       <IconButton
                         icon="edit"
                         label={t("common.edit")}

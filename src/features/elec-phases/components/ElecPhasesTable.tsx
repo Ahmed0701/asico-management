@@ -101,7 +101,7 @@ export default function ElecPhasesTable({
               const atEnd =
                 globalIndex === undefined || globalIndex >= orderTotal - 1
               return (
-                <TableRow key={row.id} className="hover:bg-muted/40">
+                <TableRow key={row.id}>
                   <TableCell className="px-4 py-3 font-medium" dir="auto">
                     {row.name}
                   </TableCell>

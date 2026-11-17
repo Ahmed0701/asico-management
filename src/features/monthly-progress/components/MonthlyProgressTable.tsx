@@ -125,7 +125,10 @@ export default function MonthlyProgressTable({
             </TableRow>
           ) : (
             rows.map((row) => (
-              <TableRow key={row.villa.id}>
+              <TableRow
+                key={row.villa.id}
+                tone={row.change > 0 ? "success" : undefined}
+              >
                 <TableCell className="px-4 py-3 text-sm font-medium">
                   <VillaCell
                     id={row.villa.id}

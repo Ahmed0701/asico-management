@@ -142,7 +142,16 @@ export default function VillasTable({
             <TableBodySkeleton columns={colCount} rows={8} />
           ) : (
             rows.map((row) => (
-              <TableRow key={row.id}>
+              <TableRow
+                key={row.id}
+                tone={
+                  row.progress >= 100
+                    ? "success"
+                    : row.targetDate && daysUntil(row.targetDate) < 0
+                      ? "danger"
+                      : undefined
+                }
+              >
                 <TableCell className="px-4 py-3">
                   <VillaCell
                     villaNumber={row.villaNumber}

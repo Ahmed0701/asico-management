@@ -123,7 +123,7 @@ export default function DailyLabourTable({
             </TableRow>
           ) : (
             rows.map((row) => (
-              <TableRow key={row.id} className="hover:bg-muted/40">
+              <TableRow key={row.id}>
                 {showVillaColumn && (
                   <TableCell className="px-4 py-3" dir="auto">
                     <VillaCell

@@ -220,7 +220,13 @@ export default function BalancePanel({
                 rows.map((row) => (
                   <TableRow
                     key={`${row.villa.id}-${row.item.id}`}
-                    className="hover:bg-muted/40"
+                    tone={
+                      row.status === "COMPLETE"
+                        ? "success"
+                        : row.status === "OVER"
+                          ? "info"
+                          : "warn"
+                    }
                   >
                     <TableCell className="px-4 py-3 font-medium tabular-nums">
                       <VillaCell

@@ -287,7 +287,10 @@ export default function MewFollowUpPage() {
               </TableRow>
             ) : (
               rows.map((row) => (
-                <TableRow key={row.id} className="hover:bg-muted/40">
+                <TableRow
+                  key={row.id}
+                  tone={filesApproved(row) ? "success" : undefined}
+                >
                   <TableCell className="px-4 py-3 font-medium">
                     <VillaCell id={row.id} villaNumber={row.villaNumber} />
                   </TableCell>

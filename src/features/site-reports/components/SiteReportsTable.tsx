@@ -134,7 +134,16 @@ export default function SiteReportsTable({
             </TableRow>
           ) : (
             rows.map((row) => (
-              <TableRow key={row.id} className="hover:bg-muted/40">
+              <TableRow
+                key={row.id}
+                tone={
+                  row.rating >= 4
+                    ? "success"
+                    : row.rating <= 2
+                      ? "danger"
+                      : undefined
+                }
+              >
                 {showVillaColumn && (
                   <TableCell className="px-4 py-3" dir="auto">
                     <VillaCell

@@ -144,7 +144,18 @@ export default function OpenWorksTable({
             </TableRow>
           ) : (
             rows.map((row) => (
-              <TableRow key={row.id} className="hover:bg-muted/40">
+              <TableRow
+                key={row.id}
+                tone={
+                  row.status === "DONE"
+                    ? "success"
+                    : row.status === "DELAYED" || row.overdue
+                      ? "danger"
+                      : row.status === "IN_PROGRESS"
+                        ? "info"
+                        : undefined
+                }
+              >
                 {showVillaColumn && (
                   <TableCell className="px-4 py-3" dir="auto">
                     <VillaCell

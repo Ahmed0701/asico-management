@@ -346,7 +346,16 @@ export default function PaymentsPage() {
               </TableRow>
             ) : (
               rows.map((row) => (
-                <TableRow key={row.id} className="hover:bg-muted/40">
+                <TableRow
+                  key={row.id}
+                  tone={
+                    row.overdue
+                      ? "danger"
+                      : row.status === "PAID"
+                        ? "success"
+                        : "warn"
+                  }
+                >
                   <TableCell className="px-4 py-3 font-medium" dir="auto">
                     <PersonCell name={row.contractor.name} />
                   </TableCell>
@@ -417,7 +426,7 @@ export default function PaymentsPage() {
                   </TableCell>
                   {showActions && (
                     <TableCell className="px-4 py-3">
-                      <div className="flex justify-end gap-1">
+                      <div className="row-actions flex justify-end gap-1">
                         {canUpdate && (
                           <IconButton
                             icon="edit"

@@ -176,7 +176,7 @@ export default function DeliveriesTable({
               </TableRow>
             ) : (
               rows.map((row) => (
-                <TableRow key={row.id} className="hover:bg-muted/40">
+                <TableRow key={row.id}>
                   <TableCell className="px-4 py-3 text-sm tabular-nums">
                     {day(row.deliveryDate)}
                   </TableCell>
@@ -273,7 +273,7 @@ export default function DeliveriesTable({
                   </TableCell>
                   {showActions && (
                     <TableCell className="px-4 py-3">
-                      <div className="flex justify-end gap-1">
+                      <div className="row-actions flex justify-end gap-1">
                         {canUpdate && (
                           <IconButton
                             icon="edit"

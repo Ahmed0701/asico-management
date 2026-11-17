@@ -174,7 +174,7 @@ export default function ElectricalEngineersTable({
             />
           ) : (
             rows.map((row) => (
-              <TableRow key={row.id} className="hover:bg-muted/40">
+              <TableRow key={row.id}>
                 <TableCell className="px-4 py-3">
                   <span className="flex min-w-0 items-center gap-2">
                     <Avatar name={row.name} />

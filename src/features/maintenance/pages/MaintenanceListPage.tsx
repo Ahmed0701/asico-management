@@ -219,7 +219,10 @@ export default function MaintenanceListPage({ solved }: { solved: boolean }) {
               </TableRow>
             ) : (
               rows.map((row) => (
-                <TableRow key={row.id} className="hover:bg-muted/40">
+                <TableRow
+                  key={row.id}
+                  tone={row.solved ? "success" : undefined}
+                >
                   <TableCell className="px-4 py-3">
                     <VillaCell villaNumber={row.villaNumber} />
                   </TableCell>
@@ -268,7 +271,7 @@ export default function MaintenanceListPage({ solved }: { solved: boolean }) {
                   </TableCell>
                   {(canUpdate || canDelete) && (
                     <TableCell className="px-4 py-3">
-                      <div className="flex justify-end gap-1">
+                      <div className="row-actions flex justify-end gap-1">
                         {canUpdate && (
                           <IconButton
                             icon="edit"

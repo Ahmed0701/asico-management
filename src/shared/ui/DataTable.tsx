@@ -269,7 +269,11 @@ export default function DataTable<T>({
 }
 
 export function RowActions({ children }: { children: React.ReactNode }) {
-  return <div className="flex items-center justify-end gap-0.5">{children}</div>
+  return (
+    <div className="row-actions flex items-center justify-end gap-0.5">
+      {children}
+    </div>
+  )
 }
 
 /** Icon-only table row action with tooltip. Prefer inside {@link RowActions}. */

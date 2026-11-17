@@ -78,7 +78,7 @@ export default function VillaDocumentsTable({
         </TableHeader>
         <TableBody>
           {rows.map((row) => (
-            <TableRow key={row.id} className="hover:bg-muted/40">
+            <TableRow key={row.id}>
               <TableCell className="max-w-56 px-4 py-3" dir="auto">
                 <span className="break-all font-medium">
                   {row.originalName}
@@ -100,7 +100,7 @@ export default function VillaDocumentsTable({
               </TableCell>
               {(canDownload || canDelete) && (
                 <TableCell className="px-4 py-3">
-                  <div className="flex justify-end gap-1">
+                  <div className="row-actions flex justify-end gap-1">
                     {canDownload && (
                       <Button
                         type="button"

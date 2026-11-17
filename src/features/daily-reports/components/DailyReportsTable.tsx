@@ -130,7 +130,7 @@ export default function DailyReportsTable({
             </TableRow>
           ) : (
             rows.map((row) => (
-              <TableRow key={row.id} className="hover:bg-muted/40">
+              <TableRow key={row.id}>
                 <TableCell className="px-4 py-3 tabular-nums">
                   {formatReportDate(row.reportDate)}
                 </TableCell>

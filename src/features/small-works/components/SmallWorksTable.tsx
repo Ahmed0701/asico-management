@@ -143,9 +143,15 @@ export default function SmallWorksTable({
             rows.map((row) => (
               <TableRow
                 key={row.id}
+                tone={
+                  row.status === "DONE"
+                    ? "success"
+                    : row.overdue
+                      ? "danger"
+                      : undefined
+                }
                 ref={row.id === highlightRowId ? highlightRef : undefined}
                 className={cn(
-                  "hover:bg-muted/40",
                   row.id === highlightRowId &&
                     "bg-accent/15 ring-1 ring-accent/40",
                 )}

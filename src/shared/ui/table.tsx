@@ -81,12 +81,20 @@ function TableFooter({ className, ...props }: React.ComponentProps<"tfoot">) {
   )
 }
 
-function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
+/** What a row's colour says: done (success), late (danger), waiting (warn), under way (info). */
+export type RowTone = "success" | "danger" | "warn" | "info"
+
+function TableRow({
+  className,
+  tone,
+  ...props
+}: React.ComponentProps<"tr"> & { tone?: RowTone }) {
   return (
     <tr
       data-slot="table-row"
+      data-row-tone={tone}
       className={cn(
-        "group/row border-b border-table-border/70 transition-colors duration-150 hover:bg-accent/[0.06] data-[state=selected]:bg-accent/10",
+        "group/row border-b border-table-border/70 transition-colors duration-150 hover:bg-accent/[0.07] data-[state=selected]:bg-accent/10",
 
         className,
       )}

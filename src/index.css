@@ -253,7 +253,7 @@ button {
   /* Cards: soft depth and a short entrance. */
   [data-slot='card'] {
     box-shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 1px 3px rgb(0 0 0 / 0.03);
-    animation: rise-in 0.35s ease-out both;
+    animation: rise-in 0.35s ease-out backwards;
     transition:
       transform 0.2s ease,
       box-shadow 0.2s ease,
@@ -279,12 +279,12 @@ button {
   /* The bordered box around a table: same depth as a card. */
   .bg-card.border:has(> [data-slot='table-container']) {
     box-shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 4px 16px -8px rgb(0 0 0 / 0.08);
-    animation: rise-in 0.3s ease-out both;
+    animation: rise-in 0.3s ease-out backwards;
   }
 
   /* List rows: a staggered fade in when a page of rows appears. */
   [data-slot='table-body'] > tr {
-    animation: rise-in 0.3s ease-out both;
+    animation: rise-in 0.3s ease-out backwards;
   }
   [data-slot='table-body'] > tr:nth-child(2) { animation-delay: 25ms; }
   [data-slot='table-body'] > tr:nth-child(3) { animation-delay: 50ms; }
@@ -305,6 +305,50 @@ button {
   }
   [dir='rtl'] [data-slot='table-body'] > tr:hover > td:first-child {
     box-shadow: inset -3px 0 0 var(--accent);
+  }
+
+  /* A row with a tone (TableRow tone=...): its colour as a bar on the leading edge and a faint wash, always shown. */
+  [data-slot='table-body'] > tr[data-row-tone='success'] { --row-tone: var(--success); }
+  [data-slot='table-body'] > tr[data-row-tone='danger'] { --row-tone: var(--danger); }
+  [data-slot='table-body'] > tr[data-row-tone='warn'] { --row-tone: var(--progress); }
+  [data-slot='table-body'] > tr[data-row-tone='info'] { --row-tone: var(--open); }
+  [data-slot='table-body'] > tr[data-row-tone] {
+    background-color: color-mix(in srgb, var(--row-tone) 5%, transparent);
+  }
+  [data-slot='table-body'] > tr[data-row-tone] > td:first-child {
+    box-shadow: inset 3px 0 0 var(--row-tone);
+  }
+  [dir='rtl'] [data-slot='table-body'] > tr[data-row-tone] > td:first-child {
+    box-shadow: inset -3px 0 0 var(--row-tone);
+  }
+  [data-slot='table-body'] > tr[data-row-tone]:hover {
+    background-color: color-mix(in srgb, var(--row-tone) 10%, transparent);
+  }
+
+  /* A row being used with the keyboard looks like a hovered one: the soft accent wash and the bar. */
+  [data-slot='table-body'] > tr:focus-within {
+    background-color: color-mix(in srgb, var(--accent) 6%, transparent);
+  }
+  [data-slot='table-body'] > tr:focus-within > td:first-child {
+    box-shadow: inset 3px 0 0 var(--accent);
+  }
+  [dir='rtl'] [data-slot='table-body'] > tr:focus-within > td:first-child {
+    box-shadow: inset -3px 0 0 var(--accent);
+  }
+
+  /* A row's actions (edit, delete) sit back until the row is hovered or focused; on a touch screen they always show. */
+  .row-actions {
+    opacity: 0.55;
+    transition: opacity 0.15s ease;
+  }
+  [data-slot='table-body'] > tr:hover .row-actions,
+  [data-slot='table-body'] > tr:focus-within .row-actions {
+    opacity: 1;
+  }
+  @media (hover: none) {
+    .row-actions {
+      opacity: 1;
+    }
   }
 
   /* Table header: a soft band, set apart from the rows by a hairline. */
@@ -344,7 +388,7 @@ button {
     box-shadow:
       0 1px 2px rgb(0 0 0 / 0.04),
       0 12px 32px -20px rgb(0 0 0 / 0.22);
-    animation: rise-in 0.3s ease-out both;
+    animation: rise-in 0.3s ease-out backwards;
   }
   .list-surface::before {
     content: '';
