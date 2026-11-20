@@ -353,7 +353,12 @@ export function useUpdateVillaPhaseProgressMutation() {
 export function useMewFollowUpListParams() {
   const base = useVillasListParams()
   const params = useMemo(
-    () => ({ ...base.params, mewFollowUp: true as const }),
+    // A villa that passed the MEW inspection leaves the list; taking the pass back brings it here again.
+    () => ({
+      ...base.params,
+      mewFollowUp: true as const,
+      mewInspectionPassed: false as const,
+    }),
     [base.params],
   )
   return { ...base, params }

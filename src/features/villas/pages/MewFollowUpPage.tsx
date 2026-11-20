@@ -1,25 +1,11 @@
-import { VillaCell } from "@/shared/list/cells"
-import SortableHead from "@/shared/list/SortableHead"
 import { useCallback, useState } from "react"
 import { SearchSelect } from "@/shared/ui/search-select"
 import { useTranslation } from "react-i18next"
 import { usePermissions } from "@/features/auth/api"
 import { useDebouncedSearchParam } from "@/shared/hooks/useDebouncedSearchParam"
 import { normalizeSearchInput } from "@/shared/lib/phone/phoneNormalize"
-import { formatDateTime } from "@/shared/lib/format"
 import PageHeader from "@/shared/ui/PageHeader"
 import ListPageHeaderActions from "@/shared/list/ListPageHeaderActions"
-import ProgressCell from "@/shared/list/ProgressCell"
-import { Badge } from "@/shared/ui/Badge"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/shared/ui/table"
-import { TableBodySkeleton } from "@/shared/ui/loading-skeletons"
 import { downloadExport } from "@/shared/export/downloadExport"
 import { toApiError } from "@/shared/api/errors"
 import {
@@ -33,22 +19,20 @@ import {
   type MewStatesInput,
   type VillaListItem,
 } from "../api"
-import MewStateSelect from "../components/MewStateSelect"
+import MewFollowUpSummary from "../components/MewFollowUpSummary"
+import MewFollowUpTable from "../components/MewFollowUpTable"
 import VariationOrdersPendingModal, {
   type PendingVariationOrders,
 } from "@/features/variation-orders/components/VariationOrdersPendingModal"
 import VillasListErrorBanner from "../components/VillasListErrorBanner"
 import VillasListFooter from "../components/VillasListFooter"
-import Button, { IconButton } from "@/shared/ui/Button"
-import { Input } from "@/shared/ui/input"
+import Button from "@/shared/ui/Button"
 import { toast } from "@/shared/lib/toast"
 import { useSearchParams } from "react-router"
 import ListToolbar, {
   clearedListParams,
   countActive,
 } from "@/shared/list/ListToolbar"
-
-const COLUMN_COUNT = 9
 
 // The villas on MEW follow up. Villas are added and removed here (not on the villa page); each row carries the
 // villa's MEW states, its MEW inspection day, and the button that adds it for MEW inspection.
@@ -174,10 +158,6 @@ export default function MewFollowUpPage() {
     }
   }
 
-  // MEW inspects a villa only after both files are approved; the server refuses it otherwise.
-  const filesApproved = (row: VillaListItem) =>
-    row.mewAcState === "APPROVED" && row.mewElecState === "APPROVED"
-
   const rows = data?.data ?? []
   const meta = data?.meta
   const apiError = isError ? toApiError(error) : null
@@ -206,6 +186,7 @@ export default function MewFollowUpPage() {
           ) : undefined
         }
       />
+      <MewFollowUpSummary rows={rows} total={meta?.total} />
       <ListToolbar
         search={{
           value: searchDraft,
@@ -249,166 +230,17 @@ export default function MewFollowUpPage() {
         error={showErrorBanner ? apiError : null}
         onRetry={() => void refetch()}
       />
-      <div className="list-surface overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow className="list-head-row">
-              <SortableHead
-                label={t("villas.villaNumber")}
-                field="villaNumber"
-                sort={params.sort}
-                onSort={(next) => setParam("sort", next)}
-              />
-              <TableHead className="px-4 py-2.5">{t("villas.owner")}</TableHead>
-              <TableHead className="px-4 py-2.5">
-                {t("villas.location")}
-              </TableHead>
-              <TableHead className="px-4 py-2.5">
-                {t("villas.progress")}
-              </TableHead>
-              <TableHead className="px-4 py-2.5">
-                {t("mewFollowUp.acState")}
-              </TableHead>
-              <TableHead className="px-4 py-2.5">
-                {t("mewFollowUp.elecState")}
-              </TableHead>
-              <TableHead className="px-4 py-2.5">
-                {t("mewFollowUp.inspectionDate")}
-              </TableHead>
-              <TableHead className="px-4 py-2.5">
-                {t("mewFollowUp.since")}
-              </TableHead>
-              <TableHead className="px-4 py-2.5">
-                {t("mewFollowUp.inspection")}
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {isLoading && rows.length === 0 ? (
-              <TableBodySkeleton columns={COLUMN_COUNT} rows={8} />
-            ) : rows.length === 0 ? (
-              <TableRow>
-                <TableCell
-                  colSpan={COLUMN_COUNT}
-                  className="px-4 py-10 text-center text-sm text-muted-foreground"
-                >
-                  {t("mewFollowUp.empty")}
-                </TableCell>
-              </TableRow>
-            ) : (
-              rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  tone={filesApproved(row) ? "success" : undefined}
-                >
-                  <TableCell className="px-4 py-3 font-medium">
-                    <VillaCell id={row.id} villaNumber={row.villaNumber} />
-                  </TableCell>
-                  <TableCell className="px-4 py-3" dir="auto">
-                    {row.ownerName ?? "-"}
-                  </TableCell>
-                  <TableCell className="px-4 py-3 text-sm" dir="auto">
-                    {row.location}
-                  </TableCell>
-                  <TableCell className="px-4 py-3">
-                    <ProgressCell value={row.progress} />
-                  </TableCell>
-                  <TableCell className="px-4 py-3">
-                    <MewStateSelect
-                      value={row.mewAcState}
-                      label={t("mewFollowUp.acState")}
-                      canEdit={canEdit}
-                      disabled={busyId === row.id}
-                      onChange={(next) =>
-                        void saveMew(row, { mewAcState: next })
-                      }
-                    />
-                  </TableCell>
-                  <TableCell className="px-4 py-3">
-                    <MewStateSelect
-                      value={row.mewElecState}
-                      label={t("mewFollowUp.elecState")}
-                      canEdit={canEdit}
-                      disabled={busyId === row.id}
-                      onChange={(next) =>
-                        void saveMew(row, { mewElecState: next })
-                      }
-                    />
-                  </TableCell>
-                  <TableCell className="px-4 py-3">
-                    {canEdit ? (
-                      <Input
-                        type="date"
-                        className="h-8 w-40 text-xs"
-                        aria-label={t("mewFollowUp.inspectionDate")}
-                        value={row.mewInspectionDate ?? ""}
-                        disabled={busyId === row.id}
-                        onChange={(e) =>
-                          void saveMew(row, {
-                            mewInspectionDate: e.target.value || null,
-                          })
-                        }
-                      />
-                    ) : (
-                      <span className="text-sm tabular-nums">
-                        {row.mewInspectionDate ?? t("common.none")}
-                      </span>
-                    )}
-                  </TableCell>
-                  <TableCell className="px-4 py-3">
-                    {row.mewFollowUp ? (
-                      <Badge tone="info">
-                        {formatDateTime(row.mewFollowUp.at)}
-                      </Badge>
-                    ) : (
-                      t("common.none")
-                    )}
-                  </TableCell>
-                  <TableCell className="flex items-center gap-1 px-4 py-3">
-                    {canEdit ? (
-                      <Button
-                        type="button"
-                        size="sm"
-                        icon={row.mewInspection ? "x" : "check"}
-                        variant={row.mewInspection ? "secondary" : "primary"}
-                        disabled={
-                          busyId === row.id ||
-                          (!row.mewInspection && !filesApproved(row))
-                        }
-                        title={
-                          !row.mewInspection && !filesApproved(row)
-                            ? t("mewFollowUp.approveFirst")
-                            : undefined
-                        }
-                        onClick={() => void toggleInspection(row)}
-                      >
-                        {row.mewInspection
-                          ? t("mewFollowUp.removeFromInspection")
-                          : t("mewFollowUp.addToInspection")}
-                      </Button>
-                    ) : row.mewInspection ? (
-                      <Badge tone="success">
-                        {t("mewFollowUp.onInspection")}
-                      </Badge>
-                    ) : (
-                      t("common.none")
-                    )}
-                    {canEdit && (
-                      <IconButton
-                        icon="trash"
-                        variant="danger"
-                        label={t("mewFollowUp.remove")}
-                        disabled={busyId === row.id}
-                        onClick={() => void removeFromFollowUp(row)}
-                      />
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </div>
+      <MewFollowUpTable
+        rows={rows}
+        loading={isLoading}
+        sort={params.sort}
+        onSort={(next) => setParam("sort", next)}
+        canEdit={canEdit}
+        busyId={busyId}
+        onSaveMew={(row, input) => void saveMew(row, input)}
+        onToggleInspection={(row) => void toggleInspection(row)}
+        onRemove={(row) => void removeFromFollowUp(row)}
+      />
       {meta && (
         <VillasListFooter
           meta={meta}
@@ -416,11 +248,6 @@ export default function MewFollowUpPage() {
           onPageSizeChange={setLimit}
           onGoLastPage={() => setPage(meta.totalPages)}
         />
-      )}
-      {meta && (
-        <p className="mt-3 text-sm text-muted-foreground">
-          {t("mewFollowUp.count", { count: meta.total })}
-        </p>
       )}
       <VariationOrdersPendingModal
         pending={pendingVos}

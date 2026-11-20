@@ -1,45 +1,30 @@
-import { VillaCell } from "@/shared/list/cells"
-import SortableHead from "@/shared/list/SortableHead"
 import { useState } from "react"
 import { useSearchParams, useNavigate } from "react-router"
 import { useTranslation } from "react-i18next"
 import { usePermissions } from "@/features/auth/api"
 import { useDebouncedSearchParam } from "@/shared/hooks/useDebouncedSearchParam"
 import { normalizeSearchInput } from "@/shared/lib/phone/phoneNormalize"
-import { formatDateTime } from "@/shared/lib/format"
 import { toast } from "@/shared/lib/toast"
 import PageHeader from "@/shared/ui/PageHeader"
-import { Badge } from "@/shared/ui/Badge"
 import Button from "@/shared/ui/Button"
-import { Checkbox } from "@/shared/ui/checkbox"
-import { Input } from "@/shared/ui/input"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/shared/ui/table"
-import { TableBodySkeleton } from "@/shared/ui/loading-skeletons"
 import { toApiError } from "@/shared/api/errors"
 import {
   useMewInspectionListParams,
   useMewInspectionListQuery,
+  useMewReportsQuery,
   useSetVillaMewStatesMutation,
   useVillaMewInspectionMutation,
   useVillaMewInspectionPassedMutation,
   type VillaListItem,
 } from "../api"
-import MewStateSelect from "../components/MewStateSelect"
+import MewInspectionSummary from "../components/MewInspectionSummary"
+import MewInspectionTable from "../components/MewInspectionTable"
 import VillasListErrorBanner from "../components/VillasListErrorBanner"
 import VillasListFooter from "../components/VillasListFooter"
 import ListToolbar, {
   clearedListParams,
   countActive,
 } from "@/shared/list/ListToolbar"
-
-const COLUMN_COUNT = 9
 
 // Villas someone added for MEW inspection from the MEW follow-up page and that have not passed yet.
 // Checking "Passed" moves a villa to the MEW Inspection Passed page.
@@ -117,6 +102,10 @@ export default function MewInspectionPage() {
   }
 
   const rows = data?.data ?? []
+  // The inspection reports of the villas on this page, in one request.
+  const reports = useMewReportsQuery(rows.map((row) => row.id))
+  const reportOf = (villaId: string) =>
+    reports.data?.find((report) => report.villaId === villaId)
   const meta = data?.meta
   const apiError = isError ? toApiError(error) : null
   const showErrorBanner =
@@ -141,6 +130,11 @@ export default function MewInspectionPage() {
           </Button>
         }
       />
+      <MewInspectionSummary
+        rows={rows}
+        total={meta?.total}
+        reports={reports.data ?? []}
+      />
       <ListToolbar
         search={{
           value: searchDraft,
@@ -155,139 +149,18 @@ export default function MewInspectionPage() {
         error={showErrorBanner ? apiError : null}
         onRetry={() => void refetch()}
       />
-      <div className="list-surface overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow className="list-head-row">
-              <SortableHead
-                label={t("villas.villaNumber")}
-                field="villaNumber"
-                sort={params.sort}
-                onSort={(next) => setParam("sort", next)}
-              />
-              <TableHead className="px-4 py-2.5">{t("villas.owner")}</TableHead>
-              <TableHead className="px-4 py-2.5">
-                {t("villas.location")}
-              </TableHead>
-              <TableHead className="px-4 py-2.5">
-                {t("mewFollowUp.acState")}
-              </TableHead>
-              <TableHead className="px-4 py-2.5">
-                {t("mewFollowUp.elecState")}
-              </TableHead>
-              <TableHead className="px-4 py-2.5">
-                {t("mewFollowUp.inspectionDate")}
-              </TableHead>
-              <TableHead className="px-4 py-2.5">
-                {t("mewInspection.since")}
-              </TableHead>
-              <TableHead className="px-4 py-2.5">
-                {t("mewInspection.passed")}
-              </TableHead>
-              <TableHead className="px-4 py-2.5">
-                <span className="sr-only">{t("common.actions")}</span>
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {isLoading && rows.length === 0 ? (
-              <TableBodySkeleton columns={COLUMN_COUNT} rows={8} />
-            ) : rows.length === 0 ? (
-              <TableRow>
-                <TableCell
-                  colSpan={COLUMN_COUNT}
-                  className="px-4 py-10 text-center text-sm text-muted-foreground"
-                >
-                  {t("mewInspection.empty")}
-                </TableCell>
-              </TableRow>
-            ) : (
-              rows.map((row) => (
-                <TableRow key={row.id}>
-                  <TableCell className="px-4 py-3 font-medium">
-                    <VillaCell id={row.id} villaNumber={row.villaNumber} />
-                  </TableCell>
-                  <TableCell className="px-4 py-3" dir="auto">
-                    {row.ownerName ?? "-"}
-                  </TableCell>
-                  <TableCell className="px-4 py-3 text-sm" dir="auto">
-                    {row.location}
-                  </TableCell>
-                  <TableCell className="px-4 py-3">
-                    {/* The states are changed on the MEW follow-up page. */}
-                    <MewStateSelect
-                      value={row.mewAcState}
-                      label={t("mewFollowUp.acState")}
-                      canEdit={false}
-                      onChange={() => {}}
-                    />
-                  </TableCell>
-                  <TableCell className="px-4 py-3">
-                    <MewStateSelect
-                      value={row.mewElecState}
-                      label={t("mewFollowUp.elecState")}
-                      canEdit={false}
-                      onChange={() => {}}
-                    />
-                  </TableCell>
-                  <TableCell className="px-4 py-3">
-                    {canEdit ? (
-                      <Input
-                        type="date"
-                        className="h-8 w-40 text-xs"
-                        aria-label={t("mewFollowUp.inspectionDate")}
-                        value={row.mewInspectionDate ?? ""}
-                        disabled={busyId === row.id}
-                        onChange={(e) =>
-                          void saveInspectionDate(row, e.target.value)
-                        }
-                      />
-                    ) : (
-                      <span className="text-sm tabular-nums">
-                        {row.mewInspectionDate ?? t("common.none")}
-                      </span>
-                    )}
-                  </TableCell>
-                  <TableCell className="px-4 py-3">
-                    {row.mewInspection ? (
-                      <Badge tone="success">
-                        {formatDateTime(row.mewInspection.at)}
-                      </Badge>
-                    ) : (
-                      t("common.none")
-                    )}
-                  </TableCell>
-                  <TableCell className="px-4 py-3">
-                    <Checkbox
-                      checked={false}
-                      disabled={!canEdit || busyId === row.id}
-                      aria-label={t("mewInspection.markPassed", {
-                        name: row.villaNumber,
-                      })}
-                      onCheckedChange={(checked) => {
-                        if (checked === true) void markPassed(row)
-                      }}
-                    />
-                  </TableCell>
-                  <TableCell className="px-4 py-3 text-end">
-                    {canEdit && (
-                      <Button
-                        type="button"
-                        size="sm"
-                        icon="x"
-                        disabled={busyId === row.id}
-                        onClick={() => void remove(row)}
-                      >
-                        {t("mewFollowUp.removeFromInspection")}
-                      </Button>
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </div>
+      <MewInspectionTable
+        rows={rows}
+        loading={isLoading}
+        sort={params.sort}
+        onSort={(next) => setParam("sort", next)}
+        canEdit={canEdit}
+        busyId={busyId}
+        reportOf={reportOf}
+        onSaveDate={(row, day) => void saveInspectionDate(row, day)}
+        onPassed={(row) => void markPassed(row)}
+        onRemove={(row) => void remove(row)}
+      />
       {meta && (
         <VillasListFooter
           meta={meta}
@@ -295,11 +168,6 @@ export default function MewInspectionPage() {
           onPageSizeChange={setLimit}
           onGoLastPage={() => setPage(meta.totalPages)}
         />
-      )}
-      {meta && (
-        <p className="mt-3 text-sm text-muted-foreground">
-          {t("mewInspection.count", { count: meta.total })}
-        </p>
       )}
     </>
   )

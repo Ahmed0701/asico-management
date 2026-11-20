@@ -1,34 +1,22 @@
-import { VillaCell } from "@/shared/list/cells"
-import SortableHead from "@/shared/list/SortableHead"
 import { useState } from "react"
 import { useSearchParams, useNavigate } from "react-router"
 import { useTranslation } from "react-i18next"
 import { usePermissions } from "@/features/auth/api"
 import { useDebouncedSearchParam } from "@/shared/hooks/useDebouncedSearchParam"
 import { normalizeSearchInput } from "@/shared/lib/phone/phoneNormalize"
-import { formatDateTime } from "@/shared/lib/format"
 import { toast } from "@/shared/lib/toast"
 import PageHeader from "@/shared/ui/PageHeader"
-import { Badge } from "@/shared/ui/Badge"
 import Button from "@/shared/ui/Button"
-import { Checkbox } from "@/shared/ui/checkbox"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/shared/ui/table"
-import { TableBodySkeleton } from "@/shared/ui/loading-skeletons"
 import { toApiError } from "@/shared/api/errors"
 import {
   useMewInspectionPassedListParams,
   useMewInspectionPassedListQuery,
+  useMewReportsQuery,
   useVillaMewInspectionPassedMutation,
   type VillaListItem,
 } from "../api"
-import MewStateSelect from "../components/MewStateSelect"
+import MewPassedSummary from "../components/MewPassedSummary"
+import MewPassedTable from "../components/MewPassedTable"
 import VillasListErrorBanner from "../components/VillasListErrorBanner"
 import VillasListFooter from "../components/VillasListFooter"
 import ListToolbar, {
@@ -36,9 +24,7 @@ import ListToolbar, {
   countActive,
 } from "@/shared/list/ListToolbar"
 
-const COLUMN_COUNT = 7
-
-// Villas checked as having passed the MEW inspection. Unchecking one sends it back to the MEW inspection list.
+// Villas that passed the MEW inspection. Moving one back sends it to the MEW inspection list again.
 export default function MewInspectionPassedPage() {
   const { t } = useTranslation()
   const [toolbarParams, setToolbarParams] = useSearchParams()
@@ -78,6 +64,10 @@ export default function MewInspectionPassedPage() {
 
   const rows = data?.data ?? []
   const meta = data?.meta
+  // The inspection reports of the villas on this page, in one request.
+  const reports = useMewReportsQuery(rows.map((row) => row.id))
+  const reportOf = (villaId: string) =>
+    reports.data?.find((report) => report.villaId === villaId)
   const apiError = isError ? toApiError(error) : null
   const showErrorBanner =
     apiError !== null &&
@@ -94,11 +84,17 @@ export default function MewInspectionPassedPage() {
           <Button
             type="button"
             size="sm"
+            icon="chevronLeft"
             onClick={() => navigate("/villas/mew-inspection")}
           >
             {t("mewInspectionPassed.backToInspection")}
           </Button>
         }
+      />
+      <MewPassedSummary
+        rows={rows}
+        total={meta?.total}
+        reports={reports.data ?? []}
       />
       <ListToolbar
         search={{
@@ -114,101 +110,16 @@ export default function MewInspectionPassedPage() {
         error={showErrorBanner ? apiError : null}
         onRetry={() => void refetch()}
       />
-      <div className="list-surface overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow className="list-head-row">
-              <SortableHead
-                label={t("villas.villaNumber")}
-                field="villaNumber"
-                sort={params.sort}
-                onSort={(next) => setParam("sort", next)}
-              />
-              <TableHead className="px-4 py-2.5">{t("villas.owner")}</TableHead>
-              <TableHead className="px-4 py-2.5">
-                {t("villas.location")}
-              </TableHead>
-              <TableHead className="px-4 py-2.5">
-                {t("mewFollowUp.acState")}
-              </TableHead>
-              <TableHead className="px-4 py-2.5">
-                {t("mewFollowUp.elecState")}
-              </TableHead>
-              <TableHead className="px-4 py-2.5">
-                {t("mewInspectionPassed.passedOn")}
-              </TableHead>
-              <TableHead className="px-4 py-2.5">
-                {t("mewInspection.passed")}
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {isLoading && rows.length === 0 ? (
-              <TableBodySkeleton columns={COLUMN_COUNT} rows={8} />
-            ) : rows.length === 0 ? (
-              <TableRow>
-                <TableCell
-                  colSpan={COLUMN_COUNT}
-                  className="px-4 py-10 text-center text-sm text-muted-foreground"
-                >
-                  {t("mewInspectionPassed.empty")}
-                </TableCell>
-              </TableRow>
-            ) : (
-              rows.map((row) => (
-                <TableRow key={row.id} tone="success">
-                  <TableCell className="px-4 py-3 font-medium">
-                    <VillaCell id={row.id} villaNumber={row.villaNumber} />
-                  </TableCell>
-                  <TableCell className="px-4 py-3" dir="auto">
-                    {row.ownerName ?? "-"}
-                  </TableCell>
-                  <TableCell className="px-4 py-3 text-sm" dir="auto">
-                    {row.location}
-                  </TableCell>
-                  <TableCell className="px-4 py-3">
-                    <MewStateSelect
-                      value={row.mewAcState}
-                      label={t("mewFollowUp.acState")}
-                      canEdit={false}
-                      onChange={() => {}}
-                    />
-                  </TableCell>
-                  <TableCell className="px-4 py-3">
-                    <MewStateSelect
-                      value={row.mewElecState}
-                      label={t("mewFollowUp.elecState")}
-                      canEdit={false}
-                      onChange={() => {}}
-                    />
-                  </TableCell>
-                  <TableCell className="px-4 py-3">
-                    {row.mewInspectionPassed ? (
-                      <Badge tone="success">
-                        {formatDateTime(row.mewInspectionPassed.at)}
-                      </Badge>
-                    ) : (
-                      t("common.none")
-                    )}
-                  </TableCell>
-                  <TableCell className="px-4 py-3">
-                    <Checkbox
-                      checked
-                      disabled={!canEdit || busyId === row.id}
-                      aria-label={t("mewInspectionPassed.takeBack", {
-                        name: row.villaNumber,
-                      })}
-                      onCheckedChange={(checked) => {
-                        if (checked === false) void takeBack(row)
-                      }}
-                    />
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </div>
+      <MewPassedTable
+        rows={rows}
+        loading={isLoading}
+        sort={params.sort}
+        onSort={(next) => setParam("sort", next)}
+        canEdit={canEdit}
+        busyId={busyId}
+        reportOf={reportOf}
+        onTakeBack={(row) => void takeBack(row)}
+      />
       {meta && (
         <VillasListFooter
           meta={meta}
@@ -216,11 +127,6 @@ export default function MewInspectionPassedPage() {
           onPageSizeChange={setLimit}
           onGoLastPage={() => setPage(meta.totalPages)}
         />
-      )}
-      {meta && (
-        <p className="mt-3 text-sm text-muted-foreground">
-          {t("mewInspectionPassed.count", { count: meta.total })}
-        </p>
       )}
     </>
   )

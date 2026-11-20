@@ -1,9 +1,9 @@
-import { useEffect } from "react"
-import { useQueries, useQueryClient } from "@tanstack/react-query"
+import { useQueries } from "@tanstack/react-query"
 import { usePermissions } from "@/features/auth/api"
 import type { PermissionCode } from "@/features/auth/api/permissions"
 import { api } from "@/shared/api/client"
 import type { PaginatedMeta } from "@/shared/api/types"
+import { SIDEBAR_COUNT_KEY } from "./sidebarCountKey"
 
 /**
  * The counts shown next to some sidebar entries, each with the same filters as its page, so the number is what the page lists:
@@ -21,7 +21,8 @@ const COUNTS = [
     key: "mewFollowUp",
     permission: "villas:read",
     path: "/villas",
-    params: { mewFollowUp: "true" },
+    // A villa that passed the MEW inspection has left the follow-up list.
+    params: { mewFollowUp: "true", mewInspectionPassed: "false" },
   },
   {
     key: "mewInspection",
@@ -72,7 +73,7 @@ const COUNTS = [
   params: Record<string, string>
 }[]
 
-const KEY = ["sidebar-count"] as const
+const KEY = SIDEBAR_COUNT_KEY
 
 async function countOf(
   path: string,
@@ -88,22 +89,9 @@ async function countOf(
 /** The count of each counted sidebar entry the user may open (missing while it loads, or when they may not). */
 export function useSidebarCounts(): Record<string, number | undefined> {
   const { can } = usePermissions()
-  const qc = useQueryClient()
 
-  // Any change made in the app (a work done, a villa added to MEW, a maintenance solved...) refreshes the counts.
-  useEffect(
-    () =>
-      qc.getMutationCache().subscribe((event) => {
-        if (
-          event.type === "updated" &&
-          event.mutation.state.status === "success"
-        ) {
-          void qc.invalidateQueries({ queryKey: KEY })
-        }
-      }),
-    [qc],
-  )
-
+  // Refreshed after every change made in the app by the query client itself (shared/api/queryClient.ts), as soon as
+  // the server confirms it.
   const results = useQueries({
     queries: COUNTS.map((c) => ({
       queryKey: [...KEY, c.key],
