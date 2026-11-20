@@ -13,6 +13,8 @@ import type {
   DeliveryInput,
   FactoryType,
   ItemInput,
+  MaterialOrderDates,
+  MaterialOrdersParams,
 } from "./materials.types"
 
 export const materialsKeys = {
@@ -21,6 +23,8 @@ export const materialsKeys = {
   items: () => [...materialsKeys.all, "items"] as const,
   balance: (params: BalanceListParams) =>
     [...materialsKeys.all, "balance", params] as const,
+  orders: (params: MaterialOrdersParams) =>
+    [...materialsKeys.all, "orders", params] as const,
   deliveries: (params: DeliveriesListParams) =>
     [...materialsKeys.all, "deliveries", params] as const,
   summary: (villaId: string) =>
@@ -247,6 +251,27 @@ export function useDeleteDeliveryNoteMutation() {
   return useMutation({
     mutationFn: ({ id, noteId }: DeleteNoteArgs) =>
       api.deleteDeliveryNote(id, noteId),
+    onSuccess: () => invalidateMaterials(qc),
+  })
+}
+
+export function useMaterialOrdersQuery(params: MaterialOrdersParams) {
+  return useQuery({
+    queryKey: materialsKeys.orders(params),
+    queryFn: ({ signal }) => api.listMaterialOrders(params, signal),
+    placeholderData: keepPreviousData,
+    retry: 1,
+  })
+}
+
+export function useSetMaterialOrderMutation() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (args: {
+      villaId: string
+      type: FactoryType
+      dates: MaterialOrderDates
+    }) => api.setMaterialOrder(args.villaId, args.type, args.dates),
     onSuccess: () => invalidateMaterials(qc),
   })
 }

@@ -16,8 +16,8 @@ import {
 import SmallWorkFormModal from "@/features/small-works/components/SmallWorkFormModal"
 import SmallWorksListFooter from "@/features/small-works/components/SmallWorksListFooter"
 import SmallWorksTable from "@/features/small-works/components/SmallWorksTable"
-import { SearchInput } from "@/shared/ui/Field"
 import PageHeader, { Card } from "@/shared/ui/PageHeader"
+import ListToolbar from "@/shared/list/ListToolbar"
 
 const PAGE_SIZE = 20
 
@@ -45,31 +45,35 @@ export default function DoneWorksPage() {
         title={t("doneWorks.title")}
         subtitle={t("doneWorks.subtitle")}
       />
-      <div className="mb-4 flex flex-wrap items-center gap-3">
-        <div className="min-w-0 flex-1">
-          <SearchInput
-            value={search}
-            onChange={setSearch}
-            placeholder={t("doneWorks.searchPlaceholder")}
-          />
-        </div>
-        {canOpenWorks && (
-          <Link
-            to="/villas/open-works"
-            className="text-sm text-accent hover:underline"
-          >
-            {t("doneWorks.backToOpenWorks")}
-          </Link>
-        )}
-        {canSmallWorks && (
-          <Link
-            to="/small-works"
-            className="text-sm text-accent hover:underline"
-          >
-            {t("doneWorks.backToSmallWorks")}
-          </Link>
-        )}
-      </div>
+      <ListToolbar
+        search={{
+          value: search,
+          onChange: setSearch,
+          placeholder: t("doneWorks.searchPlaceholder"),
+        }}
+        activeCount={search ? 1 : 0}
+        onClear={() => setSearch("")}
+        actions={
+          <>
+            {canOpenWorks && (
+              <Link
+                to="/villas/open-works"
+                className="text-sm text-accent hover:underline"
+              >
+                {t("doneWorks.backToOpenWorks")}
+              </Link>
+            )}
+            {canSmallWorks && (
+              <Link
+                to="/small-works"
+                className="text-sm text-accent hover:underline"
+              >
+                {t("doneWorks.backToSmallWorks")}
+              </Link>
+            )}
+          </>
+        }
+      />
       {canOpenWorks && <DoneOpenWorks search={searchText} />}
       {canSmallWorks && <DoneSmallWorks search={searchText} />}
       {!canOpenWorks && !canSmallWorks && (

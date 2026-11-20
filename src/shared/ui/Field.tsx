@@ -72,7 +72,9 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
   )
 })
 
-interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
+interface SelectProps
+  extends SelectHTMLAttributes<HTMLSelectElement> {
+  /** A line under the list, shown while there is no error. */
   label: string
   error?: string
   options: {
@@ -80,17 +82,18 @@ interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
     label: string
   }[]
   placeholder?: string
+  hint?: string
 }
 
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(
   function Select(
-    { label, error, options, placeholder, className, id, ...rest },
+    { label, error, options, placeholder, hint, className, id, ...rest },
     ref,
   ) {
     const auto = useId()
     const fid = id ?? auto
     return (
-      <FormField label={label} error={error} htmlFor={fid}>
+      <FormField label={label} error={error} hint={hint} htmlFor={fid}>
         <select
           ref={ref}
           id={fid}

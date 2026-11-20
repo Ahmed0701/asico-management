@@ -1,7 +1,11 @@
-import { useState, type FormEvent } from "react"
+import { useEffect, useState, type FormEvent } from "react"
 import { SearchSelect } from "@/shared/ui/search-select"
 import { useTranslation } from "react-i18next"
 import { useVillaOptionsQuery } from "@/features/villas/api"
+import {
+  assignedFactoryOf,
+  useVillaVendorsOfQuery,
+} from "@/features/vendors/api"
 import { toApiError } from "@/shared/api/errors"
 import { idempotencyWrite, useIdempotencyKey } from "@/shared/api/write-safety"
 import { cn } from "@/shared/lib/cn"
@@ -28,6 +32,9 @@ type Values = {
   factoryId: string
   noteNumber: string
   deliveryDate: string
+  /** Empty: not known. */
+  mrDate: string
+  poDate: string
 }
 
 type Errors = Partial<Record<keyof Values | "lines", string>>
@@ -89,6 +96,8 @@ function Inner({
     factoryId: item?.factory.id ?? "",
     noteNumber: item?.noteNumber ?? "",
     deliveryDate: item?.deliveryDate ?? new Date().toISOString().slice(0, 10),
+    mrDate: item?.mrDate ?? "",
+    poDate: item?.poDate ?? "",
   })
   const [picked, setPicked] = useState<Picked>(() =>
     Object.fromEntries(
@@ -99,6 +108,16 @@ function Inner({
   const [errors, setErrors] = useState<Errors>({})
   const [formError, setFormError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
+  // The factory follows the villa's vendor (the Vendors page) until someone picks another one by hand.
+  const [factoryPicked, setFactoryPicked] = useState(!!item)
+  const vendors = useVillaVendorsOfQuery(values.villaId || undefined)
+  const assigned = assignedFactoryOf(vendors.data, values.type)
+
+  useEffect(() => {
+    if (factoryPicked) return
+    const next = assigned?.id ?? ""
+    setValues((v) => (v.factoryId === next ? v : { ...v, factoryId: next }))
+  }, [assigned?.id, factoryPicked])
 
   const set = (key: keyof Values) => (value: string) => {
     setValues((v) => ({ ...v, [key]: value }))
@@ -108,6 +127,7 @@ function Inner({
   // A factory and the materials belong to one type: changing the type starts them over.
   const setType = (type: FactoryType) => {
     setValues((v) => ({ ...v, type, factoryId: "" }))
+    setFactoryPicked(false)
     setPicked({})
   }
 
@@ -159,6 +179,8 @@ function Inner({
       })),
       noteNumber: values.noteNumber.trim() || null,
       deliveryDate: values.deliveryDate,
+      mrDate: values.mrDate || null,
+      poDate: values.poDate || null,
     }
     setSaving(true)
     try {
@@ -230,7 +252,10 @@ function Inner({
             <SearchSelect
               id="delivery-villa"
               value={values.villaId}
-              onChange={set("villaId")}
+              onChange={(villaId) => {
+                set("villaId")(villaId)
+                setFactoryPicked(false)
+              }}
               options={villaOptions}
               placeholder={t("materials.pickVilla")}
               disabled={!!villaId && !item}
@@ -249,8 +274,20 @@ function Inner({
           <Select
             label={t("materials.factory")}
             value={values.factoryId}
-            onChange={(e) => set("factoryId")(e.target.value)}
+            onChange={(e) => {
+              set("factoryId")(e.target.value)
+              setFactoryPicked(true)
+            }}
             options={factoryOptions}
+            hint={
+              !values.villaId
+                ? undefined
+                : assigned
+                  ? values.factoryId === assigned.id
+                    ? t("materials.fromVendors")
+                    : t("materials.notTheVendor", { name: assigned.name })
+                  : t("materials.noVendor")
+            }
             placeholder={
               factoryOptions.length
                 ? t("materials.pickFactory")
@@ -348,6 +385,18 @@ function Inner({
             value={values.deliveryDate}
             onChange={(e) => set("deliveryDate")(e.target.value)}
             error={errors.deliveryDate}
+          />
+          <Input
+            label={t("materials.mrDate")}
+            type="date"
+            value={values.mrDate}
+            onChange={(e) => set("mrDate")(e.target.value)}
+          />
+          <Input
+            label={t("materials.poDate")}
+            type="date"
+            value={values.poDate}
+            onChange={(e) => set("poDate")(e.target.value)}
           />
         </div>
         <FormField

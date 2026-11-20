@@ -135,6 +135,27 @@ export function hasActiveVillaListFilters(params: VillasListParams): boolean {
   )
 }
 
+/** How many of the list filters are set (the search is not one of them). */
+export function villaFilterCount(params: VillasListParams): number {
+  return [
+    params.area,
+    params.areaId,
+    params.block,
+    params.plot,
+    params.civilEngineerId,
+    params.electricalEngineerId,
+    params.contractorId,
+    params.villaType,
+    params.startFrom,
+    params.startTo,
+    params.targetFrom,
+    params.targetTo,
+    params.mewFollowUp,
+    params.mewInspection,
+    params.mewInspectionPassed,
+  ].filter((value) => value !== undefined && value !== "").length
+}
+
 export function useVillasListParams() {
   const [searchParams, setSearchParams] = useSearchParams()
   const params = useMemo(

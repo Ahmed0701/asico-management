@@ -6,7 +6,7 @@ import { toApiError } from "@/shared/api/errors"
 import { useDebouncedSearchParam } from "@/shared/hooks/useDebouncedSearchParam"
 import { normalizeSearchInput } from "@/shared/lib/phone/phoneNormalize"
 import Button from "@/shared/ui/Button"
-import { SearchInput } from "@/shared/ui/Field"
+import ListToolbar from "@/shared/list/ListToolbar"
 import { ConfirmModal } from "@/shared/ui/Modal"
 import PageHeader from "@/shared/ui/PageHeader"
 import { ImportWizardModal, IMPORT_RESOURCES } from "@/shared/import"
@@ -202,13 +202,16 @@ export default function ContractorsPage() {
           {deleteNotice}
         </p>
       )}
-      <div className="mb-3 flex flex-wrap items-start gap-2">
-        <SearchInput
-          value={searchDraft}
-          onChange={setSearchDraft}
-          placeholder={t("contractors.searchPlaceholder")}
-        />
-      </div>
+      <ListToolbar
+        search={{
+          value: searchDraft,
+          onChange: setSearchDraft,
+          placeholder: t("contractors.searchPlaceholder"),
+        }}
+        count={meta?.total}
+        activeCount={hasSearch ? 1 : 0}
+        onClear={clearSearch}
+      />
       <ContractorsListErrorBanner
         error={showGlobalError ? apiError : null}
         onRetry={() => void refetch()}

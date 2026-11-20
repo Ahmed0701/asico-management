@@ -7,7 +7,9 @@ describe("findNavItem", () => {
     expect(findNavItem("/villas")?.item.key).toBe("villas")
     expect(findNavItem("/villas/123")?.item.key).toBe("villas")
     expect(findNavItem("/villas/mew-follow-up")?.item.key).toBe("mewFollowUp")
-    expect(findNavItem("/payments")?.group.key).toBe("directory")
+    expect(findNavItem("/contractors")?.group.key).toBe("directory")
+    // The Payments section is gone: its old address is no menu page.
+    expect(findNavItem("/payments")).toBeUndefined()
     expect(findNavItem("/audit")?.item.key).toBe("auditLog")
   })
 

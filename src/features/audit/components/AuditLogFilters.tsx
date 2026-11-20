@@ -110,11 +110,8 @@ export default function AuditLogFilters({
   }
 
   return (
-    <section
-      className="mb-4 rounded-lg border border-border bg-card/40 p-4"
-      aria-label={t("audit.filtersSection")}
-    >
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
+    <div aria-label={t("audit.filtersSection")}>
+      <div className="list-toolbar-filters grid grid-cols-2 items-end gap-3 md:grid-cols-3 lg:grid-cols-4">
         <SearchableActorSelect
           className={cn(
             filterFieldClass,
@@ -197,6 +194,6 @@ export default function AuditLogFilters({
           </div>
         </div>
       </div>
-    </section>
+    </div>
   )
 }

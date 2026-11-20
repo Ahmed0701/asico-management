@@ -1,7 +1,7 @@
 import { VillaCell } from "@/shared/list/cells"
 import SortableHead from "@/shared/list/SortableHead"
 import { useState } from "react"
-import { useNavigate } from "react-router"
+import { useSearchParams, useNavigate } from "react-router"
 import { useTranslation } from "react-i18next"
 import { usePermissions } from "@/features/auth/api"
 import { useDebouncedSearchParam } from "@/shared/hooks/useDebouncedSearchParam"
@@ -9,7 +9,6 @@ import { normalizeSearchInput } from "@/shared/lib/phone/phoneNormalize"
 import { formatDateTime } from "@/shared/lib/format"
 import { toast } from "@/shared/lib/toast"
 import PageHeader from "@/shared/ui/PageHeader"
-import { SearchInput } from "@/shared/ui/Field"
 import { Badge } from "@/shared/ui/Badge"
 import Button from "@/shared/ui/Button"
 import { Checkbox } from "@/shared/ui/checkbox"
@@ -35,6 +34,10 @@ import {
 import MewStateSelect from "../components/MewStateSelect"
 import VillasListErrorBanner from "../components/VillasListErrorBanner"
 import VillasListFooter from "../components/VillasListFooter"
+import ListToolbar, {
+  clearedListParams,
+  countActive,
+} from "@/shared/list/ListToolbar"
 
 const COLUMN_COUNT = 9
 
@@ -42,6 +45,7 @@ const COLUMN_COUNT = 9
 // Checking "Passed" moves a villa to the MEW Inspection Passed page.
 export default function MewInspectionPage() {
   const { t } = useTranslation()
+  const [toolbarParams, setToolbarParams] = useSearchParams()
   const navigate = useNavigate()
   const { can } = usePermissions()
   const canEdit = can("villas:inspection")
@@ -137,13 +141,16 @@ export default function MewInspectionPage() {
           </Button>
         }
       />
-      <div className="mb-3">
-        <SearchInput
-          value={searchDraft}
-          onChange={setSearchDraft}
-          placeholder={t("villas.searchPlaceholder")}
-        />
-      </div>
+      <ListToolbar
+        search={{
+          value: searchDraft,
+          onChange: setSearchDraft,
+          placeholder: t("villas.searchPlaceholder"),
+        }}
+        count={meta?.total}
+        activeCount={countActive(params.search)}
+        onClear={() => setToolbarParams(clearedListParams(toolbarParams))}
+      />
       <VillasListErrorBanner
         error={showErrorBanner ? apiError : null}
         onRetry={() => void refetch()}

@@ -7,7 +7,6 @@ import { useDebouncedSearchParam } from "@/shared/hooks/useDebouncedSearchParam"
 import { normalizeSearchInput } from "@/shared/lib/phone/phoneNormalize"
 import { ConfirmModal } from "@/shared/ui/Modal"
 import PageHeader from "@/shared/ui/PageHeader"
-import { SearchInput } from "@/shared/ui/Field"
 import { downloadExport } from "@/shared/export/downloadExport"
 import { ImportWizardModal, IMPORT_RESOURCES } from "@/shared/import"
 import ListPageHeaderActions from "@/shared/list/ListPageHeaderActions"
@@ -16,7 +15,6 @@ import { formatCalendarDateUtc } from "@/shared/lib/formatCalendarDateUtc"
 import { invalidateDailyReportsAfterWrite } from "../lib/dailyReportsQueryCache"
 import {
   buildDailyReportsListQueryParams,
-  hasActiveDailyReportsListFilters,
   useDeleteDailyReportMutation,
   useDailyReportsListParams,
   useDailyReportsListQuery,
@@ -27,6 +25,7 @@ import DailyReportsListErrorBanner from "../components/DailyReportsListErrorBann
 import DailyReportsListFiltersBar from "../components/DailyReportsListFiltersBar"
 import DailyReportsListFooter from "../components/DailyReportsListFooter"
 import DailyReportsTable from "../components/DailyReportsTable"
+import ListToolbar, { countActive } from "@/shared/list/ListToolbar"
 
 export default function DailyReportsPage() {
   const { t } = useTranslation()
@@ -146,26 +145,25 @@ export default function DailyReportsPage() {
           {t("common.saved")}
         </p>
       )}
-      {hasActiveDailyReportsListFilters(params) && (
-        <p className="mb-3 text-sm text-muted-foreground">
-          {t("dailyReports.filteredListHint")}{" "}
-          <button
-            type="button"
-            className="text-accent hover:underline"
-            onClick={clearFilters}
-          >
-            {t("common.clearFilters")}
-          </button>
-        </p>
-      )}
-      <div className="mb-3">
-        <SearchInput
-          value={searchDraft}
-          onChange={setSearchDraft}
-          placeholder={t("dailyReports.searchPlaceholder")}
-        />
-      </div>
-      <DailyReportsListFiltersBar params={params} setParam={setParam} />
+      <ListToolbar
+        search={{
+          value: searchDraft,
+          onChange: setSearchDraft,
+          placeholder: t("dailyReports.searchPlaceholder"),
+        }}
+        count={meta?.total}
+        activeCount={countActive(
+          params.contractorId,
+          params.preparedByEngineerId,
+          params.reportFrom,
+          params.reportTo,
+          params.weather,
+        )}
+        onClear={clearFilters}
+        filters={
+          <DailyReportsListFiltersBar params={params} setParam={setParam} />
+        }
+      />
       {showGlobalError && apiError && (
         <DailyReportsListErrorBanner
           error={apiError}

@@ -61,7 +61,7 @@ export default function DeliveriesTable({
   const [target, setTarget] = useState<MaterialDelivery | null>(null)
   const [busyId, setBusyId] = useState<string | null>(null)
   const showActions = canUpdate || canDelete
-  const columnCount = (showVilla ? 7 : 6) + (showActions ? 1 : 0)
+  const columnCount = (showVilla ? 9 : 8) + (showActions ? 1 : 0)
 
   const pickFile = (row: MaterialDelivery) => {
     setTarget(row)
@@ -127,6 +127,12 @@ export default function DeliveriesTable({
               <TableHead className="px-4 py-2.5">
                 {t("materials.deliveryDate")}
               </TableHead>
+              <TableHead className="px-4 py-2.5">
+                {t("materials.mrDate")}
+              </TableHead>
+              <TableHead className="px-4 py-2.5">
+                {t("materials.poDate")}
+              </TableHead>
               {showVilla &&
                 (onSort ? (
                   <SortableHead
@@ -177,8 +183,22 @@ export default function DeliveriesTable({
             ) : (
               rows.map((row) => (
                 <TableRow key={row.id}>
-                  <TableCell className="px-4 py-3 text-sm tabular-nums">
+                  <TableCell className="px-4 py-3 text-sm tabular-nums whitespace-nowrap">
                     {day(row.deliveryDate)}
+                  </TableCell>
+                  <TableCell className="px-4 py-3 text-sm tabular-nums whitespace-nowrap">
+                    {row.mrDate ? (
+                      day(row.mrDate)
+                    ) : (
+                      <span className="text-muted-foreground">-</span>
+                    )}
+                  </TableCell>
+                  <TableCell className="px-4 py-3 text-sm tabular-nums whitespace-nowrap">
+                    {row.poDate ? (
+                      day(row.poDate)
+                    ) : (
+                      <span className="text-muted-foreground">-</span>
+                    )}
                   </TableCell>
                   {showVilla && (
                     <TableCell className="px-4 py-3 font-medium tabular-nums">

@@ -17,8 +17,11 @@ import {
 import VillaDetailHeroCard from "../components/VillaDetailHeroCard"
 import VillaDetailPhasesCard from "../components/VillaDetailPhasesCard"
 import VillaDetailMewCard from "../components/VillaDetailMewCard"
+import VillaBudgetCard from "../components/VillaBudgetCard"
 import VariationOrdersCard from "@/features/variation-orders/components/VariationOrdersCard"
-import VillaMaterialsCard from "@/features/materials/components/VillaMaterialsCard"
+import VillaMaterialsProgressCard from "@/features/materials/components/VillaMaterialsProgressCard"
+import VillaPaymentHistoryCard from "@/features/monthly-progress/components/VillaPaymentHistoryCard"
+import VillaSiteImagesCard from "@/features/villa-images/components/VillaSiteImagesCard"
 import VillaVendorsCard from "@/features/materials/components/VillaVendorsCard"
 import VillaDetailTabbedPanel from "../components/VillaDetailTabbedPanel"
 import VillaFormModal from "../components/VillaFormModal"
@@ -52,6 +55,8 @@ export default function VillaDetailPage() {
   const canUpdate = can("villas:update")
   const canDelete = can("villas:delete")
   const canMaterials = can("materials:read")
+  const canSiteImages = can("villa-documents:download")
+  const canPayments = can("payments:read")
   // The same permission the MEW follow-up page uses to add and remove villas.
   const canMewFollowUp = can("villas:inspection")
 
@@ -144,12 +149,25 @@ export default function VillaDetailPage() {
       />
       <VillaDetailPhasesCard phases={villa.phases} />
       <SectionHeading>{t("villas.sections.records")}</SectionHeading>
+      <VillaBudgetCard villaId={villa.id} canEdit={canUpdate} />
+      {canPayments && (
+        <VillaPaymentHistoryCard
+          villaId={villa.id}
+          villaNumber={villa.villaNumber}
+        />
+      )}
       <VillaDetailMewCard villa={villa} />
       <VariationOrdersCard villaId={villa.id} canEdit={canUpdate} />
       {canMaterials && (
         <VillaVendorsCard villaId={villa.id} villaNumber={villa.villaNumber} />
       )}
-      {canMaterials && <VillaMaterialsCard villaId={villa.id} />}
+      {canMaterials && (
+        <VillaMaterialsProgressCard
+          villaId={villa.id}
+          villaNumber={villa.villaNumber}
+        />
+      )}
+      {canSiteImages && <VillaSiteImagesCard villaId={villa.id} />}
       <SectionHeading>{t("villas.sections.activity")}</SectionHeading>
       <VillaDetailTabbedPanel villa={villa} />
       <VillaFormModal

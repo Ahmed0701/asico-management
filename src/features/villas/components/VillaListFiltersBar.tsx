@@ -39,7 +39,7 @@ export default function VillaListFiltersBar({
   }))
 
   return (
-    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+    <>
       <SearchFilterSelect
         label={t("villas.area")}
         value={params.area ?? ""}
@@ -77,6 +77,6 @@ export default function VillaListFiltersBar({
         onChange={(v) => setParam("villaType", v || undefined)}
         options={villaTypeOptions}
       />
-    </div>
+    </>
   )
 }

@@ -29,10 +29,13 @@ import MewInspectionRoute from "@/features/villas/pages/MewInspectionRoute"
 import MewInspectionPassedRoute from "@/features/villas/pages/MewInspectionPassedRoute"
 import MaintenanceRoute from "@/features/maintenance/pages/MaintenanceRoute"
 import MaterialsRoute from "@/features/materials/pages/MaterialsRoute"
+import MaterialItemsRoute from "@/features/materials/pages/MaterialItemsRoute"
+import VendorsRoute from "@/features/vendors/pages/VendorsRoute"
 import MaintenanceSolvedRoute from "@/features/maintenance/pages/MaintenanceSolvedRoute"
 import OwnerNotesRoute from "@/features/owner-notes/pages/OwnerNotesRoute"
-import PaymentsRoute from "@/features/payments/pages/PaymentsRoute"
 import MonthlyProgressRoute from "@/features/monthly-progress/pages/MonthlyProgressRoute"
+import ProjectBudgetsRoute from "@/features/project-budgets/pages/ProjectBudgetsRoute"
+import DepartmentOverheadRoute from "@/features/overhead/pages/DepartmentOverheadRoute"
 import ForemanMissionsRoute from "@/features/foreman-missions/pages/ForemanMissionsRoute"
 import OwnerNotesDoneRoute from "@/features/owner-notes/pages/OwnerNotesDoneRoute"
 import ForemanMissionsDoneRoute from "@/features/foreman-missions/pages/ForemanMissionsDoneRoute"
@@ -82,8 +85,12 @@ export const router = createBrowserRouter([
               { path: "villas/open-works", Component: OpenWorksPage },
               { path: "maintenance", Component: MaintenanceRoute },
               { path: "owner-notes", Component: OwnerNotesRoute },
-              { path: "payments", Component: PaymentsRoute },
               { path: "monthly-progress", Component: MonthlyProgressRoute },
+              { path: "project-budgets", Component: ProjectBudgetsRoute },
+              {
+                path: "department-overhead",
+                Component: DepartmentOverheadRoute,
+              },
               { path: "foreman-missions", Component: ForemanMissionsRoute },
               { path: "owner-notes/done", Component: OwnerNotesDoneRoute },
               {
@@ -91,6 +98,8 @@ export const router = createBrowserRouter([
                 Component: ForemanMissionsDoneRoute,
               },
               { path: "materials", Component: MaterialsRoute },
+              { path: "material-items", Component: MaterialItemsRoute },
+              { path: "vendors", Component: VendorsRoute },
               {
                 path: "maintenance/solved",
                 Component: MaintenanceSolvedRoute,

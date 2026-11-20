@@ -5,13 +5,15 @@ import { useTranslation } from "react-i18next"
 import { useMeQuery, usePermissions } from "@/features/auth/api"
 import Button, { IconButton } from "@/shared/ui/Button"
 import DataTable, { RowActions } from "@/shared/ui/DataTable"
-import { SearchInput } from "@/shared/ui/Field"
 import { FilterSelect } from "@/shared/ui/filter-select"
-import { Label } from "@/shared/ui/label"
 import Icon from "@/shared/ui/Icon"
 import { ConfirmModal } from "@/shared/ui/Modal"
 import PageHeader from "@/shared/ui/PageHeader"
 import ListPageHeaderActions from "@/shared/list/ListPageHeaderActions"
+import ListToolbar, {
+  clearedListParams,
+  countActive,
+} from "@/shared/list/ListToolbar"
 import { Badge } from "@/shared/ui/Badge"
 import { formatDateTime } from "@/shared/lib/format"
 import { toApiError } from "@/shared/api/errors"
@@ -32,8 +34,6 @@ import { userActionRules } from "../lib/userRules"
 
 const col = createColumnHelper<UserListItem>()
 const ROLES = ["ADMIN", "EMPLOYEE"] as const
-const filterFieldClass = "min-w-0 w-full"
-const filterTriggerClass = "h-9 w-full max-w-none bg-card"
 
 function SortHeader({
   label,
@@ -73,8 +73,15 @@ export default function UsersPage() {
   const { t } = useTranslation()
   const { can } = usePermissions()
   const { data: me } = useMeQuery()
-  const { params, setParam, setPage, setLimit, toggleSort } =
-    useUsersListParams()
+  const {
+    params,
+    setParam,
+    setPage,
+    setLimit,
+    toggleSort,
+    searchParams,
+    setSearchParams,
+  } = useUsersListParams()
   const { data, isLoading, isError, error, refetch } = useUsersListQuery()
   const deactivateUser = useDeactivateUserMutation()
   const deleteUser = useDeleteUserMutation()
@@ -283,50 +290,38 @@ export default function UsersPage() {
           ) : undefined
         }
       />
-      <section
-        className="mb-4 rounded-lg border border-border bg-card/40 p-4"
-        aria-label={t("users.filtersSection")}
+      <ListToolbar
+        search={{
+          id: searchFieldId,
+          value: searchDraft,
+          onChange: setSearchDraft,
+          placeholder: t("users.searchPlaceholder"),
+        }}
+        count={meta?.total}
+        activeCount={countActive(params.search, params.role, params.isActive)}
+        onClear={() => setSearchParams(clearedListParams(searchParams))}
+        columns={2}
       >
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          <div className="flex min-w-0 flex-col gap-1.5 sm:col-span-2 lg:col-span-1">
-            <Label
-              htmlFor={searchFieldId}
-              className="text-xs font-normal text-muted-foreground"
-            >
-              {t("common.search")}
-            </Label>
-            <SearchInput
-              id={searchFieldId}
-              value={searchDraft}
-              onChange={setSearchDraft}
-              placeholder={t("common.search")}
-            />
-          </div>
-          <FilterSelect
-            className={filterFieldClass}
-            triggerClassName={filterTriggerClass}
-            label={t("users.role")}
-            value={params.role ?? ""}
-            onChange={(v) => setParam("role", v || undefined)}
-            options={ROLES.map((r) => ({ value: r, label: t(`roles.${r}`) }))}
-          />
-          <FilterSelect
-            className={filterFieldClass}
-            triggerClassName={filterTriggerClass}
-            label={t("users.status")}
-            value={isActiveFilter}
-            onChange={(v) => {
-              if (v === "true") setParam("isActive", "true")
-              else if (v === "false") setParam("isActive", "false")
-              else setParam("isActive", undefined)
-            }}
-            options={[
-              { value: "true", label: t("users.active") },
-              { value: "false", label: t("users.disabled") },
-            ]}
-          />
-        </div>
-      </section>
+        <FilterSelect
+          label={t("users.role")}
+          value={params.role ?? ""}
+          onChange={(v) => setParam("role", v || undefined)}
+          options={ROLES.map((r) => ({ value: r, label: t(`roles.${r}`) }))}
+        />
+        <FilterSelect
+          label={t("users.status")}
+          value={isActiveFilter}
+          onChange={(v) => {
+            if (v === "true") setParam("isActive", "true")
+            else if (v === "false") setParam("isActive", "false")
+            else setParam("isActive", undefined)
+          }}
+          options={[
+            { value: "true", label: t("users.active") },
+            { value: "false", label: t("users.disabled") },
+          ]}
+        />
+      </ListToolbar>
       <DataTable
         data={rows}
         columns={columns}

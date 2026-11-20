@@ -409,6 +409,41 @@ button {
       0 12px 32px -20px rgb(0 0 0 / 0.6);
   }
 
+  /* The search and filters above a list: a soft card, the search first, the filters in an even grid. */
+  .list-toolbar {
+    position: relative;
+    margin-bottom: 1rem;
+    border-radius: 1rem;
+    border: 1px solid color-mix(in srgb, var(--border) 85%, transparent);
+    background:
+      linear-gradient(180deg, color-mix(in srgb, var(--accent) 3%, var(--card)), var(--card) 60%);
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 8px 24px -20px rgb(0 0 0 / 0.18);
+    animation: rise-in 0.25s ease-out backwards;
+  }
+  .dark .list-toolbar {
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 8px 24px -20px rgb(0 0 0 / 0.5);
+  }
+  /* Every filter takes its whole cell, so the grid lines up whatever the control is. */
+  .list-toolbar-filters > * {
+    min-width: 0;
+  }
+  .list-toolbar-filters [data-slot='select-trigger'] {
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+  }
+  .list-toolbar-filters input,
+  .list-toolbar-filters [data-slot='select-trigger'] {
+    height: 2.25rem;
+    border-radius: 0.75rem;
+    background-color: var(--card);
+  }
+  /* A check box filter sits on the line of the controls, under the labels of its neighbours. */
+  .list-toolbar-filters > label:has([role='checkbox']) {
+    align-self: end;
+    height: 2.25rem;
+  }
+
   /* The pagination bar under a list: its own floating bar. */
   .list-footer {
     margin-top: 0.625rem;

@@ -25,7 +25,7 @@ export default function OpenWorksListFiltersBar({
   }))
 
   return (
-    <div className="mb-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="list-toolbar-filters grid grid-cols-1 items-end gap-3 sm:grid-cols-2 lg:grid-cols-4">
       {!hideVillaFilter && (
         <VillaOptionSelect
           label={t("listToolbar.villaFilter")}

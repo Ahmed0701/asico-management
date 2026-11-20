@@ -23,7 +23,7 @@ export default function DailyReportsListFiltersBar({
   }))
 
   return (
-    <div className="mb-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="list-toolbar-filters grid grid-cols-1 items-end gap-3 sm:grid-cols-2 lg:grid-cols-4">
       <div className="flex flex-col gap-1.5">
         <ContractorSelect
           label={t("dailyReports.filters.contractor")}

@@ -1,22 +1,48 @@
+import { useState } from "react"
+import { useQueryClient } from "@tanstack/react-query"
+import { useSearchParams } from "react-router"
 import { useTranslation } from "react-i18next"
+import { usePermissions } from "@/features/auth/api"
+import ContractorSelect from "@/features/contractors/components/ContractorSelect"
+import { formatBudgetDisplay } from "@/features/villas/api/budget"
 import VillasListFooter from "@/features/villas/components/VillasListFooter"
 import { toApiError } from "@/shared/api/errors"
 import { useDebouncedSearchParam } from "@/shared/hooks/useDebouncedSearchParam"
 import { normalizeSearchInput } from "@/shared/lib/phone/phoneNormalize"
-import { Input, SearchInput } from "@/shared/ui/Field"
+import { toast } from "@/shared/lib/toast"
+import { ImportWizardModal, IMPORT_RESOURCES } from "@/shared/import"
+import Button from "@/shared/ui/Button"
+import ListToolbar, {
+  clearedListParams,
+  countActive,
+} from "@/shared/list/ListToolbar"
+import { Checkbox } from "@/shared/ui/checkbox"
+import { ConfirmModal } from "@/shared/ui/Modal"
 import PageHeader from "@/shared/ui/PageHeader"
 import {
+  monthlyProgressKeys,
   useMonthlyProgressParams,
   useMonthlyProgressQuery,
+  usePayVillaMutation,
+  useUndoPaymentMutation,
+  type MonthlyProgressItem,
   type MonthlyProgressSortField,
 } from "../api"
-import MonthlyProgressSummaryCards from "../components/MonthlyProgressSummaryCards"
+import ContractorDuesCard from "../components/ContractorDuesCard"
 import MonthlyProgressTable from "../components/MonthlyProgressTable"
-import { monthLabel, thisMonth } from "../components/monthlyProgressFormat"
 
-/** Every villa's progress at the end of last month and this month (or a month picked), and how far it moved. */
+/**
+ * Monthly Payments: what each villa's contractor is owed now, the progress since the villa's last payment times its
+ * Work Order Value, with the villa's last update and last payment; paying it records the progress paid up to, so the
+ * next amount starts from there. And each contractor's total.
+ */
 export default function MonthlyProgressPage() {
   const { t, i18n } = useTranslation()
+  const locale = i18n.language === "ar" ? "ar-EG-u-nu-latn" : "en-GB"
+  const { can } = usePermissions()
+  const canPay = can("payments:create")
+  const canUndo = can("payments:delete")
+  const [toolbarParams, setToolbarParams] = useSearchParams()
   const { params, setParam, setPage, setLimit } = useMonthlyProgressParams()
   const { data, isLoading, isError, error } = useMonthlyProgressQuery(params)
   const { searchDraft, setSearchDraft } = useDebouncedSearchParam(
@@ -24,12 +50,23 @@ export default function MonthlyProgressPage() {
     setParam,
     normalizeSearchInput,
   )
+  const pay = usePayVillaMutation()
+  const undo = useUndoPaymentMutation()
+  const [paying, setPaying] = useState<MonthlyProgressItem | null>(null)
+  const [undoing, setUndoing] = useState<MonthlyProgressItem | null>(null)
+  const [importOpen, setImportOpen] = useState(false)
+  const qc = useQueryClient()
+  const busyId = pay.isPending
+    ? (paying?.villa.id ?? null)
+    : undo.isPending
+      ? (undoing?.villa.id ?? null)
+      : null
 
   const rows = data?.data ?? []
   const meta = data?.meta
   const summary = data?.summary
   const apiError = isError ? toApiError(error) : null
-  const maxMonth = thisMonth()
+  const kwd = (minor: number) => formatBudgetDisplay(minor, "KWD", locale)
 
   // Each sortable header cycles ascending, descending; another header starts again ascending.
   const sortOf = (field: MonthlyProgressSortField): "asc" | "desc" | "none" => {
@@ -41,43 +78,94 @@ export default function MonthlyProgressPage() {
   const onSort = (field: MonthlyProgressSortField) =>
     setParam("sort", sortOf(field) === "asc" ? `${field}:desc` : `${field}:asc`)
 
-  const previousLabel = summary
-    ? monthLabel(summary.previousMonth, i18n.language)
-    : t("monthlyProgress.lastMonth")
-  const currentLabel = summary
-    ? summary.isCurrentMonth
-      ? t("monthlyProgress.thisMonthNow", {
-          month: monthLabel(summary.month, i18n.language),
-        })
-      : monthLabel(summary.month, i18n.language)
-    : t("monthlyProgress.thisMonth")
+  const confirmPay = async () => {
+    if (!paying) return
+    try {
+      const payment = await pay.mutateAsync(paying.villa.id)
+      toast.success(
+        t("monthlyProgress.paid", {
+          amount: kwd(payment.amountMinor),
+          name: paying.villa.villaNumber,
+        }),
+      )
+    } catch (err) {
+      toast.error(toApiError(err).message)
+    } finally {
+      setPaying(null)
+    }
+  }
+
+  const confirmUndo = async () => {
+    if (!undoing?.lastPayment) return
+    try {
+      await undo.mutateAsync(undoing.lastPayment.id)
+      toast.success(
+        t("monthlyProgress.undone", { name: undoing.villa.villaNumber }),
+      )
+    } catch (err) {
+      toast.error(toApiError(err).message)
+    } finally {
+      setUndoing(null)
+    }
+  }
 
   return (
     <>
       <PageHeader
         title={t("monthlyProgress.title")}
         subtitle={t("monthlyProgress.subtitle")}
+        actions={
+          canPay ? (
+            <Button
+              type="button"
+              size="sm"
+              icon="upload"
+              onClick={() => setImportOpen(true)}
+            >
+              {t("monthlyProgress.importPrevious")}
+            </Button>
+          ) : undefined
+        }
       />
 
-      <div className="mb-4 grid gap-3 sm:grid-cols-[minmax(0,1fr)_200px] sm:items-end">
-        <SearchInput
-          value={searchDraft}
-          onChange={setSearchDraft}
-          placeholder={t("monthlyProgress.searchPlaceholder")}
+      <ListToolbar
+        search={{
+          value: searchDraft,
+          onChange: setSearchDraft,
+          placeholder: t("monthlyProgress.searchPlaceholder"),
+        }}
+        count={meta?.total}
+        activeCount={countActive(
+          params.search,
+          params.contractorId,
+          !params.owed,
+        )}
+        onClear={() => setToolbarParams(clearedListParams(toolbarParams))}
+        columns={2}
+      >
+        <ContractorSelect
+          label={t("monthlyProgress.contractor")}
+          value={params.contractorId ?? ""}
+          onChange={(v) => setParam("contractorId", v || undefined)}
         />
-        <Input
-          label={t("monthlyProgress.month")}
-          type="month"
-          value={params.month ?? maxMonth}
-          max={maxMonth}
-          onChange={(e) => {
-            const value = e.target.value
-            setParam("month", value && value !== maxMonth ? value : undefined)
-          }}
-        />
-      </div>
+        <label className="flex h-9 items-center gap-2 text-sm">
+          <Checkbox
+            checked={params.owed === true}
+            onCheckedChange={(checked) =>
+              setParam("all", checked === true ? undefined : "true")
+            }
+          />
+          {t("monthlyProgress.onlyOwed")}
+        </label>
+      </ListToolbar>
 
-      {summary && <MonthlyProgressSummaryCards summary={summary} />}
+      {summary && (
+        <ContractorDuesCard
+          summary={summary}
+          selectedId={params.contractorId}
+          onSelect={(id) => setParam("contractorId", id)}
+        />
+      )}
 
       {apiError && (
         <p
@@ -91,10 +179,13 @@ export default function MonthlyProgressPage() {
       <MonthlyProgressTable
         rows={rows}
         loading={isLoading}
-        previousLabel={previousLabel}
-        currentLabel={currentLabel}
         sortOf={sortOf}
         onSort={onSort}
+        canPay={canPay}
+        canUndo={canUndo}
+        busyId={busyId}
+        onPay={setPaying}
+        onUndo={setUndoing}
       />
 
       {meta && (
@@ -108,6 +199,56 @@ export default function MonthlyProgressPage() {
       <p className="mt-3 text-xs text-muted-foreground">
         {t("monthlyProgress.howItWorks")}
       </p>
+
+      <ConfirmModal
+        open={paying !== null}
+        onClose={() => setPaying(null)}
+        onConfirm={confirmPay}
+        closeOnConfirm={false}
+        title={t("monthlyProgress.payTitle")}
+        confirmLabel={t("monthlyProgress.pay")}
+        confirmVariant="primary"
+        message={
+          paying
+            ? t("monthlyProgress.payBody", {
+                amount: kwd(paying.dueMinor),
+                contractor:
+                  paying.contractor?.name ??
+                  t("monthlyProgress.duesNoContractor"),
+                name: paying.villa.villaNumber,
+                from: paying.paidProgress,
+                to: paying.currentProgress,
+              })
+            : ""
+        }
+        confirmPending={pay.isPending}
+      />
+      <ConfirmModal
+        open={undoing !== null}
+        onClose={() => setUndoing(null)}
+        onConfirm={confirmUndo}
+        closeOnConfirm={false}
+        title={t("monthlyProgress.undoTitle")}
+        confirmLabel={t("monthlyProgress.undo")}
+        message={
+          undoing?.lastPayment
+            ? t("monthlyProgress.undoBody", {
+                amount: kwd(undoing.lastPayment.amountMinor),
+                name: undoing.villa.villaNumber,
+              })
+            : ""
+        }
+        confirmPending={undo.isPending}
+      />
+      <ImportWizardModal
+        open={importOpen}
+        onClose={() => setImportOpen(false)}
+        config={IMPORT_RESOURCES["previous-payments"]}
+        villaRowTargetNote
+        onSuccess={() =>
+          void qc.invalidateQueries({ queryKey: monthlyProgressKeys.all })
+        }
+      />
     </>
   )
 }

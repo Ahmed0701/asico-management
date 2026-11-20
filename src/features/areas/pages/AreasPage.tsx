@@ -4,8 +4,7 @@ import { usePermissions } from "@/features/auth/api"
 import { toApiError } from "@/shared/api/errors"
 import { useDebouncedSearchParam } from "@/shared/hooks/useDebouncedSearchParam"
 import { normalizeSearchInput } from "@/shared/lib/phone/phoneNormalize"
-import Button from "@/shared/ui/Button"
-import { SearchInput } from "@/shared/ui/Field"
+import ListToolbar from "@/shared/list/ListToolbar"
 import { ConfirmModal } from "@/shared/ui/Modal"
 import PageHeader from "@/shared/ui/PageHeader"
 import ListPageHeaderActions from "@/shared/list/ListPageHeaderActions"
@@ -168,18 +167,16 @@ export default function AreasPage() {
           {t("common.saved")}
         </p>
       )}
-      <div className="mb-3 flex flex-wrap items-start gap-2">
-        <SearchInput
-          value={searchDraft}
-          onChange={setSearchDraft}
-          placeholder={t("areas.searchPlaceholder")}
-        />
-        {hasSearch && (
-          <Button type="button" variant="ghost" size="sm" onClick={clearSearch}>
-            {t("areas.clearSearch")}
-          </Button>
-        )}
-      </div>
+      <ListToolbar
+        search={{
+          value: searchDraft,
+          onChange: setSearchDraft,
+          placeholder: t("areas.searchPlaceholder"),
+        }}
+        count={meta?.total}
+        activeCount={hasSearch ? 1 : 0}
+        onClear={clearSearch}
+      />
       <AreasListErrorBanner
         error={showGlobalError ? apiError : null}
         onRetry={() => void refetch()}

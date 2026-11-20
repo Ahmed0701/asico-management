@@ -4,7 +4,6 @@ import { usePermissions } from "@/features/auth/api"
 import PageHeader from "@/shared/ui/PageHeader"
 import ListPageHeaderActions from "@/shared/list/ListPageHeaderActions"
 import Button from "@/shared/ui/Button"
-import { SearchInput } from "@/shared/ui/Field"
 import { toApiError } from "@/shared/api/errors"
 import {
   buildAuditListQueryParams,
@@ -18,6 +17,7 @@ import AuditLogFilters from "../components/AuditLogFilters"
 import AuditLogTable from "../components/AuditLogTable"
 import AuditListFooter from "../components/AuditListFooter"
 import AuditListErrorBanner from "../components/AuditListErrorBanner"
+import ListToolbar, { countActive } from "@/shared/list/ListToolbar"
 
 export default function AuditLogPage() {
   const { t } = useTranslation()
@@ -91,22 +91,30 @@ export default function AuditLogPage() {
           ) : undefined
         }
       />
-      <div className="mb-3 flex flex-wrap items-start gap-2">
-        <SearchInput
-          className="min-w-52 flex-1 sm:max-w-xl"
-          value={searchDraft}
-          onChange={setSearchDraft}
-          placeholder={t("audit.searchPlaceholder")}
-        />
-        <Button type="button" variant="ghost" size="sm" onClick={clearAll}>
-          {t("audit.clearAllFilters")}
-        </Button>
-      </div>
-      <AuditLogFilters
-        params={params}
-        setParam={setParam}
-        filters={filters}
-        fieldErrors={fieldErrors}
+      <ListToolbar
+        search={{
+          value: searchDraft,
+          onChange: setSearchDraft,
+          placeholder: t("audit.searchPlaceholder"),
+        }}
+        count={meta?.total}
+        activeCount={countActive(
+          params.search,
+          params.actorId,
+          params.action,
+          params.entity,
+          params.from,
+          params.to,
+        )}
+        onClear={clearAll}
+        filters={
+          <AuditLogFilters
+            params={params}
+            setParam={setParam}
+            filters={filters}
+            fieldErrors={fieldErrors}
+          />
+        }
       />
       <AuditListErrorBanner
         error={showGlobalError ? apiError : null}

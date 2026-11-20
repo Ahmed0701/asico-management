@@ -1,7 +1,7 @@
 import { VillaCell } from "@/shared/list/cells"
 import SortableHead from "@/shared/list/SortableHead"
 import { useState } from "react"
-import { useNavigate } from "react-router"
+import { useSearchParams, useNavigate } from "react-router"
 import { useTranslation } from "react-i18next"
 import { usePermissions } from "@/features/auth/api"
 import VillasListFooter from "@/features/villas/components/VillasListFooter"
@@ -13,7 +13,6 @@ import { formatCalendarDateUtc } from "@/shared/lib/formatCalendarDateUtc"
 import { toast } from "@/shared/lib/toast"
 import Button, { IconButton } from "@/shared/ui/Button"
 import { Checkbox } from "@/shared/ui/checkbox"
-import { SearchInput } from "@/shared/ui/Field"
 import { TableBodySkeleton } from "@/shared/ui/loading-skeletons"
 import { ConfirmModal } from "@/shared/ui/Modal"
 import PageHeader from "@/shared/ui/PageHeader"
@@ -34,6 +33,10 @@ import {
 } from "../api"
 import MaintenanceFormModal from "../components/MaintenanceFormModal"
 import MaintenanceIssueViewModal from "../components/MaintenanceIssueViewModal"
+import ListToolbar, {
+  clearedListParams,
+  countActive,
+} from "@/shared/list/ListToolbar"
 
 const day = (value: string) => formatCalendarDateUtc(`${value}T00:00:00.000Z`)
 
@@ -43,6 +46,7 @@ const day = (value: string) => formatCalendarDateUtc(`${value}T00:00:00.000Z`)
  */
 export default function MaintenanceListPage({ solved }: { solved: boolean }) {
   const { t } = useTranslation()
+  const [toolbarParams, setToolbarParams] = useSearchParams()
   const navigate = useNavigate()
   const { can } = usePermissions()
   const canCreate = can("maintenance:create")
@@ -153,13 +157,16 @@ export default function MaintenanceListPage({ solved }: { solved: boolean }) {
           </div>
         }
       />
-      <div className="mb-3">
-        <SearchInput
-          value={searchDraft}
-          onChange={setSearchDraft}
-          placeholder={t("maintenance.searchPlaceholder")}
-        />
-      </div>
+      <ListToolbar
+        search={{
+          value: searchDraft,
+          onChange: setSearchDraft,
+          placeholder: t("maintenance.searchPlaceholder"),
+        }}
+        count={meta?.total}
+        activeCount={countActive(params.search)}
+        onClear={() => setToolbarParams(clearedListParams(toolbarParams))}
+      />
       {apiError && (
         <p
           role="alert"

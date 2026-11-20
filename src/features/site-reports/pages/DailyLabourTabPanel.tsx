@@ -5,7 +5,6 @@ import {
   useDailyLabourListParams,
   useDailyLabourListQuery,
   useDeleteDailyLabourMutation,
-  hasActiveDailyLabourListFilters,
   type DailyLabour,
 } from "@/features/daily-labour/api"
 import DailyLabourFormModal from "@/features/daily-labour/components/DailyLabourFormModal"
@@ -18,8 +17,8 @@ import { useDebouncedSearchParam } from "@/shared/hooks/useDebouncedSearchParam"
 import { normalizeSearchInput } from "@/shared/lib/phone/phoneNormalize"
 import { formatCalendarDateUtc } from "@/shared/lib/formatCalendarDateUtc"
 import { ConfirmModal } from "@/shared/ui/Modal"
-import { SearchInput } from "@/shared/ui/Field"
 import { toast } from "@/shared/lib/toast"
+import ListToolbar, { countActive } from "@/shared/list/ListToolbar"
 
 export default function DailyLabourTabPanel({
   onSavedBanner,
@@ -93,28 +92,26 @@ export default function DailyLabourTabPanel({
 
   return (
     <>
-      {hasActiveDailyLabourListFilters(params) && (
-        <p className="mb-3 text-sm text-muted-foreground">
-          {t("dailyLabour.filteredListHint")}{" "}
-          <button
-            type="button"
-            className="text-accent hover:underline"
-            onClick={clearFilters}
-          >
-            {t("common.clearFilters")}
-          </button>
-        </p>
-      )}
-      <div className="mb-3">
-        <SearchInput
-          value={searchDraft}
-          onChange={setSearchDraft}
-          placeholder={t("dailyLabour.searchPlaceholder")}
-        />
-      </div>
-      <DailyLabourListFiltersBar
-        params={params}
-        setLabourParam={setLabourParam}
+      <ListToolbar
+        search={{
+          value: searchDraft,
+          onChange: setSearchDraft,
+          placeholder: t("dailyLabour.searchPlaceholder"),
+        }}
+        count={meta?.total}
+        activeCount={countActive(
+          params.contractorId,
+          params.labourFrom,
+          params.labourTo,
+          params.villaId,
+        )}
+        onClear={clearFilters}
+        filters={
+          <DailyLabourListFiltersBar
+            params={params}
+            setLabourParam={setLabourParam}
+          />
+        }
       />
       {showGlobalError && apiError && (
         <DailyLabourListErrorBanner

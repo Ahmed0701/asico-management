@@ -14,8 +14,7 @@ export const dashboardLinks = {
   maintenance: () => "/maintenance",
   ownerNotes: () => "/owner-notes",
   foremanMissions: () => "/foreman-missions",
-  payments: () => "/payments",
-  paymentsOverdue: () => "/payments?overdue=true",
+  monthlyPayments: () => "/monthly-progress",
   openWorks: () => "/villas/open-works",
   openWorksStatus: (status: string) =>
     `/villas/open-works?status=${encodeURIComponent(status)}`,

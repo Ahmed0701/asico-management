@@ -9,7 +9,6 @@ import { normalizeSearchInput } from "@/shared/lib/phone/phoneNormalize"
 import { formatDateTime } from "@/shared/lib/format"
 import PageHeader from "@/shared/ui/PageHeader"
 import ListPageHeaderActions from "@/shared/list/ListPageHeaderActions"
-import { SearchInput } from "@/shared/ui/Field"
 import ProgressCell from "@/shared/list/ProgressCell"
 import { Badge } from "@/shared/ui/Badge"
 import {
@@ -43,6 +42,11 @@ import VillasListFooter from "../components/VillasListFooter"
 import Button, { IconButton } from "@/shared/ui/Button"
 import { Input } from "@/shared/ui/input"
 import { toast } from "@/shared/lib/toast"
+import { useSearchParams } from "react-router"
+import ListToolbar, {
+  clearedListParams,
+  countActive,
+} from "@/shared/list/ListToolbar"
 
 const COLUMN_COUNT = 9
 
@@ -50,6 +54,7 @@ const COLUMN_COUNT = 9
 // villa's MEW states, its MEW inspection day, and the button that adds it for MEW inspection.
 export default function MewFollowUpPage() {
   const { t } = useTranslation()
+  const [toolbarParams, setToolbarParams] = useSearchParams()
   const { can } = usePermissions()
   const canExport = can("villas:export")
   const { params, setParam, setPage, setLimit } = useMewFollowUpListParams()
@@ -201,40 +206,45 @@ export default function MewFollowUpPage() {
           ) : undefined
         }
       />
-      <div className="mb-3 flex flex-wrap items-center gap-2">
-        <div className="min-w-0 flex-1">
-          <SearchInput
-            value={searchDraft}
-            onChange={setSearchDraft}
-            placeholder={t("villas.searchPlaceholder")}
-          />
-        </div>
-        {canEdit && (
-          <div className="flex items-center gap-2">
-            <SearchSelect
-              className="w-56"
-              aria-label={t("mewFollowUp.pickVilla")}
-              value={villaToAdd}
-              onChange={setVillaToAdd}
-              options={(villaOptions ?? []).map((villa) => ({
-                value: villa.id,
-                label: villa.villaNumber,
-              }))}
-              placeholder={t("mewFollowUp.pickVilla")}
-            />
-            <Button
-              type="button"
-              size="sm"
-              variant="primary"
-              icon="plus"
-              disabled={!villaToAdd || followUp.isPending}
-              onClick={() => void addToFollowUp()}
-            >
-              {t("mewFollowUp.add")}
-            </Button>
-          </div>
-        )}
-      </div>
+      <ListToolbar
+        search={{
+          value: searchDraft,
+          onChange: setSearchDraft,
+          placeholder: t("villas.searchPlaceholder"),
+        }}
+        count={meta?.total}
+        activeCount={countActive(params.search)}
+        onClear={() => setToolbarParams(clearedListParams(toolbarParams))}
+        actions={
+          <>
+            {canEdit && (
+              <div className="flex items-center gap-2">
+                <SearchSelect
+                  className="w-56"
+                  aria-label={t("mewFollowUp.pickVilla")}
+                  value={villaToAdd}
+                  onChange={setVillaToAdd}
+                  options={(villaOptions ?? []).map((villa) => ({
+                    value: villa.id,
+                    label: villa.villaNumber,
+                  }))}
+                  placeholder={t("mewFollowUp.pickVilla")}
+                />
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="primary"
+                  icon="plus"
+                  disabled={!villaToAdd || followUp.isPending}
+                  onClick={() => void addToFollowUp()}
+                >
+                  {t("mewFollowUp.add")}
+                </Button>
+              </div>
+            )}
+          </>
+        }
+      />
       <VillasListErrorBanner
         error={showErrorBanner ? apiError : null}
         onRetry={() => void refetch()}

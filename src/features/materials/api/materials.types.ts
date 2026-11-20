@@ -66,6 +66,10 @@ export type MaterialDelivery = {
   noteNumber: string | null
   /** YYYY-MM-DD */
   deliveryDate: string
+  /** The material request (MR) date, YYYY-MM-DD; null when not known. */
+  mrDate: string | null
+  /** The purchase order (PO) date, YYYY-MM-DD; null when not known. */
+  poDate: string | null
   /** The delivery note files, oldest first; empty until one is uploaded. */
   deliveryNotes: DeliveryNote[]
   version: number
@@ -104,6 +108,8 @@ export type DeliveryInput = {
   lines: LineInput[]
   noteNumber: string | null
   deliveryDate: string
+  mrDate: string | null
+  poDate: string | null
 }
 
 export type ItemInput = {
@@ -186,4 +192,62 @@ export type BalanceListResponse = {
   data: BalanceRow[]
   meta: PaginatedMeta
   totals: BalanceTotal[]
+}
+
+/** How much of a villa's materials of one type came. */
+export const MATERIAL_ORDER_STATUSES = [
+  "DELIVERED",
+  "PARTIAL",
+  "NOT_DELIVERED",
+  "NOT_REQUIRED",
+] as const
+export type MaterialOrderStatus = (typeof MATERIAL_ORDER_STATUSES)[number]
+
+/** One villa's switchgear or cables: its MR, PO and due dates (YYYY-MM-DD) and what came. */
+export type MaterialOrder = {
+  villa: { id: string; villaNumber: string }
+  type: FactoryType
+  factory: { id: string; name: string } | null
+  mrDate: string | null
+  poDate: string | null
+  dueDate: string | null
+  /** The earliest MR and PO dates on its delivery notes: shown when none is entered. */
+  deliveryMrDate: string | null
+  deliveryPoDate: string | null
+  lastDeliveryDate: string | null
+  requiredItems: number
+  completeItems: number
+  status: MaterialOrderStatus
+  overdue: boolean
+}
+
+export type MaterialOrdersSummary = {
+  total: number
+  delivered: number
+  partial: number
+  notDelivered: number
+  overdue: number
+}
+
+export type MaterialOrdersParams = {
+  page: number
+  limit: number
+  search?: string
+  type?: FactoryType
+  status?: MaterialOrderStatus
+  overdue?: boolean
+  sort?: string
+}
+
+export type MaterialOrdersResponse = {
+  data: MaterialOrder[]
+  meta: PaginatedMeta
+  summary: MaterialOrdersSummary
+}
+
+/** The three dates, each YYYY-MM-DD or null. */
+export type MaterialOrderDates = {
+  mrDate: string | null
+  poDate: string | null
+  dueDate: string | null
 }

@@ -1,6 +1,5 @@
 import { Link } from "react-router"
 import { useTranslation } from "react-i18next"
-import { formatBudgetDisplay } from "@/features/villas/api/budget"
 import { toApiError } from "@/shared/api/errors"
 import { Card } from "@/shared/ui/PageHeader"
 import { useDashboardChartsQuery } from "../api/dashboard-charts.api"
@@ -198,62 +197,6 @@ function LabourCard({
   )
 }
 
-function PaymentsCard({
-  months,
-}: {
-  months: NonNullable<DashboardCharts["paymentsByMonth"]>
-}) {
-  const { t, i18n } = useTranslation()
-  const lang = i18n.language
-  const kwd = (minor: number) =>
-    formatBudgetDisplay(minor, "KWD", localeOf(lang))
-  // The axis in whole KWD ("12k" past a thousand), the tooltip exact.
-  const tick = (minor: number) => {
-    const major = minor / 1000
-    return major >= 1000
-      ? `${Math.round(major / 100) / 10}k`
-      : String(Math.round(major))
-  }
-  const total = months.reduce((sum, m) => sum + m.paidMinor, 0)
-  return (
-    <ChartCard
-      title={t("dashboard.charts.paymentsTitle")}
-      caption={t("dashboard.charts.paymentsCaption", { total: kwd(total) })}
-      action={
-        <Link
-          to="/payments?status=PAID"
-          className="text-xs font-medium text-accent hover:underline"
-        >
-          {t("dashboard.charts.paymentsLink")}
-        </Link>
-      }
-      table={{
-        headers: [t("dashboard.charts.month"), t("dashboard.charts.paid")],
-        rows: months.map((m) => ({
-          label: monthText(m.month, lang, true),
-          values: [kwd(m.paidMinor)],
-        })),
-      }}
-    >
-      {total === 0 ? (
-        <EmptyNote text={t("dashboard.charts.noPayments")} />
-      ) : (
-        <ColumnChart
-          ariaLabel={t("dashboard.charts.paymentsTitle")}
-          tickText={tick}
-          columns={months.map((m) => ({
-            key: m.month,
-            axisLabel: monthText(m.month, lang, false),
-            title: monthText(m.month, lang, true),
-            value: m.paidMinor,
-            valueText: kwd(m.paidMinor),
-          }))}
-        />
-      )}
-    </ChartCard>
-  )
-}
-
 /** The dashboard's trends: progress over the months, where the open works stand by phase, workers and payments over time. */
 export default function DashboardChartsSection() {
   const { t } = useTranslation()
@@ -283,10 +226,7 @@ export default function DashboardChartsSection() {
   }
   if (
     !data ||
-    (!data.progressTrend &&
-      !data.phaseStatus &&
-      !data.labourByDay &&
-      !data.paymentsByMonth)
+    (!data.progressTrend && !data.phaseStatus && !data.labourByDay)
   ) {
     return null
   }
@@ -308,7 +248,6 @@ export default function DashboardChartsSection() {
         )}
         {data.phaseStatus && <PhaseStatusCard rows={data.phaseStatus} />}
         {data.labourByDay && <LabourCard days={data.labourByDay} />}
-        {data.paymentsByMonth && <PaymentsCard months={data.paymentsByMonth} />}
       </div>
     </section>
   )

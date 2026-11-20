@@ -18,6 +18,8 @@ export const variationOrdersKeys = {
 
 function invalidate(qc: QueryClient): void {
   void qc.invalidateQueries({ queryKey: variationOrdersKeys.all })
+  // The villa budget figures add the variation orders up.
+  void qc.invalidateQueries({ queryKey: ["villas", "finance"] })
 }
 
 /** The variation orders of a villa, fetched only when `enabled` (the card is open). */

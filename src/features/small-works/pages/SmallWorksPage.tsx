@@ -7,7 +7,7 @@ import { useDebouncedSearchParam } from "@/shared/hooks/useDebouncedSearchParam"
 import { normalizeSearchInput } from "@/shared/lib/phone/phoneNormalize"
 import { ConfirmModal } from "@/shared/ui/Modal"
 import PageHeader from "@/shared/ui/PageHeader"
-import { SearchInput } from "@/shared/ui/Field"
+import ListToolbar, { countActive } from "@/shared/list/ListToolbar"
 import { downloadExport } from "@/shared/export/downloadExport"
 import { ImportWizardModal, IMPORT_RESOURCES } from "@/shared/import"
 import ListPageHeaderActions from "@/shared/list/ListPageHeaderActions"
@@ -16,7 +16,6 @@ import { formatCalendarDateUtc } from "@/shared/lib/formatCalendarDateUtc"
 import { invalidateSmallWorksAfterWrite } from "../lib/smallWorksQueryCache"
 import {
   buildSmallWorksListQueryParams,
-  hasActiveSmallWorksListFilters,
   useDeleteSmallWorkMutation,
   useSmallWorksListParams,
   useSmallWorksListQuery,
@@ -153,32 +152,33 @@ export default function SmallWorksPage() {
           {t("common.saved")}
         </p>
       )}
-      {hasActiveSmallWorksListFilters(params) && (
-        <p className="mb-3 text-sm text-muted-foreground">
-          {t("smallWorks.filteredListHint")}{" "}
-          <button
-            type="button"
-            className="text-accent hover:underline"
-            onClick={clearFilters}
-          >
-            {t("common.clearFilters")}
-          </button>
-        </p>
-      )}
-      <div className="mb-3 flex flex-wrap items-center gap-2">
-        <div className="min-w-0 flex-1">
-          <SearchInput
-            value={searchDraft}
-            onChange={setSearchDraft}
-            placeholder={t("smallWorks.searchPlaceholder")}
+      <ListToolbar
+        search={{
+          value: searchDraft,
+          onChange: setSearchDraft,
+          placeholder: t("smallWorks.searchPlaceholder"),
+        }}
+        count={meta?.total}
+        activeCount={countActive(
+          params.villaId,
+          params.contractorId,
+          params.status,
+          params.startFrom,
+          params.startTo,
+          params.endFrom,
+          params.endTo,
+          params.overdue,
+          params.dueSoon,
+        )}
+        onClear={clearFilters}
+        actions={<DoneWorksButton />}
+        filters={
+          <SmallWorksListFiltersBar
+            params={params}
+            setParam={setParam}
+            hideStatusFilter
           />
-        </div>
-        <DoneWorksButton />
-      </div>
-      <SmallWorksListFiltersBar
-        params={params}
-        setParam={setParam}
-        hideStatusFilter
+        }
       />
       {showGlobalError && apiError && (
         <SmallWorksListErrorBanner

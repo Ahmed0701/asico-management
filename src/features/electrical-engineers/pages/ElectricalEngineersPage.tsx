@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next"
 import { usePermissions } from "@/features/auth/api"
 import { toApiError } from "@/shared/api/errors"
 import Button from "@/shared/ui/Button"
-import { SearchInput } from "@/shared/ui/Field"
+import ListToolbar from "@/shared/list/ListToolbar"
 import { ConfirmModal } from "@/shared/ui/Modal"
 import PageHeader from "@/shared/ui/PageHeader"
 import ListPageHeaderActions from "@/shared/list/ListPageHeaderActions"
@@ -193,13 +193,16 @@ export default function ElectricalEngineersPage() {
           {deleteNotice}
         </p>
       )}
-      <div className="mb-3 flex flex-wrap items-start gap-2">
-        <SearchInput
-          value={searchDraft}
-          onChange={setSearchDraft}
-          placeholder={t("electricalEngineers.searchPlaceholder")}
-        />
-      </div>
+      <ListToolbar
+        search={{
+          value: searchDraft,
+          onChange: setSearchDraft,
+          placeholder: t("electricalEngineers.searchPlaceholder"),
+        }}
+        count={meta?.total}
+        activeCount={hasSearch ? 1 : 0}
+        onClear={clearSearch}
+      />
       <ElectricalEngineersListErrorBanner
         error={showGlobalError ? apiError : null}
         onRetry={() => void refetch()}

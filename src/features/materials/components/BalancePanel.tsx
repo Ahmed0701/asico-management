@@ -7,7 +7,7 @@ import { toApiError } from "@/shared/api/errors"
 import { useDebouncedSearchParam } from "@/shared/hooks/useDebouncedSearchParam"
 import { normalizeSearchInput } from "@/shared/lib/phone/phoneNormalize"
 import { parseListParams, setListParam } from "@/shared/query/listParams"
-import { FilterSelect, SearchInput } from "@/shared/ui/Field"
+import { FilterSelect } from "@/shared/ui/Field"
 import { TableBodySkeleton } from "@/shared/ui/loading-skeletons"
 import {
   Table,
@@ -28,6 +28,10 @@ import {
 } from "../api"
 import { formatQuantity } from "./DeliveriesTable"
 import BalanceStatusBadge from "./BalanceStatusBadge"
+import ListToolbar, {
+  clearedListParams,
+  countActive,
+} from "@/shared/list/ListToolbar"
 
 const COLUMNS = 6
 
@@ -46,6 +50,7 @@ export default function BalancePanel({
   onListState?: (state: ListState) => void
 }) {
   const { t } = useTranslation()
+  const [toolbarParams, setToolbarParams] = useSearchParams()
   const [searchParams, setSearchParams] = useSearchParams()
   const setParam = (key: string, value: string | undefined) =>
     setSearchParams(setListParam(searchParams, key, value))
@@ -91,12 +96,22 @@ export default function BalancePanel({
 
   return (
     <div className="grid gap-3">
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_repeat(3,180px)] lg:items-end">
-        <SearchInput
-          value={searchDraft}
-          onChange={setSearchDraft}
-          placeholder={t("materials.balanceSearch")}
-        />
+      <ListToolbar
+        search={{
+          value: searchDraft,
+          onChange: setSearchDraft,
+          placeholder: t("materials.balanceSearch"),
+        }}
+        count={meta?.total}
+        activeCount={countActive(
+          params.search,
+          params.type,
+          params.itemId,
+          params.status,
+        )}
+        onClear={() => setToolbarParams(clearedListParams(toolbarParams))}
+        columns={3}
+      >
         <FilterSelect
           label={t("materials.type")}
           value={params.type ?? ""}
@@ -130,7 +145,7 @@ export default function BalancePanel({
             { value: "all", label: t("materials.allStatuses") },
           ]}
         />
-      </div>
+      </ListToolbar>
 
       {noRequirements && (
         <p className="rounded-lg border border-progress/40 bg-progress-soft px-3 py-2 text-sm">

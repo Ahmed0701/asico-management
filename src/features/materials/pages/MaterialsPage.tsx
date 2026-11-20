@@ -10,9 +10,10 @@ import { normalizeSearchInput } from "@/shared/lib/phone/phoneNormalize"
 import { toast } from "@/shared/lib/toast"
 import { parseListParams, setListParam } from "@/shared/query/listParams"
 import Button from "@/shared/ui/Button"
-import { FilterSelect, SearchInput } from "@/shared/ui/Field"
+import { FilterSelect } from "@/shared/ui/Field"
 import { ConfirmModal } from "@/shared/ui/Modal"
 import PageHeader from "@/shared/ui/PageHeader"
+import OrdersPanel from "../components/OrdersPanel"
 import Tabs from "@/shared/ui/Tabs"
 import { downloadExport } from "@/shared/export/downloadExport"
 import { ImportWizardModal, IMPORT_RESOURCES } from "@/shared/import"
@@ -33,33 +34,42 @@ import {
   type MaterialDelivery,
 } from "../api"
 import BalancePanel, { type ListState } from "../components/BalancePanel"
-import CatalogModal from "../components/CatalogModal"
 import DeliveriesTable from "../components/DeliveriesTable"
 import DeliveryFormModal from "../components/DeliveryFormModal"
 import FactoriesModal from "../components/FactoriesModal"
+import ListToolbar, {
+  clearedListParams,
+  countActive,
+} from "@/shared/list/ListToolbar"
 
-type MaterialsTab = "deliveries" | "balance"
+type MaterialsTab = "deliveries" | "balance" | "orders"
 
-/** The deliveries from the switchgear and cable factories, and the balance of what every villa still waits for. */
+/**
+ * The material deliveries from the switchgear and cable factories (record one with its delivery note, import, export),
+ * the balance of what every villa still waits for, each villa's material orders (MR, PO and due dates, and whether all
+ * or part of it came), and the catalog of materials and the factories. Each villa's
+ * assigned factories are on the Vendors page.
+ */
 export default function MaterialsPage() {
   const { t } = useTranslation()
   const { can } = usePermissions()
   const canCreate = can("materials:create")
   const canUpdate = can("materials:update")
   const [searchParams, setSearchParams] = useSearchParams()
+  const rawTab = searchParams.get("tab")
   const tab: MaterialsTab =
-    searchParams.get("tab") === "balance" ? "balance" : "deliveries"
-  const [factoriesOpen, setFactoriesOpen] = useState(false)
-  const [catalogOpen, setCatalogOpen] = useState(false)
+    rawTab === "balance" || rawTab === "orders" ? rawTab : "deliveries"
   const [formOpen, setFormOpen] = useState(false)
   const [importOpen, setImportOpen] = useState(false)
+  const [factoriesOpen, setFactoriesOpen] = useState(false)
   const [listState, setListState] = useState<ListState>({
     total: undefined,
     loading: true,
   })
   const qc = useQueryClient()
 
-  // The file holds what the open tab lists, with its filters (no paging): the deliveries one row per material, or the balance.
+  // The file holds what the open tab lists, with its filters (no paging): the deliveries one row per material, or the
+  // balance.
   const onExport = useCallback(
     async (format: "xlsx" | "pdf", signal: AbortSignal) => {
       const base = parseListParams(searchParams, { limit: 20 })
@@ -71,17 +81,16 @@ export default function MaterialsPage() {
         itemId: searchParams.get("itemId") || undefined,
         type: type && FACTORY_TYPES.includes(type) ? type : undefined,
       }
+      const status = searchParams.get("status")
       const query =
         tab === "balance"
           ? buildBalanceQueryParams({
               ...filters,
               status:
-                searchParams.get("status") === "all"
+                status === "all"
                   ? undefined
-                  : BALANCE_STATUSES.includes(
-                        searchParams.get("status") as BalanceStatus,
-                      )
-                    ? searchParams.get("status") as BalanceStatus
+                  : BALANCE_STATUSES.includes(status as BalanceStatus)
+                    ? status as BalanceStatus
                     : "PENDING",
             })
           : buildDeliveriesQueryParams({
@@ -111,11 +120,9 @@ export default function MaterialsPage() {
     [searchParams, tab],
   )
 
-  const switchTab = (next: MaterialsTab) => {
-    const params = new URLSearchParams()
-    if (next === "balance") params.set("tab", "balance")
-    setSearchParams(params)
-  }
+  // A tab's search, filters, sort and page do not carry over to the other.
+  const switchTab = (next: MaterialsTab) =>
+    setSearchParams(next === "deliveries" ? {} : { tab: next })
 
   return (
     <>
@@ -136,21 +143,17 @@ export default function MaterialsPage() {
                     }
                   : undefined
               }
-              exportAction={{
-                kind: "menu",
-                total: listState.total,
-                listLoading: listState.loading,
-                onExport,
-              }}
+              exportAction={
+                tab === "orders"
+                  ? undefined
+                  : {
+                      kind: "menu",
+                      total: listState.total,
+                      listLoading: listState.loading,
+                      onExport,
+                    }
+              }
             />
-            <Button
-              type="button"
-              size="sm"
-              icon="log"
-              onClick={() => setCatalogOpen(true)}
-            >
-              {t("materials.catalog")}
-            </Button>
             <Button
               type="button"
               size="sm"
@@ -173,27 +176,23 @@ export default function MaterialsPage() {
           </div>
         }
       />
-      <div className="mb-4">
-        <Tabs
-          value={tab}
-          onChange={switchTab}
-          tabs={[
-            { id: "deliveries" as const, label: t("materials.tabDeliveries") },
-            { id: "balance" as const, label: t("materials.tabBalance") },
-          ]}
-        />
-      </div>
+      <Tabs
+        value={tab}
+        onChange={switchTab}
+        tabs={[
+          { id: "deliveries", label: t("materials.tabDeliveries") },
+          { id: "balance", label: t("materials.tabBalance") },
+          { id: "orders", label: t("materials.tabOrders") },
+        ]}
+      />
       {tab === "deliveries" ? (
         <DeliveriesTab onListState={setListState} />
-      ) : (
+      ) : tab === "balance" ? (
         <BalancePanel onListState={setListState} />
+      ) : (
+        <OrdersPanel onListState={setListState} />
       )}
       <DeliveryFormModal open={formOpen} onClose={() => setFormOpen(false)} />
-      <FactoriesModal
-        open={factoriesOpen}
-        canEdit={canUpdate}
-        onClose={() => setFactoriesOpen(false)}
-      />
       <ImportWizardModal
         open={importOpen}
         onClose={() => setImportOpen(false)}
@@ -202,10 +201,10 @@ export default function MaterialsPage() {
           void qc.invalidateQueries({ queryKey: materialsKeys.all })
         }
       />
-      <CatalogModal
-        open={catalogOpen}
+      <FactoriesModal
+        open={factoriesOpen}
         canEdit={canUpdate}
-        onClose={() => setCatalogOpen(false)}
+        onClose={() => setFactoriesOpen(false)}
       />
     </>
   )
@@ -217,6 +216,7 @@ function DeliveriesTab({
   onListState?: (state: ListState) => void
 }) {
   const { t } = useTranslation()
+  const [toolbarParams, setToolbarParams] = useSearchParams()
   const { can } = usePermissions()
   const canUpdate = can("materials:update")
   const canDelete = can("materials:delete")
@@ -281,12 +281,22 @@ function DeliveriesTab({
 
   return (
     <>
-      <div className="mb-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_repeat(4,170px)] lg:items-end">
-        <SearchInput
-          value={searchDraft}
-          onChange={setSearchDraft}
-          placeholder={t("materials.searchPlaceholder")}
-        />
+      <ListToolbar
+        search={{
+          value: searchDraft,
+          onChange: setSearchDraft,
+          placeholder: t("materials.searchPlaceholder"),
+        }}
+        count={meta?.total}
+        activeCount={countActive(
+          params.search,
+          params.type,
+          params.itemId,
+          params.factoryId,
+          params.hasNote,
+        )}
+        onClear={() => setToolbarParams(clearedListParams(toolbarParams))}
+      >
         <FilterSelect
           label={t("materials.type")}
           value={params.type ?? ""}
@@ -328,7 +338,7 @@ function DeliveriesTab({
             { value: "false", label: t("materials.withoutNote") },
           ]}
         />
-      </div>
+      </ListToolbar>
       {isError && (
         <p
           role="alert"

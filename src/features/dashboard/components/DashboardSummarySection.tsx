@@ -1,4 +1,3 @@
-import { formatBudgetDisplay } from "@/features/villas/api/budget"
 import { Link } from "react-router"
 import { useTranslation } from "react-i18next"
 import type { UseQueryResult } from "@tanstack/react-query"
@@ -23,6 +22,7 @@ import {
 import { dashboardLinks } from "../lib/dashboardLinks"
 import { formatDashboardCount } from "../lib/formatDashboardNumber"
 import DashboardLinkCard from "./DashboardLinkCard"
+import DashboardMonthlyPaymentsCard from "./DashboardMonthlyPaymentsCard"
 import DashboardPairSplit from "./DashboardPairSplit"
 import DashboardProgressBreakdown from "./DashboardProgressBreakdown"
 import DashboardStatusBreakdown from "./DashboardStatusBreakdown"
@@ -39,7 +39,7 @@ export default function DashboardSummarySection({
   canVillasRead: boolean
   canContractorsRead: boolean
 }) {
-  const { t, i18n } = useTranslation()
+  const { t } = useTranslation()
   const { data, isLoading, isError, error, refetch, isFetching } = query
 
   if (isLoading && !data) {
@@ -265,32 +265,7 @@ export default function DashboardSummarySection({
             })}
           />
         )}
-        {data.payments && (
-          <DashboardLinkCard
-            to={
-              data.payments.overdueCount > 0
-                ? dashboardLinks.paymentsOverdue()
-                : dashboardLinks.payments()
-            }
-            label={t("dashboard.payments")}
-            tone={data.payments.overdueCount > 0 ? "red" : "green"}
-            icon="file"
-            value={formatBudgetDisplay(
-              data.payments.pendingMinor,
-              "KWD",
-              i18n.language === "ar" ? "ar-EG-u-nu-latn" : "en-GB",
-            )}
-            help={t("dashboard.paymentsHelp", {
-              count: data.payments.pendingCount,
-              overdue: data.payments.overdueCount,
-              paid: formatBudgetDisplay(
-                data.payments.paidThisMonthMinor,
-                "KWD",
-                i18n.language === "ar" ? "ar-EG-u-nu-latn" : "en-GB",
-              ),
-            })}
-          />
-        )}
+        <DashboardMonthlyPaymentsCard />
       </div>
 
       {data.progress && (

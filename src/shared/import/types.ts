@@ -15,7 +15,7 @@ export type ImportReport = {
   truncated: boolean
 }
 
-export type ImportResourceId = "villas" | "contractors" | "open-works" | "daily-reports" | "small-works" | "site-reports" | "daily-labour" | "material-deliveries" | "payments"
+export type ImportResourceId = "villas" | "contractors" | "open-works" | "daily-reports" | "small-works" | "site-reports" | "daily-labour" | "material-deliveries" | "payments" | "previous-payments"
 
 export type ImportResourceConfig = {
   id: ImportResourceId
@@ -89,5 +89,12 @@ export const IMPORT_RESOURCES: Record<ImportResourceId, ImportResourceConfig> =
       importPath: "/payments/import",
       listPath: "/payments",
       templateFallbackFilename: "payments-import-template.xlsx",
+    },
+    "previous-payments": {
+      id: "previous-payments",
+      templatePath: "/progress-payments/import/template",
+      importPath: "/progress-payments/import",
+      listPath: "/monthly-progress",
+      templateFallbackFilename: "previous-payments-import-template.xlsx",
     },
   }

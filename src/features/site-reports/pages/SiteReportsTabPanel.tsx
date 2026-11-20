@@ -5,11 +5,9 @@ import { toApiError } from "@/shared/api/errors"
 import { useDebouncedSearchParam } from "@/shared/hooks/useDebouncedSearchParam"
 import { normalizeSearchInput } from "@/shared/lib/phone/phoneNormalize"
 import { ConfirmModal } from "@/shared/ui/Modal"
-import { SearchInput } from "@/shared/ui/Field"
 import { toast } from "@/shared/lib/toast"
 import { formatCalendarDateUtc } from "@/shared/lib/formatCalendarDateUtc"
 import {
-  hasActiveSiteReportsListFilters,
   useDeleteSiteReportMutation,
   useSiteReportsListParams,
   useSiteReportsListQuery,
@@ -20,6 +18,7 @@ import SiteReportsListErrorBanner from "../components/SiteReportsListErrorBanner
 import SiteReportsListFiltersBar from "../components/SiteReportsListFiltersBar"
 import SiteReportsListFooter from "../components/SiteReportsListFooter"
 import SiteReportsTable from "../components/SiteReportsTable"
+import ListToolbar, { countActive } from "@/shared/list/ListToolbar"
 
 export default function SiteReportsTabPanel({
   onSavedBanner,
@@ -86,26 +85,25 @@ export default function SiteReportsTabPanel({
 
   return (
     <>
-      {hasActiveSiteReportsListFilters(params) && (
-        <p className="mb-3 text-sm text-muted-foreground">
-          {t("siteReports.filteredListHint")}{" "}
-          <button
-            type="button"
-            className="text-accent hover:underline"
-            onClick={clearFilters}
-          >
-            {t("common.clearFilters")}
-          </button>
-        </p>
-      )}
-      <div className="mb-3">
-        <SearchInput
-          value={searchDraft}
-          onChange={setSearchDraft}
-          placeholder={t("siteReports.searchPlaceholder")}
-        />
-      </div>
-      <SiteReportsListFiltersBar params={params} setParam={setParam} />
+      <ListToolbar
+        search={{
+          value: searchDraft,
+          onChange: setSearchDraft,
+          placeholder: t("siteReports.searchPlaceholder"),
+        }}
+        count={meta?.total}
+        activeCount={countActive(
+          params.rating,
+          params.type,
+          params.villaId,
+          params.visitFrom,
+          params.visitTo,
+        )}
+        onClear={clearFilters}
+        filters={
+          <SiteReportsListFiltersBar params={params} setParam={setParam} />
+        }
+      />
       {showGlobalError && apiError && (
         <SiteReportsListErrorBanner
           error={apiError}

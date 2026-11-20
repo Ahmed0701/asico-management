@@ -1,7 +1,7 @@
 import { VillaCell } from "@/shared/list/cells"
 import SortableHead from "@/shared/list/SortableHead"
 import { useState } from "react"
-import { useNavigate } from "react-router"
+import { useSearchParams, useNavigate } from "react-router"
 import { useTranslation } from "react-i18next"
 import { usePermissions } from "@/features/auth/api"
 import VillasListFooter from "@/features/villas/components/VillasListFooter"
@@ -12,7 +12,6 @@ import { formatDateTime } from "@/shared/lib/format"
 import { toast } from "@/shared/lib/toast"
 import Button, { IconButton } from "@/shared/ui/Button"
 import { Checkbox } from "@/shared/ui/checkbox"
-import { SearchInput } from "@/shared/ui/Field"
 import { TableBodySkeleton } from "@/shared/ui/loading-skeletons"
 import { ConfirmModal } from "@/shared/ui/Modal"
 import PageHeader from "@/shared/ui/PageHeader"
@@ -33,6 +32,10 @@ import {
 } from "../api"
 import OwnerNoteFormModal from "../components/OwnerNoteFormModal"
 import OwnerNoteViewModal from "../components/OwnerNoteViewModal"
+import ListToolbar, {
+  clearedListParams,
+  countActive,
+} from "@/shared/list/ListToolbar"
 
 /**
  * The owner notes: the open ones (`done` false), reminded every day through the notifications, or the done ones. Checking
@@ -40,6 +43,7 @@ import OwnerNoteViewModal from "../components/OwnerNoteViewModal"
  */
 export default function OwnerNotesListPage({ done }: { done: boolean }) {
   const { t } = useTranslation()
+  const [toolbarParams, setToolbarParams] = useSearchParams()
   const navigate = useNavigate()
   const { can } = usePermissions()
   const canCreate = can("owner-notes:create")
@@ -149,13 +153,16 @@ export default function OwnerNotesListPage({ done }: { done: boolean }) {
           </div>
         }
       />
-      <div className="mb-3">
-        <SearchInput
-          value={searchDraft}
-          onChange={setSearchDraft}
-          placeholder={t("ownerNotes.searchPlaceholder")}
-        />
-      </div>
+      <ListToolbar
+        search={{
+          value: searchDraft,
+          onChange: setSearchDraft,
+          placeholder: t("ownerNotes.searchPlaceholder"),
+        }}
+        count={meta?.total}
+        activeCount={countActive(params.search)}
+        onClear={() => setToolbarParams(clearedListParams(toolbarParams))}
+      />
       {apiError && (
         <p
           role="alert"

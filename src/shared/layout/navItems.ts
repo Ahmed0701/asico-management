@@ -1,10 +1,13 @@
 import {
-  Banknote,
+  Boxes,
+  Factory,
+  BriefcaseBusiness,
   BellRing,
   Building2,
   ClipboardCheck,
   ClipboardList,
   Hammer,
+  Landmark,
   HardHat,
   LayoutDashboard,
   ListTodo,
@@ -46,14 +49,17 @@ export const NAV_ICONS: Record<string, LucideIcon> = {
   siteReports: ShieldCheck,
   areas: Map,
   elecPhases: Zap,
+  materialItems: Boxes,
   mewFollowUp: BellRing,
   mewInspection: ClipboardCheck,
   maintenance: Toolbox,
   ownerNotes: StickyNote,
   foremanMissions: ListTodo,
-  payments: Banknote,
   monthlyProgress: TrendingUp,
+  projectBudgets: Landmark,
+  departmentOverhead: BriefcaseBusiness,
   materials: Package,
+  vendors: Factory,
   contractors: HardHat,
   civilEngineers: Wrench,
   electricalEngineers: UserCog,
@@ -69,6 +75,10 @@ export const NAV_GROUPS: NavGroup[] = [
       { to: "/", key: "dashboard", end: true },
       { to: "/villas", key: "villas", end: true },
       { to: "/monthly-progress", key: "monthlyProgress" },
+      { to: "/project-budgets", key: "projectBudgets" },
+      { to: "/department-overhead", key: "departmentOverhead" },
+      { to: "/materials", key: "materials" },
+      { to: "/vendors", key: "vendors" },
     ],
   },
   {
@@ -83,7 +93,6 @@ export const NAV_GROUPS: NavGroup[] = [
       { to: "/maintenance", key: "maintenance" },
       { to: "/owner-notes", key: "ownerNotes" },
       { to: "/foreman-missions", key: "foremanMissions" },
-      { to: "/materials", key: "materials" },
     ],
   },
   {
@@ -94,7 +103,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { to: "/civil-engineers", key: "civilEngineers" },
       { to: "/areas", key: "areas" },
       { to: "/elec-phases", key: "elecPhases" },
-      { to: "/payments", key: "payments" },
+      { to: "/material-items", key: "materialItems" },
     ],
   },
   {
@@ -117,9 +126,7 @@ export type NavMatch = {
  * The menu page a path belongs to, and its section: the longest menu path the path is, or is under ("/villas/12" is under
  * "/villas"). The dashboard ("/") matches only itself. Undefined for a page that is not in the menu (the profile).
  */
-export function findNavItem(
-  pathname: string,
-): NavMatch | undefined {
+export function findNavItem(pathname: string): NavMatch | undefined {
   let best: NavMatch | undefined
   for (const group of NAV_GROUPS) {
     for (const item of group.items) {

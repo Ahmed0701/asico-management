@@ -16,6 +16,10 @@ import type {
   ItemInput,
   MaterialDelivery,
   MaterialItem,
+  MaterialOrder,
+  MaterialOrderDates,
+  MaterialOrdersParams,
+  MaterialOrdersResponse,
   MaterialsSummary,
 } from "./materials.types"
 
@@ -292,6 +296,46 @@ export async function getMaterialsSummary(
   return unwrap(
     api.get<ApiSuccess<MaterialsSummary>>(
       `/villas/${villaId}/materials-summary`,
+    ),
+  )
+}
+
+export function buildMaterialOrdersQueryParams(
+  params: MaterialOrdersParams,
+): Record<string, string | number> {
+  const out: Record<string, string | number> = {
+    page: params.page,
+    limit: params.limit,
+  }
+  if (params.search) out.search = params.search
+  if (params.type) out.type = params.type
+  if (params.status) out.status = params.status
+  if (params.overdue) out.overdue = "true"
+  if (params.sort) out.sort = params.sort
+  return out
+}
+
+export async function listMaterialOrders(
+  params: MaterialOrdersParams,
+  signal?: AbortSignal,
+): Promise<MaterialOrdersResponse> {
+  const res = await api.get<MaterialOrdersResponse>("/material-orders", {
+    params: buildMaterialOrdersQueryParams(params),
+    signal,
+  })
+  return { data: res.data.data, meta: res.data.meta, summary: res.data.summary }
+}
+
+/** Sets the MR, PO and due dates of a villa's switchgear or cables. */
+export async function setMaterialOrder(
+  villaId: string,
+  type: FactoryType,
+  dates: MaterialOrderDates,
+): Promise<MaterialOrder> {
+  return unwrap(
+    api.put<ApiSuccess<MaterialOrder>>(
+      `/villas/${villaId}/material-orders/${type}`,
+      dates,
     ),
   )
 }
