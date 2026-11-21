@@ -55,7 +55,9 @@
     "activeFilters_two": "{{count}} active",
     "activeFilters_few": "{{count}} active",
     "activeFilters_many": "{{count}} active",
-    "activeFilters_other": "{{count}} active"
+    "activeFilters_other": "{{count}} active",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password"
   },
   "nav": {
     "ownerNotes": "Owner Notes",
@@ -96,6 +98,35 @@
     "departmentOverhead": "Department Overhead"
   },
   "directory": {
+    "transferVillas": {
+      "button": "Move villas",
+      "buttonFor": "Move the villas of {{name}} to another engineer",
+      "title": "Move every villa to another engineer",
+      "subtitle": "All the villas of {{name}} go to the engineer you choose, at once.",
+      "count_one": "{{count}} villa will move",
+      "count_other": "{{count}} villas will move",
+      "count_zero": "{{count}} villas will move",
+      "count_two": "{{count}} villas will move",
+      "count_few": "{{count}} villas will move",
+      "count_many": "{{count}} villas will move",
+      "target": "Move them to",
+      "targetPlaceholder": "Choose an engineer",
+      "targetRequired": "Choose the engineer to move the villas to",
+      "hint": "Only active engineers are listed. Afterwards this engineer can be deleted.",
+      "noTargets": "There is no other active engineer to move the villas to.",
+      "confirm_one": "Move {{count}} villa",
+      "confirm_other": "Move {{count}} villas",
+      "confirm_zero": "Move {{count}} villas",
+      "confirm_two": "Move {{count}} villas",
+      "confirm_few": "Move {{count}} villas",
+      "confirm_many": "Move {{count}} villas",
+      "done_one": "{{count}} villa moved to {{name}}",
+      "done_other": "{{count}} villas moved to {{name}}",
+      "done_zero": "{{count}} villas moved to {{name}}",
+      "done_two": "{{count}} villas moved to {{name}}",
+      "done_few": "{{count}} villas moved to {{name}}",
+      "done_many": "{{count}} villas moved to {{name}}"
+    },
     "email": "Email",
     "emailPlaceholder": "name@company.com",
     "emailPendingBackend": "Email will be saved when the API supports it",
@@ -300,6 +331,7 @@
     "colLate": "Late by",
     "noOpenWorks": "No open works",
     "smallWorksTotal": "Small works (total)",
+    "smallWorksOpen": "Small works (not done)",
     "smallWorksAlertsTitle": "Small works alerts",
     "smallWorksAlertsCaption": "Pending works due soon or overdue (application time zone).",
     "smallWorksPending": "Small works pending",
@@ -506,7 +538,29 @@
     "selectPlaceholder": "Select engineer…",
     "selectSearch": "Filter engineers…",
     "selectForbidden": "You need permission to view electrical engineers",
-    "optionsIncomplete": "List may be incomplete, try narrowing your search."
+    "optionsIncomplete": "List may be incomplete, try narrowing your search.",
+    "userAccount": "User account",
+    "noUserAccount": "Not linked",
+    "userAccountHint": "Signed in with this account, the user sees only this engineer's villas everywhere in the app. Administrators are not listed: they always see every villa.",
+    "userAccountPlaceholder": "No user account",
+    "userLinkedTo": "linked to {{name}}",
+    "userInactive": "inactive",
+    "userOptionsFailed": "The users could not be loaded.",
+    "contact": "Contact",
+    "villasPill_zero": "{{count}} villas",
+    "villasPill_one": "{{count}} villa",
+    "villasPill_two": "{{count}} villas",
+    "villasPill_few": "{{count}} villas",
+    "villasPill_many": "{{count}} villas",
+    "villasPill_other": "{{count}} villas",
+    "summary": {
+      "label": "Electrical engineers at a glance",
+      "all": "Electrical engineers",
+      "active": "Active",
+      "linked": "With a user account",
+      "villas": "Villas assigned",
+      "pageNote": "The last three count the engineers on this page."
+    }
   },
   "villas": {
     "mewNotScheduled": "Not scheduled",
@@ -1875,11 +1929,22 @@
     "adminResetRestricted": "Only admins can reset an admin account password.",
     "resetPasswordEmailFailed": "This user's sessions were already closed, but the email could not be sent. Try again to send a new reset link.",
     "resetPasswordTooManyRequests": "Too many attempts. Please try again later.",
-    "searchPlaceholder": "Search name or email…"
+    "searchPlaceholder": "Search name or email…",
+    "roleChoice": {
+      "label": "Administrator or engineer",
+      "hint": {
+        "ADMIN": "Every permission, sees every villa",
+        "EMPLOYEE": "Only the permissions you give"
+      },
+      "confirmBody": {
+        "ADMIN": "Make {{name}} an administrator? They get every permission and see every villa.",
+        "EMPLOYEE": "Make {{name}} an engineer? They lose the administrator access and start with no permissions."
+      }
+    }
   },
   "roles": {
     "ADMIN": "Admin",
-    "EMPLOYEE": "Employee",
+    "EMPLOYEE": "Engineer",
     "MANAGER": "Manager",
     "ENGINEER": "Engineer",
     "VIEWER": "Viewer"

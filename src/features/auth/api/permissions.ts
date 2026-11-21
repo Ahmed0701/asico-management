@@ -131,6 +131,12 @@ export const NAV_ITEM_PERMISSIONS: Record<string, PermissionCode | undefined> =
     auditLog: "audit:read",
   }
 
+/** Menu entries a user linked to an electrical engineer never sees, whatever it was granted: the villas' money. */
+export const NAV_ITEMS_HIDDEN_FOR_ENGINEER: ReadonlySet<string> = new Set([
+  "projectBudgets",
+  "monthlyProgress",
+])
+
 export function canAccess(
   me: MeDto | null | undefined,
   code: PermissionCode,

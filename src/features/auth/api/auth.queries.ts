@@ -93,7 +93,13 @@ export function useMeQuery() {
 export function usePermissions() {
   const { data: me } = useMeQuery()
   const can = useCallback((code: PermissionCode) => canAccess(me, code), [me])
-  return { can, me, isAdmin: me?.role === "ADMIN" }
+  return {
+    can,
+    me,
+    isAdmin: me?.role === "ADMIN",
+    /** A user linked to an electrical engineer: no villa budget, no payments owed. */
+    engineerScope: me?.engineerScope === true,
+  }
 }
 
 export function useLoginMutation() {

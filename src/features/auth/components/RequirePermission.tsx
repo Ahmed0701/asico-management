@@ -9,16 +9,18 @@ export default function RequirePermission({
   children,
   forbiddenTitleKey = "audit.forbiddenTitle",
   forbiddenBodyKey = "audit.forbiddenBody",
+  notForEngineer = false,
 }: {
   permission: PermissionCode
   children: React.ReactNode
   forbiddenTitleKey?: string
   forbiddenBodyKey?: string
+  notForEngineer?: boolean
 }) {
   const { t } = useTranslation()
-  const { can } = usePermissions()
+  const { can, engineerScope } = usePermissions()
 
-  if (!can(permission)) {
+  if (!can(permission) || (notForEngineer && engineerScope)) {
     return (
       <Card className="mx-auto mt-16 flex max-w-md flex-col items-center gap-3 p-10 text-center">
         <span className="grid size-10 place-items-center rounded-full bg-muted">

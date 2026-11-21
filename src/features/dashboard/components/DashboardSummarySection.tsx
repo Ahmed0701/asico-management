@@ -152,11 +152,11 @@ export default function DashboardSummarySection({
         )}
         {data.smallWorks && (
           <DashboardLinkCard
-            to={dashboardLinks.smallWorksTotal()}
-            label={t("dashboard.smallWorksTotal")}
+            to={dashboardLinks.smallWorksPending()}
+            label={t("dashboard.smallWorksOpen")}
             tone="purple"
             icon="ruler"
-            value={formatDashboardCount(data.smallWorks.total)}
+            value={formatDashboardCount(data.smallWorks.pending)}
           />
         )}
         {data.delayedSmallWorks && (

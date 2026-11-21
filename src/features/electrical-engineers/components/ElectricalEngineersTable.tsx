@@ -1,4 +1,13 @@
 import { Avatar } from "@/shared/list/cells"
+import {
+  ArrowRightLeft,
+  Building2,
+  Mail,
+  Phone,
+  UserCheck,
+  UserX,
+} from "lucide-react"
+import { cn } from "@/shared/lib/cn"
 import { useTranslation } from "react-i18next"
 import { Link, useLocation } from "react-router"
 import { usePermissions } from "@/features/auth/api"
@@ -28,25 +37,39 @@ type ProjectsCountCellProps = {
 
 function ProjectsCountCell({ id, count }: ProjectsCountCellProps) {
   const { can } = usePermissions()
-  if (can("villas:read")) {
+  const { t } = useTranslation()
+  const pill = cn(
+    "inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold tabular-nums",
+    count > 0
+      ? "bg-progress-soft text-progress"
+      : "bg-muted text-muted-foreground",
+  )
+  const text = t("electricalEngineers.villasPill", { count })
+  if (can("villas:read") && count > 0) {
     return (
       <Link
         to={`/villas?electricalEngineerId=${id}`}
-        className="tabular-nums hover:underline"
+        className={cn(pill, "hover:underline")}
       >
-        {count}
+        <Building2 size={12} aria-hidden />
+        {text}
       </Link>
     )
   }
-  return <span className="tabular-nums">{count}</span>
+  return (
+    <span className={pill}>
+      <Building2 size={12} aria-hidden />
+      {text}
+    </span>
+  )
 }
 
-function formatCreated(iso: string): string {
+function formatCreated(iso: string, part: "date" | "time"): string {
   const locale = i18n.language === "ar" ? "ar-EG-u-nu-latn" : "en-GB"
-  return new Intl.DateTimeFormat(locale, {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(new Date(iso))
+  return new Intl.DateTimeFormat(
+    locale,
+    part === "date" ? { dateStyle: "medium" } : { timeStyle: "short" },
+  ).format(new Date(iso))
 }
 
 export default function ElectricalEngineersTable({
@@ -60,6 +83,7 @@ export default function ElectricalEngineersTable({
   canDelete,
   onEdit,
   onDelete,
+  onTransfer,
   onToggleStatus,
   statusPendingId,
   deleteDisabled,
@@ -75,6 +99,7 @@ export default function ElectricalEngineersTable({
   canDelete: boolean
   onEdit: (row: ElectricalEngineer) => void
   onDelete: (row: ElectricalEngineer) => void
+  onTransfer?: (row: ElectricalEngineer) => void
   onToggleStatus?: (row: ElectricalEngineer, active: boolean) => void
   statusPendingId?: string | null
   deleteDisabled: (row: ElectricalEngineer) => boolean
@@ -83,7 +108,7 @@ export default function ElectricalEngineersTable({
   const { t } = useTranslation()
   const location = useLocation()
   const skeletonRows = 8
-  const showActions = canUpdate || canDelete
+  const showActions = canUpdate || canDelete || !!onTransfer
   const colCount = showActions ? 6 : 5
 
   return (
@@ -121,10 +146,10 @@ export default function ElectricalEngineersTable({
               </Button>
             </TableHead>
             <TableHead className="px-4 py-2.5 font-medium">
-              {t("electricalEngineers.phone")}
+              {t("electricalEngineers.contact")}
             </TableHead>
             <TableHead className="px-4 py-2.5 font-medium">
-              {t("directory.email")}
+              {t("electricalEngineers.userAccount")}
             </TableHead>
             <TableHead className="px-4 py-2.5 font-medium">
               {t("electricalEngineers.projectsCount")}
@@ -174,31 +199,107 @@ export default function ElectricalEngineersTable({
             />
           ) : (
             rows.map((row) => (
-              <TableRow key={row.id}>
+              <TableRow
+                key={row.id}
+                className={cn(row.status === "INACTIVE" && "opacity-60")}
+              >
                 <TableCell className="px-4 py-3">
-                  <span className="flex min-w-0 items-center gap-2">
-                    <Avatar name={row.name} />
-                    <Link
-                      to={`/electrical-engineers/${row.id}`}
-                      state={{ listSearch: location.search }}
-                      dir="auto"
-                      className="font-medium hover:underline"
-                    >
-                      {row.name}
-                    </Link>
+                  <span className="flex min-w-0 items-center gap-3">
+                    <Avatar
+                      name={row.name}
+                      className={cn(
+                        "size-9 text-xs",
+                        row.status === "ACTIVE"
+                          ? "bg-accent/10 text-accent"
+                          : "bg-muted text-muted-foreground",
+                      )}
+                    />
+                    <span className="grid min-w-0 gap-0.5">
+                      <Link
+                        to={`/electrical-engineers/${row.id}`}
+                        state={{ listSearch: location.search }}
+                        dir="auto"
+                        className="truncate font-semibold hover:underline"
+                      >
+                        {row.name}
+                      </Link>
+                      <span
+                        className={cn(
+                          "inline-flex w-fit items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold",
+                          row.status === "ACTIVE"
+                            ? "bg-success-soft text-success"
+                            : "bg-muted text-muted-foreground",
+                        )}
+                      >
+                        <span
+                          aria-hidden
+                          className="size-1.5 rounded-full bg-current"
+                        />
+                        {t(`directory.statusLabels.${row.status}`)}
+                      </span>
+                    </span>
                   </span>
                 </TableCell>
                 <TableCell className="px-4 py-3">
-                  <PhoneDisplay phone={row.phone} />
+                  <div className="grid gap-1 text-sm">
+                    <span className="inline-flex items-center gap-1.5">
+                      <Phone
+                        size={13}
+                        className="text-muted-foreground"
+                        aria-hidden
+                      />
+                      <PhoneDisplay phone={row.phone} />
+                    </span>
+                    {row.email && (
+                      <span className="inline-flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground">
+                        <Mail size={13} aria-hidden />
+                        <DirectoryEmailDisplay value={row.email} />
+                      </span>
+                    )}
+                  </div>
                 </TableCell>
-                <TableCell className="px-4 py-3">
-                  <DirectoryEmailDisplay value={row.email} />
+                <TableCell className="px-4 py-3 text-sm">
+                  {row.user ? (
+                    <span className="inline-flex max-w-full items-center gap-2 rounded-lg border border-open/30 bg-open-soft px-2.5 py-1.5">
+                      <UserCheck
+                        size={14}
+                        className="shrink-0 text-open"
+                        aria-hidden
+                      />
+                      <span className="grid min-w-0">
+                        <span
+                          className="truncate text-xs font-medium"
+                          dir="auto"
+                        >
+                          {row.user.name}
+                        </span>
+                        <span
+                          className="truncate text-[11px] text-muted-foreground"
+                          dir="ltr"
+                        >
+                          {row.user.email}
+                        </span>
+                      </span>
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1.5 rounded-lg border border-dashed border-border px-2.5 py-1 text-xs text-muted-foreground">
+                      <UserX size={13} aria-hidden />
+                      {t("electricalEngineers.noUserAccount")}
+                    </span>
+                  )}
                 </TableCell>
                 <TableCell className="px-4 py-3 tabular-nums">
                   <ProjectsCountCell id={row.id} count={row.villaCount} />
                 </TableCell>
                 <TableCell className="px-4 py-3 whitespace-nowrap tabular-nums">
-                  {formatCreated(row.createdAt)}
+                  <span className="grid">
+                    <span className="text-sm">
+                      {formatCreated(row.createdAt, "date")}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {formatCreated(row.createdAt, "time")}
+                    </span>
+                  </span>
                 </TableCell>
                 {showActions && (
                   <TableCell className="px-4 py-3">
@@ -212,6 +313,22 @@ export default function ElectricalEngineersTable({
                             onToggleStatus(row, active)
                           }
                         />
+                      )}
+                      {onTransfer && row.villaCount > 0 && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="px-2"
+                          title={t("directory.transferVillas.button")}
+                          aria-label={t("directory.transferVillas.buttonFor", {
+                            name: row.name,
+                          })}
+                          onClick={() => onTransfer(row)}
+                        >
+                          <ArrowRightLeft size={14} aria-hidden />
+                          {t("directory.transferVillas.button")}
+                        </Button>
                       )}
                       {canUpdate && (
                         <IconButton

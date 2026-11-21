@@ -1,4 +1,5 @@
 import { Avatar } from "@/shared/list/cells"
+import { ArrowRightLeft } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { Link, useLocation } from "react-router"
 import { usePermissions } from "@/features/auth/api"
@@ -60,6 +61,7 @@ export default function CivilEngineersTable({
   canDelete,
   onEdit,
   onDelete,
+  onTransfer,
   onToggleStatus,
   statusPendingId,
   deleteDisabled,
@@ -75,6 +77,7 @@ export default function CivilEngineersTable({
   canDelete: boolean
   onEdit: (row: CivilEngineer) => void
   onDelete: (row: CivilEngineer) => void
+  onTransfer?: (row: CivilEngineer) => void
   onToggleStatus?: (row: CivilEngineer, active: boolean) => void
   statusPendingId?: string | null
   deleteDisabled: (row: CivilEngineer) => boolean
@@ -83,7 +86,7 @@ export default function CivilEngineersTable({
   const { t } = useTranslation()
   const location = useLocation()
   const skeletonRows = 8
-  const showActions = canUpdate || canDelete
+  const showActions = canUpdate || canDelete || !!onTransfer
   const colCount = showActions ? 6 : 5
 
   return (
@@ -212,6 +215,22 @@ export default function CivilEngineersTable({
                             onToggleStatus(row, active)
                           }
                         />
+                      )}
+                      {onTransfer && row.villaCount > 0 && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="px-2"
+                          title={t("directory.transferVillas.button")}
+                          aria-label={t("directory.transferVillas.buttonFor", {
+                            name: row.name,
+                          })}
+                          onClick={() => onTransfer(row)}
+                        >
+                          <ArrowRightLeft size={14} aria-hidden />
+                          {t("directory.transferVillas.button")}
+                        </Button>
                       )}
                       {canUpdate && (
                         <IconButton

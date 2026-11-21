@@ -13,16 +13,20 @@ import {
   useUpdateElectricalEngineerMutation,
   useElectricalEngineersListParams,
   useElectricalEngineersListQuery,
+  useElectricalEngineerOptions,
+  useTransferElectricalEngineerVillasMutation,
 } from "../api"
 import { ifMatchWrite } from "@/shared/api/write-safety"
 import { toast } from "@/shared/lib/toast"
 import type { PartyStatus } from "@/shared/directory/party.types"
 import { downloadExport } from "@/shared/export/downloadExport"
 import type { ElectricalEngineer } from "../api"
+import ElectricalEngineersSummary from "../components/ElectricalEngineersSummary"
 import ElectricalEngineersTable from "../components/ElectricalEngineersTable"
 import ElectricalEngineerFormModal from "../components/ElectricalEngineerFormModal"
 import ElectricalEngineersListErrorBanner from "../components/ElectricalEngineersListErrorBanner"
 import ElectricalEngineersListFooter from "../components/ElectricalEngineersListFooter"
+import TransferVillasModal from "@/shared/directory/TransferVillasModal"
 import { useDebouncedSearchParam } from "@/shared/hooks/useDebouncedSearchParam"
 import { normalizeSearchInput } from "@/shared/lib/phone/phoneNormalize"
 
@@ -44,6 +48,11 @@ export default function ElectricalEngineersPage() {
   const [formOpen, setFormOpen] = useState(false)
   const [editId, setEditId] = useState<string | undefined>()
   const [deleting, setDeleting] = useState<ElectricalEngineer | null>(null)
+  const [transferring, setTransferring] = useState<ElectricalEngineer | null>(
+    null,
+  )
+  const [transferError, setTransferError] = useState<string | null>(null)
+  const transfer = useTransferElectricalEngineerVillasMutation()
   const [savedBanner, setSavedBanner] = useState(false)
   const [deleteNotice, setDeleteNotice] = useState<string | null>(null)
 
@@ -51,6 +60,8 @@ export default function ElectricalEngineersPage() {
   const canUpdate = can("electrical-engineers:update")
   const canDelete = can("electrical-engineers:delete")
   const canExport = can("electrical-engineers:read")
+  const canTransfer = can("villas:update")
+  const targets = useElectricalEngineerOptions()
 
   const onExport = useCallback(
     async (format: "xlsx" | "pdf", signal: AbortSignal) => {
@@ -120,6 +131,31 @@ export default function ElectricalEngineersPage() {
       toast.error(parsed.message || t("common.listErrorTitle"))
     } finally {
       setStatusPendingId(null)
+    }
+  }
+
+  const openTransfer = (row: ElectricalEngineer) => {
+    setTransferError(null)
+    setTransferring(row)
+  }
+
+  const handleTransfer = async (toEngineerId: string) => {
+    if (!transferring) return
+    setTransferError(null)
+    try {
+      const result = await transfer.mutateAsync({
+        id: transferring.id,
+        toEngineerId,
+      })
+      setTransferring(null)
+      toast.success(
+        t("directory.transferVillas.done", {
+          count: result.moved,
+          name: result.to.name,
+        }),
+      )
+    } catch (err) {
+      setTransferError(toApiError(err).message)
     }
   }
 
@@ -193,6 +229,7 @@ export default function ElectricalEngineersPage() {
           {deleteNotice}
         </p>
       )}
+      <ElectricalEngineersSummary rows={rows} total={meta?.total} />
       <ListToolbar
         search={{
           value: searchDraft,
@@ -218,6 +255,7 @@ export default function ElectricalEngineersPage() {
         canDelete={canDelete}
         onEdit={openEdit}
         onDelete={setDeleting}
+        onTransfer={canTransfer ? openTransfer : undefined}
         onToggleStatus={canUpdate ? toggleStatus : undefined}
         statusPendingId={statusPendingId}
         deleteDisabled={(row) => row.villaCount > 0}
@@ -286,6 +324,15 @@ export default function ElectricalEngineersPage() {
           setDeleteNotice(t("electricalEngineers.editDeleted"))
           void refetch()
         }}
+      />
+      <TransferVillasModal
+        from={transferring}
+        targets={targets.data ?? []}
+        targetsLoading={targets.isLoading}
+        pending={transfer.isPending}
+        error={transferError}
+        onClose={() => setTransferring(null)}
+        onConfirm={(toEngineerId) => void handleTransfer(toEngineerId)}
       />
       <ConfirmModal
         open={!!deleting}

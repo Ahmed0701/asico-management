@@ -4,7 +4,7 @@ import ProjectBudgetsPage from "./ProjectBudgetsPage"
 /** Every villa's budget figures. */
 export default function ProjectBudgetsRoute() {
   return (
-    <RequirePermission permission="villas:read">
+    <RequirePermission permission="villas:read" notForEngineer>
       <ProjectBudgetsPage />
     </RequirePermission>
   )

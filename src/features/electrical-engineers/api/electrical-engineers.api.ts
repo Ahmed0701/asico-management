@@ -9,9 +9,11 @@ import type {
   CreateElectricalEngineerInput,
   ElectricalEngineer,
   ElectricalEngineerOption,
+  ElectricalEngineerUserOption,
   ElectricalEngineersListParams,
   ElectricalEngineersListResponse,
   UpdateElectricalEngineerInput,
+  TransferVillasResult,
 } from "./electrical-engineers.types"
 
 export const OPTIONS_CAP = 1000
@@ -62,6 +64,15 @@ export async function getElectricalEngineer(
   )
 }
 
+/** The users an engineer can be linked to. */
+export async function listElectricalEngineerUserOptions(): Promise<ElectricalEngineerUserOption[]> {
+  return unwrap(
+    api.get<ApiSuccess<ElectricalEngineerUserOption[]>>(
+      "/electrical-engineers/user-options",
+    ),
+  )
+}
+
 export async function listElectricalEngineerOptions(): Promise<ElectricalEngineerOption[]> {
   return unwrap(
     api.get<ApiSuccess<ElectricalEngineerOption[]>>(
@@ -109,5 +120,18 @@ export async function deleteElectricalEngineer(
     api.delete(`/electrical-engineers/${id}`, {
       headers: buildWriteHeaders(write),
     }),
+  )
+}
+
+/** Moves every villa of the engineer to another, active, engineer. */
+export async function transferElectricalEngineerVillas(
+  id: string,
+  toEngineerId: string,
+): Promise<TransferVillasResult> {
+  return unwrap(
+    api.post<ApiSuccess<TransferVillasResult>>(
+      `/electrical-engineers/${id}/transfer-villas`,
+      { toEngineerId },
+    ),
   )
 }

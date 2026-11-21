@@ -2,7 +2,11 @@ import { useState } from "react"
 import { NavLink, useMatch, useLocation, matchPath } from "react-router"
 import { useTranslation } from "react-i18next"
 import { ChevronDown } from "lucide-react"
-import { usePermissions, NAV_ITEM_PERMISSIONS } from "@/features/auth/api"
+import {
+  usePermissions,
+  NAV_ITEM_PERMISSIONS,
+  NAV_ITEMS_HIDDEN_FOR_ENGINEER,
+} from "@/features/auth/api"
 import { cn } from "../lib/cn"
 import { useUiDirection } from "../lib/useUiDirection"
 import { useUiStore } from "../lib/store"
@@ -266,7 +270,7 @@ function SidebarNavGroup({
 
 export default function Sidebar() {
   const counts = useSidebarCounts()
-  const { can } = usePermissions()
+  const { can, engineerScope } = usePermissions()
   const direction = useUiDirection()
   const { pathname } = useLocation()
   const collapsed = useUiStore((s) => s.sidebarCollapsed)
@@ -338,6 +342,11 @@ export default function Sidebar() {
             <div dir={direction}>
               {NAV_GROUPS.map((g) => {
                 const visibleItems = g.items.filter((item) => {
+                  if (
+                    engineerScope &&
+                    NAV_ITEMS_HIDDEN_FOR_ENGINEER.has(item.key)
+                  )
+                    return false
                   const perm = NAV_ITEM_PERMISSIONS[item.key]
                   return !perm || can(perm)
                 })

@@ -163,6 +163,20 @@ export function useUpdateEngineerMutation() {
   })
 }
 
+/** Moves every villa of an engineer to another; the villas lists change too. */
+export function useTransferEngineerVillasMutation() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, toEngineerId }: { id: string; toEngineerId: string }) =>
+      api.transferEngineerVillas(id, toEngineerId),
+    onError: (err) => onEngineersForbidden(qc, toApiError(err)),
+    onSuccess: () => {
+      invalidateEngineers(qc)
+      void qc.invalidateQueries({ queryKey: ["villas"] })
+    },
+  })
+}
+
 export function useDeleteEngineerMutation() {
   const qc = useQueryClient()
   return useMutation({

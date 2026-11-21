@@ -27,6 +27,8 @@ import {
   useIdempotencyKey,
 } from "@/shared/api/write-safety"
 import VersionConflictDialog from "@/shared/ui/VersionConflictDialog"
+import { usePermissions } from "@/features/auth/api"
+import EngineerUserField from "./EngineerUserField"
 import { getElectricalEngineer } from "../api/electrical-engineers.api"
 import DirectoryEmailFormField from "@/shared/directory/DirectoryEmailFormField"
 import {
@@ -73,6 +75,9 @@ function Inner({
   onDeletedWhileEditing: () => void
 }) {
   const { t } = useTranslation()
+  const { can } = usePermissions()
+  // The user picker needs the list of users, which only someone who may change engineers can read.
+  const canLinkUser = can("electrical-engineers:update")
   const isEdit = !!engineerId
   const {
     data: loaded,
@@ -93,6 +98,7 @@ function Inner({
     name: string
     phone: string
     email: string
+    userId: string
   } | null>(null)
 
   useEffect(() => {
@@ -101,17 +107,23 @@ function Inner({
 
   const form = useForm<ElectricalEngineerFormValues>({
     resolver: zodResolver(electricalEngineerFormSchema),
-    defaultValues: { name: "", phone: "", email: "" },
+    defaultValues: { name: "", phone: "", email: "", userId: "" },
   })
 
   useEffect(() => {
     if (isEdit && loaded) {
       const email = directoryEmailFromApi(loaded.email)
-      form.reset({ name: loaded.name, phone: loaded.phone, email })
-      baseline.current = { name: loaded.name, phone: loaded.phone, email }
+      const userId = loaded.user?.id ?? ""
+      form.reset({ name: loaded.name, phone: loaded.phone, email, userId })
+      baseline.current = {
+        name: loaded.name,
+        phone: loaded.phone,
+        email,
+        userId,
+      }
     }
     if (!isEdit) {
-      form.reset({ name: "", phone: "", email: "" })
+      form.reset({ name: "", phone: "", email: "", userId: "" })
       baseline.current = null
     }
   }, [isEdit, loaded, form])
@@ -140,6 +152,7 @@ function Inner({
     const name = values.name.trim()
     const phone = normalizePhoneInput(values.phone)
     const email = directoryEmailForApi(values.email)
+    const userId = values.userId || null
     const baseEmail = baseline.current
       ? directoryEmailForApi(baseline.current.email)
       : null
@@ -150,9 +163,13 @@ function Inner({
           name?: string
           phone?: string
           email?: string | null
+          userId?: string | null
         } = {}
         if (name !== baseline.current.name) patch.name = name
         if (phone !== baseline.current.phone) patch.phone = phone
+        if (canLinkUser && values.userId !== baseline.current.userId) {
+          patch.userId = userId
+        }
         if (DIRECTORY_EMAIL_API_ENABLED && email !== baseEmail) {
           patch.email = email
         }
@@ -168,7 +185,12 @@ function Inner({
         })
       } else {
         await create.mutateAsync({
-          input: stripDirectoryEmailFromPayload({ name, phone, email }),
+          input: stripDirectoryEmailFromPayload({
+            name,
+            phone,
+            email,
+            ...(canLinkUser && userId ? { userId } : {}),
+          }),
           write: idempotencyWrite(idempotency.getKey()),
         })
       }
@@ -274,6 +296,12 @@ function Inner({
               onBlur={onPhoneBlur}
             />
             <DirectoryEmailFormField control={form.control} name="email" />
+            {canLinkUser && (
+              <EngineerUserField
+                control={form.control}
+                engineerId={engineerId}
+              />
+            )}
           </form>
         </Form>
       )}
@@ -284,15 +312,18 @@ function Inner({
         onReload={() => {
           if (freshForConflict) {
             const freshEmail = directoryEmailFromApi(freshForConflict.email)
+            const freshUser = freshForConflict.user?.id ?? ""
             form.reset({
               name: freshForConflict.name,
               phone: freshForConflict.phone,
               email: freshEmail,
+              userId: freshUser,
             })
             baseline.current = {
               name: freshForConflict.name,
               phone: freshForConflict.phone,
               email: freshEmail,
+              userId: freshUser,
             }
             ifMatchRef.current = freshForConflict.version
             idempotency.resetKey()

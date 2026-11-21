@@ -43,3 +43,9 @@ export type EngineersListResponse = {
   data: CivilEngineer[]
   meta: PaginatedMeta
 }
+
+/** The answer to moving every villa of an engineer to another one. */
+export type TransferVillasResult = {
+  moved: number
+  to: { id: string; name: string }
+}

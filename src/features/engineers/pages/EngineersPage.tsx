@@ -13,6 +13,8 @@ import {
   useUpdateEngineerMutation,
   useEngineersListParams,
   useEngineersListQuery,
+  useCivilEngineerOptions,
+  useTransferEngineerVillasMutation,
 } from "../api"
 import { ifMatchWrite } from "@/shared/api/write-safety"
 import { toast } from "@/shared/lib/toast"
@@ -23,6 +25,7 @@ import CivilEngineersTable from "../components/CivilEngineersTable"
 import EngineerFormModal from "../components/EngineerFormModal"
 import EngineersListErrorBanner from "../components/EngineersListErrorBanner"
 import EngineersListFooter from "../components/EngineersListFooter"
+import TransferVillasModal from "@/shared/directory/TransferVillasModal"
 import { useDebouncedSearchParam } from "@/shared/hooks/useDebouncedSearchParam"
 import { normalizeSearchInput } from "@/shared/lib/phone/phoneNormalize"
 
@@ -43,6 +46,9 @@ export default function EngineersPage() {
   const [formOpen, setFormOpen] = useState(false)
   const [editId, setEditId] = useState<string | undefined>()
   const [deleting, setDeleting] = useState<CivilEngineer | null>(null)
+  const [transferring, setTransferring] = useState<CivilEngineer | null>(null)
+  const [transferError, setTransferError] = useState<string | null>(null)
+  const transfer = useTransferEngineerVillasMutation()
   const [savedBanner, setSavedBanner] = useState(false)
   const [deleteNotice, setDeleteNotice] = useState<string | null>(null)
 
@@ -50,6 +56,8 @@ export default function EngineersPage() {
   const canUpdate = can("civil-engineers:update")
   const canDelete = can("civil-engineers:delete")
   const canExport = can("civil-engineers:read")
+  const canTransfer = can("villas:update")
+  const targets = useCivilEngineerOptions()
 
   const onExport = useCallback(
     async (format: "xlsx" | "pdf", signal: AbortSignal) => {
@@ -117,6 +125,31 @@ export default function EngineersPage() {
       toast.error(parsed.message || t("common.listErrorTitle"))
     } finally {
       setStatusPendingId(null)
+    }
+  }
+
+  const openTransfer = (row: CivilEngineer) => {
+    setTransferError(null)
+    setTransferring(row)
+  }
+
+  const handleTransfer = async (toEngineerId: string) => {
+    if (!transferring) return
+    setTransferError(null)
+    try {
+      const result = await transfer.mutateAsync({
+        id: transferring.id,
+        toEngineerId,
+      })
+      setTransferring(null)
+      toast.success(
+        t("directory.transferVillas.done", {
+          count: result.moved,
+          name: result.to.name,
+        }),
+      )
+    } catch (err) {
+      setTransferError(toApiError(err).message)
     }
   }
 
@@ -209,6 +242,7 @@ export default function EngineersPage() {
         canDelete={canDelete}
         onEdit={openEdit}
         onDelete={setDeleting}
+        onTransfer={canTransfer ? openTransfer : undefined}
         onToggleStatus={canUpdate ? toggleStatus : undefined}
         statusPendingId={statusPendingId}
         deleteDisabled={(row) => row.villaCount > 0}
@@ -275,6 +309,15 @@ export default function EngineersPage() {
           setDeleteNotice(t("engineers.editDeleted"))
           void refetch()
         }}
+      />
+      <TransferVillasModal
+        from={transferring}
+        targets={targets.data ?? []}
+        targetsLoading={targets.isLoading}
+        pending={transfer.isPending}
+        error={transferError}
+        onClose={() => setTransferring(null)}
+        onConfirm={(toEngineerId) => void handleTransfer(toEngineerId)}
       />
       <ConfirmModal
         open={!!deleting}

@@ -44,7 +44,7 @@ function SectionHeading({ children }: { children: ReactNode }) {
 export default function VillaDetailPage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const { can } = usePermissions()
+  const { can, engineerScope } = usePermissions()
   const { id } = useParams<{ id: string }>()
   const [editOpen, setEditOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
@@ -53,10 +53,13 @@ export default function VillaDetailPage() {
   const mewFollowUp = useVillaMewFollowUpMutation()
 
   const canUpdate = can("villas:update")
+  // A user linked to an electrical engineer adds variation orders but never sees the budget.
+  const canBudget = !engineerScope
   const canDelete = can("villas:delete")
   const canMaterials = can("materials:read")
   const canSiteImages = can("villa-documents:download")
-  const canPayments = can("payments:read")
+  // A user linked to an electrical engineer never sees the payments.
+  const canPayments = can("payments:read") && !engineerScope
   // The same permission the MEW follow-up page uses to add and remove villas.
   const canMewFollowUp = can("villas:inspection")
 
@@ -149,7 +152,7 @@ export default function VillaDetailPage() {
       />
       <VillaDetailPhasesCard phases={villa.phases} />
       <SectionHeading>{t("villas.sections.records")}</SectionHeading>
-      <VillaBudgetCard villaId={villa.id} canEdit={canUpdate} />
+      {canBudget && <VillaBudgetCard villaId={villa.id} canEdit={canUpdate} />}
       {canPayments && (
         <VillaPaymentHistoryCard
           villaId={villa.id}

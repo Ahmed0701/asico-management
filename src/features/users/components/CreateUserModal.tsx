@@ -22,6 +22,7 @@ import { useCreateUserMutation } from "../api"
 import { usePermissionCatalogQuery } from "@/features/permissions/api"
 import { PermissionAssignGroups } from "@/features/permissions/components/PermissionAssignGroups"
 import ApiErrorBanner from "./ApiErrorBanner"
+import UserRoleChoice from "./UserRoleChoice"
 
 const schema = z.object({
   name: z
@@ -38,6 +39,7 @@ const schema = z.object({
     .string()
     .min(8, "validation.min8")
     .max(72, "validation.passwordMaxBytes"),
+  role: z.enum(["ADMIN", "EMPLOYEE"]),
   isActive: z.boolean(),
   permissions: z.array(z.string()),
 })
@@ -52,13 +54,13 @@ export default function CreateUserModal({
   onClose: () => void
 }) {
   const { t } = useTranslation()
-  const { can } = usePermissions()
+  const { can, isAdmin } = usePermissions()
   const createUser = useCreateUserMutation()
   const idempotency = useIdempotencyKey(open)
   const { data: catalog } = usePermissionCatalogQuery()
   const [apiError, setApiError] =
     useState<ReturnType<typeof toApiError> | null>(null)
-  const showPermissions = can("permissions:assign")
+  const mayAssign = can("permissions:assign")
 
   const form = useForm<Values>({
     resolver: zodResolver(schema),
@@ -66,12 +68,16 @@ export default function CreateUserModal({
       name: "",
       email: "",
       password: "",
+      role: "EMPLOYEE",
       isActive: true,
       permissions: [],
     },
   })
 
   const selected = form.watch("permissions")
+  const role = form.watch("role")
+  // An administrator has every permission: there is nothing to pick.
+  const showPermissions = mayAssign && role !== "ADMIN"
 
   const togglePerm = (code: string) => {
     const next = selected.includes(code)
@@ -88,6 +94,7 @@ export default function CreateUserModal({
           name: values.name,
           email: values.email,
           password: values.password,
+          role: isAdmin ? values.role : "EMPLOYEE",
           isActive: values.isActive,
           permissions: showPermissions ? values.permissions : [],
         },
@@ -151,6 +158,23 @@ export default function CreateUserModal({
             label={t("users.password")}
             autoComplete="new-password"
           />
+          {isAdmin && (
+            <FormField
+              control={form.control}
+              name="role"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t("users.role")}</FormLabel>
+                  <FormControl>
+                    <UserRoleChoice
+                      value={field.value}
+                      onChange={field.onChange}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+          )}
           <FormField
             control={form.control}
             name="isActive"

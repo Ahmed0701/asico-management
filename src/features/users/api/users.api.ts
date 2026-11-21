@@ -8,6 +8,7 @@ import {
 } from "@/shared/api/write-safety"
 import type {
   CreateUserInput,
+  UserRole,
   UpdateUserInput,
   UserDetail,
   UserListItem,
@@ -61,6 +62,21 @@ export async function updateUser(
   return executeWrite(write, () =>
     unwrap(
       api.patch<ApiSuccess<UserListItem>>(`/users/${id}`, input, {
+        headers: buildWriteHeaders(write),
+      }),
+    ),
+  )
+}
+
+/** Makes a user an administrator or an engineer (an administrator only, never on yourself). */
+export async function setUserRole(
+  id: string,
+  role: UserRole,
+  write: Pick<WriteRequest, "ifMatch">,
+): Promise<UserDetail> {
+  return executeWrite({ ...write }, () =>
+    unwrap(
+      api.patch<ApiSuccess<UserDetail>>(`/users/${id}/role`, { role }, {
         headers: buildWriteHeaders(write),
       }),
     ),

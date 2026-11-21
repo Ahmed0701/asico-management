@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { useTranslation } from "react-i18next"
+import { usePermissions } from "@/features/auth/api"
 import { applyApiFieldErrors } from "@/features/auth/api/formErrors"
 import { toApiError } from "@/shared/api/errors"
 import {
@@ -13,11 +14,19 @@ import {
 import VersionConflictDialog from "@/shared/ui/VersionConflictDialog"
 import Modal from "@/shared/ui/Modal"
 import Button from "@/shared/ui/Button"
-import { Form } from "@/shared/ui/form"
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+} from "@/shared/ui/form"
 import { FormTextField } from "@/shared/ui/form-text-field"
 import type { UserDetail } from "../api"
-import { getUser, useUpdateUserMutation } from "../api"
+import { getUser, useSetUserRoleMutation, useUpdateUserMutation } from "../api"
 import ApiErrorBanner from "./ApiErrorBanner"
+import UserRoleChoice from "./UserRoleChoice"
 
 const schema = z.object({
   name: z
@@ -30,6 +39,7 @@ const schema = z.object({
     .trim()
     .min(1, "validation.required")
     .email("validation.email"),
+  role: z.enum(["ADMIN", "EMPLOYEE"]),
 })
 
 type Values = z.infer<typeof schema>
@@ -53,6 +63,10 @@ type EditUserModalInnerProps = {
 function Inner({ user, onClose }: EditUserModalInnerProps) {
   const { t } = useTranslation()
   const updateUser = useUpdateUserMutation()
+  const setRole = useSetUserRoleMutation()
+  const { isAdmin, me } = usePermissions()
+  // Only an administrator chooses the role, and never its own (one administrator is always left).
+  const canChangeRole = isAdmin && me?.id !== user.id
   const idempotency = useIdempotencyKey(true)
   const ifMatchRef = useRef(user.version)
   const [conflictOpen, setConflictOpen] = useState(false)
@@ -61,13 +75,16 @@ function Inner({ user, onClose }: EditUserModalInnerProps) {
     useState<ReturnType<typeof toApiError> | null>(null)
   const form = useForm<Values>({
     resolver: zodResolver(schema),
-    defaultValues: { name: user.name, email: user.email },
+    defaultValues: { name: user.name, email: user.email, role: user.role },
   })
 
   useEffect(() => {
     ifMatchRef.current = user.version
-    form.reset({ name: user.name, email: user.email })
-  }, [user.id, user.version, user.name, user.email, form])
+    form.reset({ name: user.name, email: user.email, role: user.role })
+  }, [user.id, user.version, user.name, user.email, user.role, form])
+
+  const role = form.watch("role")
+  const roleChanged = canChangeRole && role !== user.role
 
   return (
     <Modal
@@ -81,7 +98,11 @@ function Inner({ user, onClose }: EditUserModalInnerProps) {
             type="submit"
             form="user-form"
             variant="primary"
-            disabled={form.formState.isSubmitting || updateUser.isPending}
+            disabled={
+              form.formState.isSubmitting ||
+              updateUser.isPending ||
+              setRole.isPending
+            }
           >
             {t("common.save")}
           </Button>
@@ -96,13 +117,28 @@ function Inner({ user, onClose }: EditUserModalInnerProps) {
           className="space-y-4"
           onSubmit={form.handleSubmit(async (values) => {
             setApiError(null)
+            const profileChanged =
+              values.name.trim() !== user.name ||
+              values.email.trim().toLowerCase() !== user.email
             const run = async () => {
-              await updateUser.mutateAsync({
-                id: user.id,
-                input: values,
-                write: fullWrite(idempotency.getKey(), ifMatchRef.current),
-              })
-              idempotency.resetKey()
+              // The name and email first (unless only the role changed), then the role on the new version.
+              if (profileChanged || !roleChanged) {
+                const updated = await updateUser.mutateAsync({
+                  id: user.id,
+                  input: { name: values.name, email: values.email },
+                  write: fullWrite(idempotency.getKey(), ifMatchRef.current),
+                })
+                idempotency.resetKey()
+                ifMatchRef.current = updated.version
+              }
+              if (roleChanged) {
+                const updated = await setRole.mutateAsync({
+                  id: user.id,
+                  role: values.role,
+                  write: { ifMatch: ifMatchRef.current },
+                })
+                ifMatchRef.current = updated.version
+              }
               onClose()
             }
             pendingResubmitRef.current = run
@@ -137,6 +173,30 @@ function Inner({ user, onClose }: EditUserModalInnerProps) {
             label={t("users.email")}
             dir="ltr"
           />
+          {canChangeRole && (
+            <FormField
+              control={form.control}
+              name="role"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t("users.role")}</FormLabel>
+                  <FormControl>
+                    <UserRoleChoice
+                      value={field.value}
+                      onChange={field.onChange}
+                    />
+                  </FormControl>
+                  {roleChanged && (
+                    <FormDescription>
+                      {t(`users.roleChoice.confirmBody.${role}`, {
+                        name: user.name,
+                      })}
+                    </FormDescription>
+                  )}
+                </FormItem>
+              )}
+            />
+          )}
         </form>
       </Form>
       <VersionConflictDialog
@@ -145,7 +205,7 @@ function Inner({ user, onClose }: EditUserModalInnerProps) {
         recordLabel={user.name}
         onReload={async () => {
           const fresh = await getUser(user.id)
-          form.reset({ name: fresh.name, email: fresh.email })
+          form.reset({ name: fresh.name, email: fresh.email, role: fresh.role })
           ifMatchRef.current = fresh.version
           idempotency.resetKey()
           setConflictOpen(false)

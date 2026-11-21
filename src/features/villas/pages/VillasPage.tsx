@@ -29,7 +29,7 @@ import VillasTable from "../components/VillasTable"
 
 export default function VillasPage() {
   const { t } = useTranslation()
-  const { can } = usePermissions()
+  const { can, isAdmin } = usePermissions()
   const { params, setParam, setPage, setLimit, clearFilters } =
     useVillasListParams()
   const { data, isLoading, isError, error, refetch } = useVillasListQuery()
@@ -45,12 +45,13 @@ export default function VillasPage() {
   const [savedBanner, setSavedBanner] = useState(false)
   const [deleteNotice, setDeleteNotice] = useState<string | null>(null)
 
-  const canCreate = can("villas:create")
+  // Villas are added (one by one or from a file) by an administrator only.
+  const canCreate = isAdmin
   const canUpdate = can("villas:update")
   const canDelete = can("villas:delete")
   const canLinkDetail = can("villas:detail")
   const canExport = can("villas:export")
-  const canImport = can("villas:import")
+  const canImport = isAdmin
   const qc = useQueryClient()
   const [importOpen, setImportOpen] = useState(false)
 

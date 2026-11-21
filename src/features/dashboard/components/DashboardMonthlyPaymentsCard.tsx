@@ -12,8 +12,9 @@ import DashboardLinkCard from "./DashboardLinkCard"
 
 export default function DashboardMonthlyPaymentsCard() {
   const { t, i18n } = useTranslation()
-  const { can } = usePermissions()
-  const allowed = can("villas:read")
+  const { can, engineerScope } = usePermissions()
+  // A user linked to an electrical engineer never sees the payments owed.
+  const allowed = can("villas:read") && !engineerScope
   // One row is enough: the totals are over every villa owed money.
   const query = useMonthlyProgressQuery(
     { page: 1, limit: 1, owed: true },

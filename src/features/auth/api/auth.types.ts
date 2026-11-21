@@ -9,7 +9,8 @@ export type UserDto = {
   createdAt: string
 }
 
-export type MeDto = UserDto & { permissions: string[] }
+/** `engineerScope` is true only for a user linked to an electrical engineer: it never sees a villa's budget or the payments owed. */
+export type MeDto = UserDto & { permissions: string[]; engineerScope?: true }
 
 export type LoginDto = {
   accessToken: string

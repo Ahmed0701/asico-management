@@ -12,6 +12,7 @@ import type {
   CreateUserInput,
   UpdateUserInput,
   UserListItem,
+  UserRole,
   UsersListParams,
 } from "./users.types"
 import * as api from "./users.api"
@@ -140,6 +141,27 @@ export function useUpdateUserMutation() {
     }) => api.updateUser(id, input, write),
     onError,
     onSuccess: (item) => patchUserCaches(qc, item),
+  })
+}
+
+/** Administrator or engineer: the answer carries the permissions too, so the page shows them at once. */
+export function useSetUserRoleMutation() {
+  const { onError, qc } = useUsersMutationDefaults()
+  return useMutation({
+    mutationFn: ({
+      id,
+      role,
+      write,
+    }: {
+      id: string
+      role: UserRole
+      write: Pick<WriteRequest, "ifMatch">
+    }) => api.setUserRole(id, role, write),
+    onError,
+    onSuccess: (item) => {
+      patchUserCaches(qc, item)
+      qc.setQueryData(usersKeys.detail(item.id), item)
+    },
   })
 }
 

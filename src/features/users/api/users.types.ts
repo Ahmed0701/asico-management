@@ -27,6 +27,8 @@ export type CreateUserInput = {
   name: string
   email: string
   password: string
+  /** EMPLOYEE (an engineer) unless an administrator creates another ADMIN. */
+  role?: UserRole
   isActive?: boolean
   permissions?: string[]
 }

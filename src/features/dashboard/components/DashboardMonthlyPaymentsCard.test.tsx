@@ -11,11 +11,12 @@ vi.mock("@/shared/api/client", async (importActual) => ({
   ...(await importActual<typeof import("@/shared/api/client")>()),
   api: http,
 }))
-const perms = vi.hoisted(() => ({ villas: true }))
+const perms = vi.hoisted(() => ({ villas: true, engineerScope: false }))
 vi.mock("@/features/auth/api", async (importActual) => ({
   ...(await importActual<typeof import("@/features/auth/api")>()),
   usePermissions: () => ({
     can: (code: string) => code !== "villas:read" || perms.villas,
+    engineerScope: perms.engineerScope,
   }),
 }))
 
@@ -54,6 +55,7 @@ function renderCard() {
 beforeEach(() => {
   vi.clearAllMocks()
   perms.villas = true
+  perms.engineerScope = false
 })
 
 describe("DashboardMonthlyPaymentsCard", () => {
@@ -70,6 +72,13 @@ describe("DashboardMonthlyPaymentsCard", () => {
         params: expect.objectContaining({ owed: "true" }),
       }),
     )
+  })
+
+  it("is not shown, nor asked for, to a user linked to an electrical engineer", () => {
+    perms.engineerScope = true
+    renderCard()
+    expect(screen.queryByRole("link")).toBeNull()
+    expect(http.get).not.toHaveBeenCalled()
   })
 
   it("is not shown, nor asked for, without villas:read", () => {

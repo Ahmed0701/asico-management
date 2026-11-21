@@ -6,7 +6,10 @@ import i18n from "@/shared/i18n"
 import { meQueryKey } from "@/features/auth/api/auth.queries"
 import RequirePermission from "./RequirePermission"
 
-function renderGuard(permissions: string[]) {
+function renderGuard(
+  permissions: string[],
+  options: { engineerScope?: boolean; notForEngineer?: boolean } = {},
+) {
   const qc = new QueryClient()
   qc.setQueryData(meQueryKey, {
     id: "u1",
@@ -16,11 +19,15 @@ function renderGuard(permissions: string[]) {
     isActive: true,
     createdAt: "2026-01-01T00:00:00.000Z",
     permissions,
+    ...(options.engineerScope ? { engineerScope: true } : {}),
   })
   return render(
     <QueryClientProvider client={qc}>
       <I18nextProvider i18n={i18n}>
-        <RequirePermission permission="audit:read">
+        <RequirePermission
+          permission="audit:read"
+          notForEngineer={options.notForEngineer}
+        >
           <p>Secret audit</p>
         </RequirePermission>
       </I18nextProvider>
@@ -37,6 +44,21 @@ describe("RequirePermission", () => {
 
   it("allows with audit:read", () => {
     renderGuard(["audit:read"])
+    expect(screen.getByText("Secret audit")).toBeInTheDocument()
+  })
+
+  it("blocks a user linked to an electrical engineer from a page that is not for it", () => {
+    renderGuard(["audit:read"], { engineerScope: true, notForEngineer: true })
+    expect(screen.queryByText("Secret audit")).not.toBeInTheDocument()
+  })
+
+  it("lets that user into the other pages, and anyone else into this one", () => {
+    renderGuard(["audit:read"], { engineerScope: true })
+    expect(screen.getByText("Secret audit")).toBeInTheDocument()
+  })
+
+  it("lets a user not linked into a page that is not for an engineer", () => {
+    renderGuard(["audit:read"], { notForEngineer: true })
     expect(screen.getByText("Secret audit")).toBeInTheDocument()
   })
 })

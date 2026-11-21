@@ -18,6 +18,8 @@ export const electricalEngineerFormSchema = z.object({
       { message: "validation.phoneInvalid" },
     ),
   email: optionalEmailField,
+  // The linked user account's id; empty: none.
+  userId: z.string(),
 })
 
 export type ElectricalEngineerFormValues = z.infer<typeof electricalEngineerFormSchema>

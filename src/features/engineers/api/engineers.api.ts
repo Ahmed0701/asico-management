@@ -12,6 +12,7 @@ import type {
   EngineersListParams,
   EngineersListResponse,
   UpdateEngineerInput,
+  TransferVillasResult,
 } from "./engineers.types"
 
 export const OPTIONS_CAP = 1000
@@ -96,5 +97,18 @@ export async function deleteEngineer(
     api.delete(`/civil-engineers/${id}`, {
       headers: buildWriteHeaders(write),
     }),
+  )
+}
+
+/** Moves every villa of the engineer to another, active, engineer. */
+export async function transferEngineerVillas(
+  id: string,
+  toEngineerId: string,
+): Promise<TransferVillasResult> {
+  return unwrap(
+    api.post<ApiSuccess<TransferVillasResult>>(
+      `/civil-engineers/${id}/transfer-villas`,
+      { toEngineerId },
+    ),
   )
 }

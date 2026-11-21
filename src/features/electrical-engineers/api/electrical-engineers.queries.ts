@@ -97,6 +97,16 @@ export function useElectricalEngineersListQuery() {
   })
 }
 
+/** The users the form can link; `enabled` false waits (only someone who may change engineers can load them). */
+export function useElectricalEngineerUserOptions(enabled = true) {
+  return useQuery({
+    queryKey: [...electricalEngineersKeys.all, "user-options"] as const,
+    queryFn: () => api.listElectricalEngineerUserOptions(),
+    enabled,
+    retry: false,
+  })
+}
+
 export function useElectricalEngineerOptions() {
   const qc = useQueryClient()
   return useQuery({
@@ -160,6 +170,20 @@ export function useUpdateElectricalEngineerMutation() {
     onSuccess: (item, { id }) => {
       invalidateElectricalEngineers(qc)
       qc.setQueryData(electricalEngineersKeys.detail(id), item)
+    },
+  })
+}
+
+/** Moves every villa of an engineer to another; the villas lists change too. */
+export function useTransferElectricalEngineerVillasMutation() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, toEngineerId }: { id: string; toEngineerId: string }) =>
+      api.transferElectricalEngineerVillas(id, toEngineerId),
+    onError: (err) => onElectricalEngineersForbidden(qc, toApiError(err)),
+    onSuccess: () => {
+      invalidateElectricalEngineers(qc)
+      void qc.invalidateQueries({ queryKey: ["villas"] })
     },
   })
 }

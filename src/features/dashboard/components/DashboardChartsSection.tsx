@@ -1,4 +1,5 @@
 import { Link } from "react-router"
+import { usePermissions } from "@/features/auth/api"
 import { useTranslation } from "react-i18next"
 import { toApiError } from "@/shared/api/errors"
 import { Card } from "@/shared/ui/PageHeader"
@@ -45,6 +46,8 @@ function ProgressTrendCard({
   points: NonNullable<DashboardCharts["progressTrend"]>
 }) {
   const { t, i18n } = useTranslation()
+  // A user linked to an electrical engineer does not open the Monthly Payments.
+  const { engineerScope } = usePermissions()
   const lang = i18n.language
   const first = points[0]
   const last = points[points.length - 1]
@@ -55,12 +58,14 @@ function ProgressTrendCard({
       title={t("dashboard.charts.progressTitle")}
       caption={t("dashboard.charts.progressCaption")}
       action={
-        <Link
-          to="/monthly-progress"
-          className="text-xs font-medium text-accent hover:underline"
-        >
-          {t("dashboard.charts.openMonthly")}
-        </Link>
+        engineerScope ? undefined : (
+          <Link
+            to="/monthly-progress"
+            className="text-xs font-medium text-accent hover:underline"
+          >
+            {t("dashboard.charts.openMonthly")}
+          </Link>
+        )
       }
       table={{
         headers: [

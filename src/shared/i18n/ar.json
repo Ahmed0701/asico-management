@@ -55,7 +55,9 @@
     "activeFilters_two": "فلتران مفعّلان",
     "activeFilters_few": "{{count}} فلاتر مفعّلة",
     "activeFilters_many": "{{count}} فلترًا مفعّلًا",
-    "activeFilters_other": "{{count}} فلتر مفعّل"
+    "activeFilters_other": "{{count}} فلتر مفعّل",
+    "showPassword": "إظهار كلمة المرور",
+    "hidePassword": "إخفاء كلمة المرور"
   },
   "nav": {
     "ownerNotes": "ملاحظات الملاك",
@@ -96,6 +98,35 @@
     "departmentOverhead": "المصاريف العامة للقسم"
   },
   "directory": {
+    "transferVillas": {
+      "button": "نقل الفلل",
+      "buttonFor": "نقل فلل {{name}} إلى مهندس آخر",
+      "title": "نقل كل الفلل إلى مهندس آخر",
+      "subtitle": "كل فلل {{name}} تنتقل إلى المهندس الذي تختاره، مرة واحدة.",
+      "count_zero": "لا توجد فلل للنقل",
+      "count_one": "سيتم نقل فيلا واحدة",
+      "count_two": "سيتم نقل فيلتين",
+      "count_few": "سيتم نقل {{count}} فلل",
+      "count_many": "سيتم نقل {{count}} فيلا",
+      "count_other": "سيتم نقل {{count}} فيلا",
+      "target": "انقلها إلى",
+      "targetPlaceholder": "اختر مهندسًا",
+      "targetRequired": "اختر المهندس الذي ستنتقل إليه الفلل",
+      "hint": "تظهر المهندسون النشطون فقط. بعدها يمكن حذف هذا المهندس.",
+      "noTargets": "لا يوجد مهندس نشط آخر لنقل الفلل إليه.",
+      "confirm_zero": "نقل",
+      "confirm_one": "نقل فيلا واحدة",
+      "confirm_two": "نقل فيلتين",
+      "confirm_few": "نقل {{count}} فلل",
+      "confirm_many": "نقل {{count}} فيلا",
+      "confirm_other": "نقل {{count}} فيلا",
+      "done_zero": "لم تكن هناك فلل لنقلها إلى {{name}}",
+      "done_one": "تم نقل فيلا واحدة إلى {{name}}",
+      "done_two": "تم نقل فيلتين إلى {{name}}",
+      "done_few": "تم نقل {{count}} فلل إلى {{name}}",
+      "done_many": "تم نقل {{count}} فيلا إلى {{name}}",
+      "done_other": "تم نقل {{count}} فيلا إلى {{name}}"
+    },
     "email": "البريد الإلكتروني",
     "emailPlaceholder": "name@company.com",
     "emailPendingBackend": "سيُحفظ البريد عند دعم واجهة البرمجة",
@@ -300,6 +331,7 @@
     "colLate": "مدة التأخير",
     "noOpenWorks": "لا أعمال مفتوحة",
     "smallWorksTotal": "الأعمال الصغيرة (الإجمالي)",
+    "smallWorksOpen": "الأعمال الصغيرة (غير المنجزة)",
     "smallWorksAlertsTitle": "تنبيهات الأعمال الصغيرة",
     "smallWorksAlertsCaption": "أعمال معلّقة على وشك التأخر أو متأخرة (توقيت التطبيق).",
     "smallWorksPending": "أعمال صغيرة معلّقة",
@@ -506,7 +538,29 @@
     "selectPlaceholder": "اختر مهندسًا…",
     "selectSearch": "تصفية المهندسين…",
     "selectForbidden": "تحتاج صلاحية عرض المهندسين الكهربائيين",
-    "optionsIncomplete": "قد تكون القائمة ناقصة، ضيّق البحث."
+    "optionsIncomplete": "قد تكون القائمة ناقصة، ضيّق البحث.",
+    "userAccount": "حساب المستخدم",
+    "noUserAccount": "غير مرتبط",
+    "userAccountHint": "عند الدخول بهذا الحساب، يرى المستخدم فلل هذا المهندس فقط في كل التطبيق. المديرون غير معروضين لأنهم يرون كل الفلل دائمًا.",
+    "userAccountPlaceholder": "بدون حساب مستخدم",
+    "userLinkedTo": "مرتبط بـ {{name}}",
+    "userInactive": "غير نشط",
+    "userOptionsFailed": "تعذر تحميل المستخدمين.",
+    "contact": "التواصل",
+    "villasPill_zero": "لا فلل",
+    "villasPill_one": "فيلا واحدة",
+    "villasPill_two": "فيلتان",
+    "villasPill_few": "{{count}} فلل",
+    "villasPill_many": "{{count}} فيلا",
+    "villasPill_other": "{{count}} فيلا",
+    "summary": {
+      "label": "نظرة سريعة على مهندسي الكهرباء",
+      "all": "مهندسو الكهرباء",
+      "active": "نشط",
+      "linked": "لديهم حساب مستخدم",
+      "villas": "الفلل المسندة",
+      "pageNote": "تُحسب البطاقات الثلاث الأخيرة للمهندسين الظاهرين في هذه الصفحة."
+    }
   },
   "villas": {
     "mewNotScheduled": "لم يُحدَّد",
@@ -1875,11 +1929,22 @@
     "adminResetRestricted": "يمكن لمديري النظام فقط إعادة تعيين كلمة مرور حساب مدير النظام.",
     "resetPasswordEmailFailed": "تم تسجيل خروج جلسات هذا المستخدم بالفعل، لكن تعذّر إرسال البريد. أعد المحاولة لإرسال رابط جديد.",
     "resetPasswordTooManyRequests": "محاولات كثيرة. يرجى المحاولة لاحقًا.",
-    "searchPlaceholder": "ابحث بالاسم أو البريد الإلكتروني…"
+    "searchPlaceholder": "ابحث بالاسم أو البريد الإلكتروني…",
+    "roleChoice": {
+      "label": "مدير أو مهندس",
+      "hint": {
+        "ADMIN": "كل الصلاحيات، ويرى كل الفلل",
+        "EMPLOYEE": "الصلاحيات التي تعطيها له فقط"
+      },
+      "confirmBody": {
+        "ADMIN": "هل تريد جعل {{name}} مديرًا؟ سيحصل على كل الصلاحيات ويرى كل الفلل.",
+        "EMPLOYEE": "هل تريد جعل {{name}} مهندسًا؟ سيفقد صلاحيات المدير ويبدأ بدون صلاحيات."
+      }
+    }
   },
   "roles": {
     "ADMIN": "مدير النظام",
-    "EMPLOYEE": "موظف",
+    "EMPLOYEE": "مهندس",
     "MANAGER": "مدير",
     "ENGINEER": "مهندس",
     "VIEWER": "مشاهد"

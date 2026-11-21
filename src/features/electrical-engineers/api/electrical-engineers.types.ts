@@ -8,6 +8,8 @@ export type ElectricalEngineer = {
   phone: string
   email?: string | null
   status: PartyStatus
+  /** The linked user account: signed in, it sees only this engineer's villas. */
+  user?: { id: string; name: string; email: string } | null
   villaCount: number
   createdAt: string
   updatedAt: string
@@ -16,6 +18,15 @@ export type ElectricalEngineer = {
 export type ElectricalEngineerOption = {
   id: string
   name: string
+}
+
+/** A user the engineer form can link: every user but the ADMINs, with the engineer it is linked to now. */
+export type ElectricalEngineerUserOption = {
+  id: string
+  name: string
+  email: string
+  isActive: boolean
+  engineer: { id: string; name: string } | null
 }
 
 export type ElectricalEngineersListParams = {
@@ -30,6 +41,7 @@ export type CreateElectricalEngineerInput = {
   name: string
   phone: string
   email?: string | null
+  userId?: string | null
 }
 
 export type UpdateElectricalEngineerInput = {
@@ -37,9 +49,16 @@ export type UpdateElectricalEngineerInput = {
   phone?: string
   email?: string | null
   status?: PartyStatus
+  userId?: string | null
 }
 
 export type ElectricalEngineersListResponse = {
   data: ElectricalEngineer[]
   meta: PaginatedMeta
+}
+
+/** The answer to moving every villa of an engineer to another one. */
+export type TransferVillasResult = {
+  moved: number
+  to: { id: string; name: string }
 }
