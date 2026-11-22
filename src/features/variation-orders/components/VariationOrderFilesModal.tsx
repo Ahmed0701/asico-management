@@ -21,7 +21,10 @@ const sizeText = (bytes: number) =>
 
 type Props = {
   item: VariationOrder | null
+  /** Removing a file. */
   canEdit: boolean
+  /** Adding files; defaults to canEdit. */
+  canUpload?: boolean
   onClose: () => void
 }
 
@@ -29,6 +32,7 @@ type Props = {
 export default function VariationOrderFilesModal({
   item,
   canEdit,
+  canUpload = canEdit,
   onClose,
 }: Props) {
   const { t } = useTranslation()
@@ -77,7 +81,7 @@ export default function VariationOrderFilesModal({
       title={t("variationOrders.filesTitle", { name: item.voNumber })}
       footer={
         <>
-          {canEdit && (
+          {canUpload && (
             <Button
               type="button"
               variant="primary"

@@ -164,3 +164,22 @@ export type VillasListResponse = {
   data: VillaListItem[]
   meta: PaginatedMeta
 }
+
+/** How many of each record deleting a villa removes with it. */
+export type VillaDeletionImpact = {
+  openWorks: number
+  smallWorks: number
+  siteReports: number
+  labour: number
+  deliveries: number
+  materialOrders: number
+  ownerNotes: number
+  foremanMissions: number
+  payments: number
+  progressPayments: number
+  variationOrders: number
+  overheadExpenses: number
+  documents: number
+  images: number
+  inspectionReports: number
+}

@@ -24,13 +24,19 @@ import VariationOrdersTable from "./VariationOrdersTable"
 type Props = {
   villaId: string
   canEdit: boolean
+  /** Adding a variation order and its files; an electrical engineer may add without editing. Defaults to canEdit. */
+  canAdd?: boolean
 }
 
 /**
  * The Variation Orders of a villa, folded like the MEW details: VO number, amount, date added, Pending or Paid, notes,
  * and their PDF files. Loaded the first time it is opened.
  */
-export default function VariationOrdersCard({ villaId, canEdit }: Props) {
+export default function VariationOrdersCard({
+  villaId,
+  canEdit,
+  canAdd = canEdit,
+}: Props) {
   const { t, i18n } = useTranslation()
   const [searchParams] = useSearchParams()
   const linked = searchParams.get("variationOrders") === "open"
@@ -131,7 +137,7 @@ export default function VariationOrdersCard({ villaId, canEdit }: Props) {
                 </span>
               </span>
             </div>
-            {canEdit && (
+            {canAdd && (
               <Button
                 type="button"
                 variant="primary"
@@ -174,6 +180,9 @@ export default function VariationOrdersCard({ villaId, canEdit }: Props) {
         open={formOpen}
         villaId={villaId}
         item={editing}
+        canSetStatus={canEdit}
+        // The files open next, so the VO's PDF is attached right away.
+        onCreated={(created) => setFilesId(created.id)}
         onClose={() => setFormOpen(false)}
       />
       <VariationOrderNotesModal
@@ -184,6 +193,7 @@ export default function VariationOrdersCard({ villaId, canEdit }: Props) {
       <VariationOrderFilesModal
         item={filesOf}
         canEdit={canEdit}
+        canUpload={canAdd}
         onClose={() => setFilesId(null)}
       />
       <ConfirmModal

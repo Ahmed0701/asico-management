@@ -11,6 +11,7 @@ import type {
   MewState,
   PhaseProgressUpdateDto,
   UpdateVillaInput,
+  VillaDeletionImpact,
   VillaDetail,
   VillaFiltersDto,
   VillaListItem,
@@ -121,6 +122,15 @@ export async function updateVilla(
         headers: buildWriteHeaders(write),
       }),
     ),
+  )
+}
+
+/** What deleting the villa would remove with it (villas:delete). */
+export async function getVillaDeletionImpact(
+  id: string,
+): Promise<VillaDeletionImpact> {
+  return unwrap(
+    api.get<ApiSuccess<VillaDeletionImpact>>(`/villas/${id}/deletion-impact`),
   )
 }
 

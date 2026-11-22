@@ -89,6 +89,10 @@ type Props = {
   open: boolean
   villaId: string
   item?: VariationOrder
+  /** Choosing Pending or Paid; without it (an electrical engineer) a new order is pending. Defaults to true. */
+  canSetStatus?: boolean
+  /** Called with a new order once it is added, e.g. to attach its PDF next. */
+  onCreated?: (item: VariationOrder) => void
   onClose: () => void
 }
 
@@ -97,6 +101,8 @@ export default function VariationOrderFormModal({
   open,
   villaId,
   item,
+  canSetStatus = true,
+  onCreated,
   onClose,
 }: Props) {
   if (!open) return null
@@ -105,6 +111,8 @@ export default function VariationOrderFormModal({
       key={item?.id ?? "new"}
       villaId={villaId}
       item={item}
+      canSetStatus={canSetStatus}
+      onCreated={onCreated}
       onClose={onClose}
     />
   )
@@ -113,10 +121,18 @@ export default function VariationOrderFormModal({
 type InnerProps = {
   villaId: string
   item?: VariationOrder
+  canSetStatus: boolean
+  onCreated?: (item: VariationOrder) => void
   onClose: () => void
 }
 
-function Inner({ villaId, item, onClose }: InnerProps) {
+function Inner({
+  villaId,
+  item,
+  canSetStatus,
+  onCreated,
+  onClose,
+}: InnerProps) {
   const { t } = useTranslation()
   const create = useCreateVariationOrderMutation()
   const update = useUpdateVariationOrderMutation()
@@ -172,12 +188,13 @@ function Inner({ villaId, item, onClose }: InnerProps) {
           })
         }
       } else {
-        await create.mutateAsync({
+        const created = await create.mutateAsync({
           villaId,
           input,
           write: idempotencyWrite(idempotency.getKey()),
         })
         toast.success(t("variationOrders.added"))
+        onCreated?.(created)
       }
       idempotency.resetKey()
       onClose()
@@ -236,17 +253,19 @@ function Inner({ villaId, item, onClose }: InnerProps) {
             onChange={(e) => set("dateAdded")(e.target.value)}
             error={errors.dateAdded}
           />
-          <Select
-            label={t("variationOrders.status")}
-            value={values.status}
-            onChange={(e) =>
-              set("status")(e.target.value as VariationOrderStatus)
-            }
-            options={VARIATION_ORDER_STATUSES.map((status) => ({
-              value: status,
-              label: t(`variationOrders.statuses.${status}`),
-            }))}
-          />
+          {canSetStatus && (
+            <Select
+              label={t("variationOrders.status")}
+              value={values.status}
+              onChange={(e) =>
+                set("status")(e.target.value as VariationOrderStatus)
+              }
+              options={VARIATION_ORDER_STATUSES.map((status) => ({
+                value: status,
+                label: t(`variationOrders.statuses.${status}`),
+              }))}
+            />
+          )}
         </div>
         <Textarea
           label={t("variationOrders.notes")}

@@ -6,7 +6,6 @@ import { useTranslation } from "react-i18next"
 import { usePermissions } from "@/features/auth/api"
 import { toApiError } from "@/shared/api/errors"
 import { toast } from "@/shared/lib/toast"
-import { ConfirmModal } from "@/shared/ui/Modal"
 import { Card } from "@/shared/ui/PageHeader"
 import { VillaDetailSkeleton } from "@/shared/ui/loading-skeletons"
 import {
@@ -24,6 +23,7 @@ import VillaPaymentHistoryCard from "@/features/monthly-progress/components/Vill
 import VillaSiteImagesCard from "@/features/villa-images/components/VillaSiteImagesCard"
 import VillaVendorsCard from "@/features/materials/components/VillaVendorsCard"
 import VillaDetailTabbedPanel from "../components/VillaDetailTabbedPanel"
+import VillaDeleteDialog from "../components/VillaDeleteDialog"
 import VillaFormModal from "../components/VillaFormModal"
 
 // A small title between the groups of the villa page, with a line that fades out.
@@ -160,7 +160,11 @@ export default function VillaDetailPage() {
         />
       )}
       <VillaDetailMewCard villa={villa} />
-      <VariationOrdersCard villaId={villa.id} canEdit={canUpdate} />
+      <VariationOrdersCard
+        villaId={villa.id}
+        canEdit={canUpdate}
+        canAdd={canUpdate || engineerScope}
+      />
       {canMaterials && (
         <VillaVendorsCard villaId={villa.id} villaNumber={villa.villaNumber} />
       )}
@@ -183,14 +187,11 @@ export default function VillaDetailPage() {
           navigate("/villas")
         }}
       />
-      <ConfirmModal
-        open={deleteOpen}
-        title={t("villas.deleteTitle")}
-        message={t("villas.deleteBody", { name: villa.villaNumber })}
-        confirmLabel={t("common.delete")}
+      <VillaDeleteDialog
+        villa={deleteOpen ? villa : null}
+        pending={remove.isPending}
         onConfirm={() => void handleDelete()}
         onClose={() => setDeleteOpen(false)}
-        confirmPending={remove.isPending}
       />
     </>
   )

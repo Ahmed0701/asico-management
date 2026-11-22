@@ -283,6 +283,18 @@ export function useUpdateVillaMutation() {
   })
 }
 
+/** What deleting the villa would remove with it; loads while the confirmation is open. */
+export function useVillaDeletionImpactQuery(id: string | undefined) {
+  return useQuery({
+    queryKey: [...villasKeys.all, "deletion-impact", id ?? ""] as const,
+    queryFn: () => api.getVillaDeletionImpact(id!),
+    enabled: !!id,
+    staleTime: 0,
+    gcTime: 0,
+    retry: false,
+  })
+}
+
 export function useDeleteVillaMutation() {
   const qc = useQueryClient()
   return useMutation({
@@ -296,7 +308,8 @@ export function useDeleteVillaMutation() {
     onError: (err) => onVillasForbidden(qc, toApiError(err)),
     onSuccess: (_void, { id }) => {
       removeVillaDetailCache(qc, id)
-      invalidateVillaListsAndDashboard(qc)
+      // Everything that belonged to the villa went with it (open works, small works, payments...): every list refreshes.
+      void qc.invalidateQueries()
     },
   })
 }

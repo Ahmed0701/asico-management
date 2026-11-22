@@ -660,7 +660,7 @@
     "showingRange": "عرض {{start}}–{{end}} من {{total}}",
     "goToLastPage": "الانتقال إلى الصفحة الأخيرة",
     "deleteTitle": "حذف الفيلا",
-    "deleteBody": "حذف الفيلا «{{name}}»؟ لا يمكن التراجع.",
+    "deleteBody": "هل تريد حذف الفيلا “{{name}}” وكل ما يخصها؟ لا يمكن التراجع عن ذلك.",
     "deleteAlreadyGone": "تمت إزالة هذه الفيلا مسبقاً.",
     "mockSliceMissing": "لا بيانات تجريبية محلية لرقم الفيلا هذا بعد.",
     "mockProgressHint": "بيانات تجريبية عند تطابق البذرة مع رقم الفيلا",
@@ -761,6 +761,29 @@
       "shareOf": "{{share}}% من المصاريف العامة للقسم",
       "expenses": "مصروفات إضافية",
       "expensesHint": "المصروفات الإضافية ({{amount}}) تأتي من صفحة المصاريف العامة للقسم."
+    },
+    "deleteImpact": {
+      "title": "سيتم حذف هذه معها",
+      "loading": "جارٍ التحقق مما يخص هذه الفيلا…",
+      "failed": "تعذّر التحقق مما يخص هذه الفيلا. كل ما يخصها سيُحذف معها.",
+      "nothing": "لا يوجد شيء آخر يخص هذه الفيلا.",
+      "kinds": {
+        "openWorks": "الأعمال المفتوحة",
+        "smallWorks": "الأعمال الصغيرة",
+        "siteReports": "تقارير الموقع",
+        "labour": "العمالة اليومية",
+        "deliveries": "توريدات المواد",
+        "materialOrders": "طلبات المواد",
+        "ownerNotes": "ملاحظات المالك",
+        "foremanMissions": "مهام الفورمان",
+        "payments": "الدفعات",
+        "progressPayments": "المدفوعات الشهرية",
+        "variationOrders": "أوامر التغيير",
+        "overheadExpenses": "المصروفات الإضافية",
+        "documents": "المستندات",
+        "images": "الصور",
+        "inspectionReports": "تقرير الفحص"
+      }
     }
   },
   "villaDocuments": {

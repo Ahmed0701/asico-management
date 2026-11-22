@@ -660,7 +660,7 @@
     "showingRange": "Showing {{start}}–{{end}} of {{total}}",
     "goToLastPage": "Go to last page",
     "deleteTitle": "Delete villa",
-    "deleteBody": "Delete villa “{{name}}”? This cannot be undone.",
+    "deleteBody": "Delete villa “{{name}}” and everything that belongs to it? This cannot be undone.",
     "deleteAlreadyGone": "This villa was already removed.",
     "mockSliceMissing": "No local mock data for this villa number yet.",
     "mockProgressHint": "mock data when seed matches villa number",
@@ -761,6 +761,29 @@
       "shareOf": "{{share}}% of Department Overhead",
       "expenses": "Additional Expenses",
       "expensesHint": "Additional expenses ({{amount}}) come from the Department Overhead page."
+    },
+    "deleteImpact": {
+      "title": "These go with it",
+      "loading": "Checking what belongs to this villa…",
+      "failed": "Could not check what belongs to this villa. Everything that belongs to it is deleted with it.",
+      "nothing": "Nothing else belongs to this villa.",
+      "kinds": {
+        "openWorks": "Open works",
+        "smallWorks": "Small works",
+        "siteReports": "Site reports",
+        "labour": "Daily labour",
+        "deliveries": "Material deliveries",
+        "materialOrders": "Material orders",
+        "ownerNotes": "Owner notes",
+        "foremanMissions": "Foreman missions",
+        "payments": "Payments",
+        "progressPayments": "Monthly payments",
+        "variationOrders": "Variation orders",
+        "overheadExpenses": "Additional expenses",
+        "documents": "Documents",
+        "images": "Images",
+        "inspectionReports": "Inspection report"
+      }
     }
   },
   "villaDocuments": {

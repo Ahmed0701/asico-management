@@ -6,7 +6,6 @@ import { usePermissions } from "@/features/auth/api"
 import { toApiError } from "@/shared/api/errors"
 import { useDebouncedSearchParam } from "@/shared/hooks/useDebouncedSearchParam"
 import { normalizeSearchInput } from "@/shared/lib/phone/phoneNormalize"
-import { ConfirmModal } from "@/shared/ui/Modal"
 import PageHeader from "@/shared/ui/PageHeader"
 import ListToolbar from "@/shared/list/ListToolbar"
 import { downloadExport } from "@/shared/export/downloadExport"
@@ -25,6 +24,7 @@ import VillaFormModal from "../components/VillaFormModal"
 import VillaListFiltersBar from "../components/VillaListFiltersBar"
 import VillasListErrorBanner from "../components/VillasListErrorBanner"
 import VillasListFooter from "../components/VillasListFooter"
+import VillaDeleteDialog from "../components/VillaDeleteDialog"
 import VillasTable from "../components/VillasTable"
 
 export default function VillasPage() {
@@ -205,14 +205,11 @@ export default function VillasPage() {
           void refetch()
         }}
       />
-      <ConfirmModal
-        open={!!deleting}
-        title={t("villas.deleteTitle")}
-        message={t("villas.deleteBody", { name: deleting?.villaNumber ?? "" })}
-        confirmLabel={t("common.delete")}
+      <VillaDeleteDialog
+        villa={deleting}
+        pending={remove.isPending}
         onConfirm={() => void handleDelete()}
         onClose={() => setDeleting(null)}
-        confirmPending={remove.isPending}
       />
       <ImportWizardModal
         open={importOpen}
