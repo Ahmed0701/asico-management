@@ -25,7 +25,7 @@ import DashboardLinkCard from "./DashboardLinkCard"
 import DashboardMonthlyPaymentsCard from "./DashboardMonthlyPaymentsCard"
 import DashboardPairSplit from "./DashboardPairSplit"
 import DashboardProgressBreakdown from "./DashboardProgressBreakdown"
-import DashboardStatusBreakdown from "./DashboardStatusBreakdown"
+import DashboardOpenWorksBreakdown from "./DashboardOpenWorksBreakdown"
 import DashboardUtcHint from "./DashboardUtcHint"
 import DashboardSmallWorksSection from "./DashboardSmallWorksSection"
 import DashboardOverdueOpenWorksSection from "./DashboardOverdueOpenWorksSection"
@@ -90,21 +90,6 @@ export default function DashboardSummarySection({
       </Card>
     )
   }
-
-  // Done open works leave the dashboard (they are on the Done Works page): only the ones still to finish are shown.
-  const openWorkSegments = data.openWorks
-    ? ([
-        ["NOT_STARTED", "bg-muted-foreground/40"],
-        ["IN_PROGRESS", "bg-open"],
-        ["DELAYED", "bg-accent"],
-      ] as const).map(([status, tone]) => ({
-        key: status,
-        label: t(`openWorks.status.${status}`),
-        count: data.openWorks!.byStatus[status],
-        tone,
-        href: dashboardLinks.openWorksStatus(status),
-      }))
-    : []
 
   return (
     <div className="space-y-6" aria-busy={isFetching}>
@@ -385,21 +370,7 @@ export default function DashboardSummarySection({
 
       {data.openWorks && (
         <Card className="p-4">
-          <DashboardStatusBreakdown
-            heading={t("dashboard.openWorksTitle")}
-            segments={openWorkSegments}
-            emptyKey="dashboard.noOpenWorks"
-          />
-          <p className="mt-3 text-xs">
-            <Link
-              to={dashboardLinks.openWorksOverdue()}
-              className="text-accent hover:underline"
-            >
-              {t("dashboard.openWorksOverdueLink", {
-                count: formatDashboardCount(data.openWorks.overdue),
-              })}
-            </Link>
-          </p>
+          <DashboardOpenWorksBreakdown openWorks={data.openWorks} />
         </Card>
       )}
 
