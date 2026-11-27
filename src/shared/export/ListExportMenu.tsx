@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react"
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import type { ApiError } from "@/shared/api/types"
 import { toast } from "@/shared/lib/toast"
@@ -9,6 +9,17 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/shared/ui/tooltip"
 import { cn } from "@/shared/lib/cn"
 import { EXPORT_MAX_RECORDS, type ExportFormat } from "./constants"
 import { useExportContext } from "./ExportProvider"
+import ExportColumnsDialog from "./ExportColumnsDialog"
+import {
+  rememberColumns,
+  rememberedColumns,
+  withColumnChooser,
+  type ColumnChooser,
+} from "./columnChoice"
+
+type ColumnRequest = Parameters<ColumnChooser>[0] & {
+  resolve: (chosen: string[] | null) => void
+}
 
 export type ListExportMenuProps = {
   total: number | undefined
@@ -58,6 +69,25 @@ export function ListExportMenu({
     markRateLimited,
   } = useExportContext()
   const [liveMessage, setLiveMessage] = useState("")
+  const [columnRequest, setColumnRequest] = useState<ColumnRequest | null>(null)
+  // The open question, so it can be answered "cancelled" if the menu goes away first (the export then ends).
+  const pendingRef = useRef<ColumnRequest | null>(null)
+  // Opens the column dialog and waits for the person's choice (null when they cancel).
+  const chooseColumns = useCallback<ColumnChooser>(
+    (request) =>
+      new Promise((resolve) => {
+        const pending = { ...request, resolve }
+        pendingRef.current = pending
+        setColumnRequest(pending)
+      }),
+    [],
+  )
+  const answer = (chosen: string[] | null) => {
+    pendingRef.current?.resolve(chosen)
+    pendingRef.current = null
+    setColumnRequest(null)
+  }
+  useEffect(() => () => pendingRef.current?.resolve(null), [])
 
   const tooMany = total !== undefined && total > EXPORT_MAX_RECORDS
   const noData = total === 0
@@ -65,11 +95,19 @@ export function ListExportMenu({
   const exportBlocked = listLoading || totalPending || noData
   const disabled = isExporting || isCooldown || tooMany || exportBlocked
 
-  const handleExport = async (format: ExportFormat, close: () => void) => {
+  const handleExport = async (
+    format: ExportFormat,
+    close: () => void,
+    pickColumns = false,
+  ) => {
     close()
     setLiveMessage(t("export.inProgress"))
     try {
-      await runExport(format, (signal) => onExport(format, signal))
+      await runExport(format, (signal) =>
+        pickColumns
+          ? withColumnChooser(chooseColumns, () => onExport(format, signal))
+          : onExport(format, signal),
+      )
       toast.success(t("export.downloaded"))
       setLiveMessage(t("export.downloaded"))
     } catch (err) {
@@ -97,7 +135,11 @@ export function ListExportMenu({
           setLiveMessage(apiErr.message)
           return
         }
-        if (apiErr.code === "EXPORT_TOO_LARGE") {
+        if (
+          apiErr.code === "EXPORT_TOO_LARGE" ||
+          apiErr.code === "EXPORT_COLUMNS_UNAVAILABLE" ||
+          apiErr.code === "EXPORT_COLUMNS_UNKNOWN"
+        ) {
           toast.error(apiErr.message)
           setLiveMessage(apiErr.message)
           return
@@ -111,6 +153,10 @@ export function ListExportMenu({
       }
       toast.error(t("export.failedGeneric"))
       setLiveMessage(t("export.failedGeneric"))
+    } finally {
+      // However the export ended (cancelled while the dialog was open, too), the dialog closes.
+      pendingRef.current = null
+      setColumnRequest(null)
     }
   }
 
@@ -186,6 +232,18 @@ export function ListExportMenu({
               {t("export.pdf")}
             </span>
           </MenuItem>
+          <MenuItem
+            disabled={disabled}
+            onClick={() => void handleExport("xlsx", close, true)}
+          >
+            {t("export.columns.excel")}
+          </MenuItem>
+          <MenuItem
+            disabled={disabled}
+            onClick={() => void handleExport("pdf", close, true)}
+          >
+            {t("export.columns.pdf")}
+          </MenuItem>
         </>
       )}
     </Menu>
@@ -203,6 +261,24 @@ export function ListExportMenu({
       menuTrigger
     )
 
+  const columnDialog = columnRequest && (
+    <ExportColumnsDialog
+      columns={columnRequest.columns}
+      initial={(() => {
+        const last = rememberedColumns(columnRequest.key)?.filter((title) =>
+          columnRequest.columns.includes(title),
+        )
+        return last && last.length > 0 ? last : columnRequest.columns
+      })()}
+      format={columnRequest.format}
+      onConfirm={(chosen) => {
+        rememberColumns(columnRequest.key, chosen)
+        answer(chosen)
+      }}
+      onCancel={() => answer(null)}
+    />
+  )
+
   return (
     <div
       className={cn(
@@ -210,6 +286,7 @@ export function ListExportMenu({
         className,
       )}
     >
+      {columnDialog}
       <div
         className={cn(
           layout === "toolbar"

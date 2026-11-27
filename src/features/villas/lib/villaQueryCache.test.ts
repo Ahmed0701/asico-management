@@ -31,6 +31,7 @@ const baseDetail = (): VillaDetail => ({
   mewAcState: "NOT_SUBMITTED",
   mewElecState: "NOT_SUBMITTED",
   mewInspectionDate: null,
+  electricityConnectionDate: null,
   version: 2,
   createdAt: "2026-01-01T00:00:00.000Z",
   updatedAt: "2026-01-02T00:00:00.000Z",

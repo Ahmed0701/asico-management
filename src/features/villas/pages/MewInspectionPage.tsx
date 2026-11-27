@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useCallback, useState } from "react"
 import { useSearchParams, useNavigate } from "react-router"
 import { useTranslation } from "react-i18next"
 import { usePermissions } from "@/features/auth/api"
@@ -6,9 +6,12 @@ import { useDebouncedSearchParam } from "@/shared/hooks/useDebouncedSearchParam"
 import { normalizeSearchInput } from "@/shared/lib/phone/phoneNormalize"
 import { toast } from "@/shared/lib/toast"
 import PageHeader from "@/shared/ui/PageHeader"
+import ListPageHeaderActions from "@/shared/list/ListPageHeaderActions"
+import { downloadExport } from "@/shared/export/downloadExport"
 import Button from "@/shared/ui/Button"
 import { toApiError } from "@/shared/api/errors"
 import {
+  buildVillasQueryParams,
   useMewInspectionListParams,
   useMewInspectionListQuery,
   useMewReportsQuery,
@@ -35,6 +38,20 @@ export default function MewInspectionPage() {
   const { can } = usePermissions()
   const canEdit = can("villas:inspection")
   const { params, setParam, setPage, setLimit } = useMewInspectionListParams()
+  const canExport = can("villas:export")
+  // The villas of the current search: the server writes the MEW Inspection columns, with each villa's report, for this filter.
+  const onExport = useCallback(
+    async (format: "xlsx" | "pdf", signal: AbortSignal) => {
+      await downloadExport({
+        path: "/villas/export",
+        query: buildVillasQueryParams(params, { forExport: true }),
+        format,
+        filenameStem: "mew-inspection",
+        signal,
+      })
+    },
+    [params],
+  )
   const { data, isLoading, isError, error, refetch } =
     useMewInspectionListQuery()
   const { searchDraft, setSearchDraft } = useDebouncedSearchParam(
@@ -120,14 +137,27 @@ export default function MewInspectionPage() {
         title={t("mewInspection.title")}
         subtitle={t("mewInspection.subtitle")}
         actions={
-          <Button
-            type="button"
-            size="sm"
-            icon="check"
-            onClick={() => navigate("/villas/mew-inspection-passed")}
-          >
-            {t("mewInspectionPassed.title")}
-          </Button>
+          <>
+            <Button
+              type="button"
+              size="sm"
+              icon="check"
+              onClick={() => navigate("/villas/mew-inspection-passed")}
+            >
+              {t("mewInspectionPassed.title")}
+            </Button>
+            {canExport && (
+              <ListPageHeaderActions
+                showImport={false}
+                exportAction={{
+                  kind: "menu",
+                  total: meta?.total,
+                  listLoading: isLoading,
+                  onExport,
+                }}
+              />
+            )}
+          </>
         }
       />
       <MewInspectionSummary

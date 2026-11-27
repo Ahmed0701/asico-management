@@ -9,6 +9,7 @@ import {
 import { I18nextProvider } from "react-i18next"
 import { MemoryRouter } from "react-router"
 import { beforeEach, describe, expect, it, vi } from "vitest"
+import { ExportProvider } from "@/shared/export/ExportProvider"
 import i18n from "@/shared/i18n"
 import type { VillaListItem } from "../api"
 import MewInspectionPassedPage from "./MewInspectionPassedPage"
@@ -47,6 +48,7 @@ const villa = (
   mewAcState: "APPROVED",
   mewElecState: "APPROVED",
   mewInspectionDate: null,
+  electricityConnectionDate: null,
   version: 1,
   createdAt: daysAgo(200),
   updatedAt: daysAgo(1),
@@ -64,17 +66,23 @@ const report = {
 const http = vi.hoisted(() => ({
   get: vi.fn(),
   post: vi.fn(),
+  patch: vi.fn(),
   delete: vi.fn(),
 }))
 vi.mock("@/shared/api/client", async (importActual) => ({
   ...(await importActual<typeof import("@/shared/api/client")>()),
   api: http,
 }))
-const perms = vi.hoisted(() => ({ edit: true }))
+const perms = vi.hoisted(() => ({ edit: true, export: true }))
 vi.mock("@/features/auth/api", async (importActual) => ({
   ...(await importActual<typeof import("@/features/auth/api")>()),
   usePermissions: () => ({
-    can: (code: string) => code !== "villas:inspection" || perms.edit,
+    can: (code: string) =>
+      code === "villas:inspection"
+        ? perms.edit
+        : code === "villas:export"
+          ? perms.export
+          : true,
   }),
 }))
 
@@ -98,7 +106,9 @@ function renderPage() {
     >
       <I18nextProvider i18n={i18n}>
         <MemoryRouter initialEntries={["/villas/mew-inspection-passed"]}>
-          <MewInspectionPassedPage />
+          <ExportProvider>
+            <MewInspectionPassedPage />
+          </ExportProvider>
         </MemoryRouter>
       </I18nextProvider>
     </QueryClientProvider>,
@@ -108,6 +118,7 @@ function renderPage() {
 beforeEach(() => {
   vi.clearAllMocks()
   perms.edit = true
+  perms.export = true
 })
 
 describe("MEW Inspection Passed", () => {
@@ -148,10 +159,49 @@ describe("MEW Inspection Passed", () => {
     )
   })
 
+  it("saves the electricity connection date as soon as it is picked", async () => {
+    http.patch.mockResolvedValue({
+      data: { data: { ...rows[0], electricityConnectionDate: "2026-12-15" } },
+    })
+    renderPage()
+    const input = await screen.findByLabelText(
+      "Electricity connection date of villa V-1",
+    )
+    const v1 = input.closest("tr")!
+    expect(within(v1).getByText("Not connected yet")).toBeTruthy()
+
+    fireEvent.change(input, { target: { value: "2026-12-15" } })
+
+    await waitFor(() =>
+      expect(http.patch).toHaveBeenCalledWith(
+        "/villas/v1/mew-states",
+        { electricityConnectionDate: "2026-12-15" },
+        expect.anything(),
+      ),
+    )
+  })
+
   it("only reads the list without villas:inspection", async () => {
     perms.edit = false
     renderPage()
-    await screen.findByRole("link", { name: "V-1" })
+    const v1 = (await screen.findByRole("link", { name: "V-1" })).closest("tr")!
     expect(screen.queryByRole("button", { name: /Take back/ })).toBeNull()
+    expect(
+      screen.queryByLabelText(/Electricity connection date of villa/),
+    ).toBeNull()
+    expect(within(v1).getByText("Not connected yet")).toBeTruthy()
+  })
+
+  it("offers the MEW Inspection Passed export to who may export villas", async () => {
+    renderPage()
+    await screen.findByRole("link", { name: "V-1" })
+    expect(screen.getByRole("button", { name: /Export/ })).toBeTruthy()
+  })
+
+  it("has no export without villas:export", async () => {
+    perms.export = false
+    renderPage()
+    await screen.findByRole("link", { name: "V-1" })
+    expect(screen.queryByRole("button", { name: /Export/ })).toBeNull()
   })
 })

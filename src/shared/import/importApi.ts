@@ -155,7 +155,10 @@ export async function postImport(options: {
 
   const lang = i18n.language === "ar" ? "ar" : "en"
   const base = options.path.startsWith("/") ? options.path : `/${options.path}`
-  const url = `${API_BASE_URL}${base}${options.dryRun ? "?dryRun=true" : ""}`
+  // The path may carry its own query (the store an import goes into): dryRun is added to it.
+  const url = `${API_BASE_URL}${base}${
+    options.dryRun ? `${base.includes("?") ? "&" : "?"}dryRun=true` : ""
+  }`
 
   const form = new FormData()
   form.append("file", options.file)

@@ -6,6 +6,7 @@ import type { ApiError } from "@/shared/api/types"
 import { parseDownloadFilename } from "@/shared/lib/parseContentDisposition"
 import type { ExportFilenameStem, ExportFormat } from "./constants"
 import { EXPORT_FETCH_TIMEOUT_MS, fallbackExportFilename } from "./constants"
+import { activeColumnChooser } from "./columnChoice"
 
 function errorFromResponse(status: number, body: unknown): ApiError {
   if (isApiErrorFlatBody(body)) {
@@ -59,6 +60,53 @@ function toQueryString(
   return sp.toString()
 }
 
+// The titles of the columns the export would write (describe=columns): nothing is made or counted by the server.
+async function describeColumns(
+  base: string,
+  query: Record<string, string | number | boolean>,
+  format: ExportFormat,
+  headers: Record<string, string>,
+  signal: AbortSignal | undefined,
+): Promise<string[]> {
+  const params = toQueryString({ ...query, format, describe: "columns" })
+  let res: Response
+  try {
+    res = await fetch(`${base}?${params}`, {
+      headers,
+      ...(signal && { signal }),
+    })
+  } catch (err) {
+    if (signal?.aborted) throw err
+    throw errorFromResponse(0, {
+      code: "NETWORK_ERROR",
+      message: i18n.t("export.failedGeneric"),
+    })
+  }
+  let body: unknown = null
+  try {
+    body = await res.json()
+  } catch {
+    body = null
+  }
+  if (!res.ok) {
+    if (res.status === 401) notifySessionExpired()
+    throw errorFromResponse(res.status, body ?? { code: "UNKNOWN" })
+  }
+  const columns = (body as { data?: { columns?: unknown } } | null)?.data
+    ?.columns
+  if (
+    !Array.isArray(columns) ||
+    columns.length === 0 ||
+    !columns.every((title) => typeof title === "string")
+  ) {
+    throw errorFromResponse(0, {
+      code: "EXPORT_COLUMNS_UNAVAILABLE",
+      message: i18n.t("export.columns.unavailable"),
+    })
+  }
+  return columns
+}
+
 export type DownloadExportOptions = {
   path: string
   query: Record<string, string | number | boolean>
@@ -84,21 +132,49 @@ export async function downloadExport({
   }
 
   const lang = i18n.language === "ar" ? "ar" : "en"
-  const params = toQueryString({ ...query, format })
-  const url = `/api/v1${path.startsWith("/") ? path : `/${path}`}?${params}`
+  const headers = { Authorization: `Bearer ${token}`, "Accept-Language": lang }
+  const base = `/api/v1${path.startsWith("/") ? path : `/${path}`}`
+
+  // "Choose columns": ask the server for the file's column titles, let the person pick, then ask for those only.
+  let columns: string[] | undefined
+  const chooser = activeColumnChooser()
+  if (chooser) {
+    const available = await describeColumns(
+      base,
+      query,
+      format,
+      headers,
+      signal,
+    )
+    // Cancelling the export while the dialog is open answers it as cancelled too.
+    const picked = await new Promise<string[] | null>((resolve, reject) => {
+      const onAbort = () => resolve(null)
+      signal?.addEventListener("abort", onAbort, { once: true })
+      chooser({ columns: available, format, key: `${path}|${format}` }).then(
+        (chosen) => {
+          signal?.removeEventListener("abort", onAbort)
+          resolve(chosen)
+        },
+        reject,
+      )
+    })
+    if (picked === null) throw new DOMException("cancelled", "AbortError")
+    if (picked.length < available.length) columns = picked
+  }
+
+  const params = toQueryString({
+    ...query,
+    format,
+    ...(columns && { columns: columns.join(",") }),
+  })
+  const url = `${base}?${params}`
 
   const timeout = AbortSignal.timeout(EXPORT_FETCH_TIMEOUT_MS)
   const combined = mergeAbortSignals(signal, timeout)
 
   let res: Response
   try {
-    res = await fetch(url, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Accept-Language": lang,
-      },
-      signal: combined,
-    })
+    res = await fetch(url, { headers, signal: combined })
   } catch (err) {
     if (signal?.aborted) {
       throw err

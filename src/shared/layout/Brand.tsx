@@ -10,21 +10,19 @@ export default function Brand({ compact = false, withTagline = false }: Props) {
   return (
     <div className="flex items-center gap-2.5">
       <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-primary text-primary-foreground shadow-sm ring-1 ring-black/5">
+        {/* A lightning bolt: Elecico does electrical works. */}
         <svg
           width="19"
           height="19"
           viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2.2"
-          strokeLinecap="round"
+          aria-hidden
           strokeLinejoin="round"
         >
-          <path d="M3 20V11l9-7 9 7v9" />
           <path
-            d="M9 20v-6h6v6"
-            className="text-accent"
+            d="M13.2 2.5 4.6 13.8h6.2l-1.3 7.7 8.9-11.7h-6.3l1.1-7.3Z"
+            fill="var(--accent)"
             stroke="var(--accent)"
+            strokeWidth="1.2"
           />
         </svg>
       </span>

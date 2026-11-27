@@ -41,6 +41,8 @@ type ImportWizardModalProps = {
   onSuccess?: () => void
   /** When true, explains that each row is saved to the villa named in the file. */
   villaRowTargetNote?: boolean
+  /** One more line for the notes (where the rows go, when the page decides it). */
+  extraNote?: string
 }
 
 function formatBytes(max: number): string {
@@ -54,6 +56,7 @@ export default function ImportWizardModal({
   config,
   onSuccess,
   villaRowTargetNote = false,
+  extraNote,
 }: ImportWizardModalProps) {
   const { t, i18n } = useTranslation()
   const [state, dispatch] = useReducer(
@@ -225,6 +228,7 @@ export default function ImportWizardModal({
   const title = t(`import.resources.${config.id}.title`)
   const description = t(`import.resources.${config.id}.description`)
   const importExtraNotes = [
+    extraNote ?? null,
     villaRowTargetNote ? t("import.villaRowTargetNote") : null,
     config.id === "villas" ? t("import.resources.villas.budgetNote") : null,
     config.id === "open-works"

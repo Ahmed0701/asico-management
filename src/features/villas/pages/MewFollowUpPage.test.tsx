@@ -35,6 +35,7 @@ const villa = (over: Partial<VillaListItem>): VillaListItem => ({
   mewAcState: "RUNNING",
   mewElecState: "APPROVED",
   mewInspectionDate: null,
+  electricityConnectionDate: null,
   version: 1,
   createdAt: daysAgo(30),
   updatedAt: daysAgo(1),

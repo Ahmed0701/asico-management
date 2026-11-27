@@ -4,7 +4,7 @@ export const EXPORT_FETCH_TIMEOUT_MS = 60_000
 
 export type ExportFormat = "xlsx" | "pdf"
 
-export type ExportFilenameStem = "villas" | "contractors" | "civil-engineers" | "electrical-engineers" | "contractor-summary" | "audit-logs" | "areas" | "open-works" | "daily-reports" | "small-works" | "site-reports" | "daily-labour" | "material-deliveries" | "material-balance" | "payments" | "payment-history"
+export type ExportFilenameStem = "villas" | "contractors" | "civil-engineers" | "electrical-engineers" | "contractor-summary" | "audit-logs" | "areas" | "open-works" | "daily-reports" | "small-works" | "site-reports" | "daily-labour" | "material-deliveries" | "material-balance" | "payments" | "payment-history" | "mew-inspection-passed" | "monthly-payments" | "mew-follow-up" | "mew-inspection" | "store-stock" | "store-movements"
 
 export function fallbackExportFilename(
   stem: ExportFilenameStem,

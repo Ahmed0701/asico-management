@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useCallback, useState } from "react"
 import { useQueryClient } from "@tanstack/react-query"
 import { useSearchParams } from "react-router"
 import { useTranslation } from "react-i18next"
@@ -19,7 +19,10 @@ import ListToolbar, {
 import { Checkbox } from "@/shared/ui/checkbox"
 import { ConfirmModal } from "@/shared/ui/Modal"
 import PageHeader from "@/shared/ui/PageHeader"
+import ListPageHeaderActions from "@/shared/list/ListPageHeaderActions"
+import { downloadExport } from "@/shared/export/downloadExport"
 import {
+  buildMonthlyProgressQueryParams,
   monthlyProgressKeys,
   useMonthlyProgressParams,
   useMonthlyProgressQuery,
@@ -42,9 +45,23 @@ export default function MonthlyProgressPage() {
   const { can } = usePermissions()
   const canPay = can("payments:create")
   const canUndo = can("payments:delete")
+  const canExport = can("villas:export")
   const [toolbarParams, setToolbarParams] = useSearchParams()
   const { params, setParam, setPage, setLimit } = useMonthlyProgressParams()
   const { data, isLoading, isError, error } = useMonthlyProgressQuery(params)
+  // The villas of the current filters and sort, with the totals: Excel or PDF, every column or the ones chosen.
+  const onExport = useCallback(
+    async (format: "xlsx" | "pdf", signal: AbortSignal) => {
+      await downloadExport({
+        path: "/monthly-progress/export",
+        query: buildMonthlyProgressQueryParams(params, { forExport: true }),
+        format,
+        filenameStem: "monthly-payments",
+        signal,
+      })
+    },
+    [params],
+  )
   const { searchDraft, setSearchDraft } = useDebouncedSearchParam(
     params.search,
     setParam,
@@ -115,15 +132,30 @@ export default function MonthlyProgressPage() {
         title={t("monthlyProgress.title")}
         subtitle={t("monthlyProgress.subtitle")}
         actions={
-          canPay ? (
-            <Button
-              type="button"
-              size="sm"
-              icon="upload"
-              onClick={() => setImportOpen(true)}
-            >
-              {t("monthlyProgress.importPrevious")}
-            </Button>
+          canPay || canExport ? (
+            <>
+              {canPay && (
+                <Button
+                  type="button"
+                  size="sm"
+                  icon="upload"
+                  onClick={() => setImportOpen(true)}
+                >
+                  {t("monthlyProgress.importPrevious")}
+                </Button>
+              )}
+              {canExport && (
+                <ListPageHeaderActions
+                  showImport={false}
+                  exportAction={{
+                    kind: "menu",
+                    total: data?.meta.total,
+                    listLoading: isLoading,
+                    onExport,
+                  }}
+                />
+              )}
+            </>
           ) : undefined
         }
       />

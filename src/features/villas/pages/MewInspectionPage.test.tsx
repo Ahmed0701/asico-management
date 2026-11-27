@@ -9,6 +9,7 @@ import {
 import { I18nextProvider } from "react-i18next"
 import { MemoryRouter } from "react-router"
 import { beforeEach, describe, expect, it, vi } from "vitest"
+import { ExportProvider } from "@/shared/export/ExportProvider"
 import i18n from "@/shared/i18n"
 import type { VillaListItem } from "../api"
 import MewInspectionPage from "./MewInspectionPage"
@@ -49,6 +50,7 @@ const villa = (
   mewAcState: "APPROVED",
   mewElecState: "APPROVED",
   mewInspectionDate: inspectionDay,
+  electricityConnectionDate: null,
   version: 1,
   createdAt: "2026-01-01T00:00:00.000Z",
   updatedAt: "2026-11-01T00:00:00.000Z",
@@ -75,11 +77,16 @@ vi.mock("@/shared/api/client", async (importActual) => ({
   ...(await importActual<typeof import("@/shared/api/client")>()),
   api: http,
 }))
-const perms = vi.hoisted(() => ({ edit: true }))
+const perms = vi.hoisted(() => ({ edit: true, export: true }))
 vi.mock("@/features/auth/api", async (importActual) => ({
   ...(await importActual<typeof import("@/features/auth/api")>()),
   usePermissions: () => ({
-    can: (code: string) => code !== "villas:inspection" || perms.edit,
+    can: (code: string) =>
+      code === "villas:inspection"
+        ? perms.edit
+        : code === "villas:export"
+          ? perms.export
+          : true,
   }),
 }))
 
@@ -111,7 +118,9 @@ function renderPage() {
     >
       <I18nextProvider i18n={i18n}>
         <MemoryRouter initialEntries={["/villas/mew-inspection"]}>
-          <MewInspectionPage />
+          <ExportProvider>
+            <MewInspectionPage />
+          </ExportProvider>
         </MemoryRouter>
       </I18nextProvider>
     </QueryClientProvider>,
@@ -121,6 +130,7 @@ function renderPage() {
 beforeEach(() => {
   vi.clearAllMocks()
   perms.edit = true
+  perms.export = true
 })
 
 describe("MEW Inspection: the list", () => {
@@ -240,5 +250,26 @@ describe("MEW Inspection: the inspection report", () => {
     expect(within(v1).queryByRole("button", { name: /Replace/ })).toBeNull()
     const v2 = screen.getByRole("link", { name: "V-2" }).closest("tr")!
     expect(within(v2).getByText("No report yet")).toBeTruthy()
+  })
+
+  it("offers the MEW Inspection export, with every option, to who may export villas", async () => {
+    renderPage()
+    await screen.findByRole("link", { name: "V-1" })
+    fireEvent.click(screen.getByRole("button", { name: /Export list/ }))
+    for (const option of [
+      "Excel (.xlsx)",
+      "PDF",
+      "Excel, choose columns…",
+      "PDF, choose columns…",
+    ]) {
+      expect(await screen.findByRole("menuitem", { name: option })).toBeTruthy()
+    }
+  })
+
+  it("has no export without villas:export", async () => {
+    perms.export = false
+    renderPage()
+    await screen.findByRole("link", { name: "V-1" })
+    expect(screen.queryByRole("button", { name: /Export list/ })).toBeNull()
   })
 })

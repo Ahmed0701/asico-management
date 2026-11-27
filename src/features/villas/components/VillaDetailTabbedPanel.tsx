@@ -11,14 +11,16 @@ import VillaDetailSmallWorksPanel from "./VillaDetailSmallWorksPanel"
 import VillaDetailSiteReportsPanel from "./VillaDetailSiteReportsPanel"
 import VillaDetailDocumentsPanel from "./VillaDetailDocumentsPanel"
 import VillaMaterialsPanel from "@/features/materials/components/VillaMaterialsPanel"
+import VillaStorePanel from "@/features/store/components/VillaStorePanel"
 
-type VillaTab = "openWorks" | "smallWorks" | "siteReports" | "materials" | "documents" | "contractors"
+type VillaTab = "openWorks" | "smallWorks" | "siteReports" | "materials" | "store" | "documents" | "contractors"
 
 const TAB_IDS: VillaTab[] = [
   "openWorks",
   "smallWorks",
   "siteReports",
   "materials",
+  "store",
   "documents",
   "contractors",
 ]
@@ -40,6 +42,7 @@ export default function VillaDetailTabbedPanel({
   const showDocuments = can("villa-documents:download")
   const canDailyReports = can("daily-reports:read")
   const showMaterials = can("materials:read")
+  const showStore = can("store:read")
   const initialTab = useMemo(
     () => tabFromSearch(searchParams.get("tab")) ?? "openWorks",
     [searchParams],
@@ -68,6 +71,9 @@ export default function VillaDetailTabbedPanel({
     ...(showMaterials
       ? [{ id: "materials" as const, label: t("villas.tabs.materials") }]
       : []),
+    ...(showStore
+      ? [{ id: "store" as const, label: t("villas.tabs.store") }]
+      : []),
     ...(showDocuments
       ? [{ id: "documents" as const, label: t("villas.tabs.documents") }]
       : []),
@@ -93,6 +99,7 @@ export default function VillaDetailTabbedPanel({
         {tab === "materials" && showMaterials && (
           <VillaMaterialsPanel villaId={villa.id} />
         )}
+        {tab === "store" && showStore && <VillaStorePanel villaId={villa.id} />}
         {tab === "documents" && showDocuments && (
           <VillaDetailDocumentsPanel villaId={villa.id} />
         )}

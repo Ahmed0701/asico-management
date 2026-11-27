@@ -70,6 +70,8 @@ export type VillaListItem = {
   mewElecState: MewState
   /** The day MEW is to inspect the villa, YYYY-MM-DD; null until it is picked. */
   mewInspectionDate: string | null
+  /** The day MEW connected the villa's electricity, YYYY-MM-DD; null until it is set. */
+  electricityConnectionDate: string | null
   version: number
   createdAt: string
   updatedAt: string

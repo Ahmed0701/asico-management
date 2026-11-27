@@ -10,11 +10,12 @@ import type {
 
 export function buildMonthlyProgressQueryParams(
   params: MonthlyProgressParams,
+  options?: { forExport?: boolean },
 ): Record<string, string | number> {
-  const out: Record<string, string | number> = {
-    page: params.page,
-    limit: params.limit,
-  }
+  // An export takes the filters and the sort, never a page.
+  const out: Record<string, string | number> = options?.forExport
+    ? {}
+    : { page: params.page, limit: params.limit }
   if (params.search) out.search = params.search
   if (params.sort) out.sort = params.sort
   if (params.owed !== undefined) out.owed = params.owed ? "true" : "false"

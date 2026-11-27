@@ -9,6 +9,7 @@ import {
 import { I18nextProvider } from "react-i18next"
 import { MemoryRouter } from "react-router"
 import { beforeEach, describe, expect, it, vi } from "vitest"
+import { ExportProvider } from "@/shared/export/ExportProvider"
 import i18n from "@/shared/i18n"
 import type { MonthlyProgressItem, ProgressPayment } from "../api"
 import MonthlyProgressPage from "./MonthlyProgressPage"
@@ -60,11 +61,14 @@ vi.mock("@/shared/api/client", async (importActual) => ({
   ...(await importActual<typeof import("@/shared/api/client")>()),
   api: http,
 }))
-const perms = vi.hoisted(() => ({ pay: true }))
+const perms = vi.hoisted(() => ({ pay: true, export: true }))
 vi.mock("@/features/auth/api", async (importActual) => ({
   ...(await importActual<typeof import("@/features/auth/api")>()),
   usePermissions: () => ({
-    can: (code: string) => !code.startsWith("payments:") || perms.pay,
+    can: (code: string) =>
+      code === "villas:export"
+        ? perms.export
+        : !code.startsWith("payments:") || perms.pay,
   }),
 }))
 
@@ -100,7 +104,9 @@ function renderPage(entry = "/monthly-progress") {
     >
       <I18nextProvider i18n={i18n}>
         <MemoryRouter initialEntries={[entry]}>
-          <MonthlyProgressPage />
+          <ExportProvider>
+            <MonthlyProgressPage />
+          </ExportProvider>
         </MemoryRouter>
       </I18nextProvider>
     </QueryClientProvider>,
@@ -114,6 +120,7 @@ const lastListParams = () =>
 beforeEach(() => {
   vi.clearAllMocks()
   perms.pay = true
+  perms.export = true
 })
 
 describe("Monthly Payments", () => {
@@ -203,6 +210,28 @@ describe("Monthly Payments", () => {
     )
     const dialog = await screen.findByRole("dialog")
     expect(within(dialog).getByText("Import previous payments")).toBeTruthy()
+  })
+
+  it("offers the export, with every option, to who may export villas, and only to them", async () => {
+    renderPage()
+    // The menu opens once the list has loaded (it shows how many records it exports).
+    await screen.findByRole("link", { name: "V-2" })
+    fireEvent.click(screen.getByRole("button", { name: /Export list/ }))
+    for (const option of [
+      "Excel (.xlsx)",
+      "PDF",
+      "Excel, choose columns…",
+      "PDF, choose columns…",
+    ]) {
+      expect(await screen.findByRole("menuitem", { name: option })).toBeTruthy()
+    }
+  })
+
+  it("has no export without villas:export", async () => {
+    perms.export = false
+    renderPage()
+    await screen.findByRole("link", { name: "V-2" })
+    expect(screen.queryByRole("button", { name: /Export list/ })).toBeNull()
   })
 
   it("hides Pay and Undo without the payments permissions", async () => {

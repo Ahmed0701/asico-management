@@ -30,6 +30,7 @@ export function mergeListItemIntoDetail(
     mewAcState: item.mewAcState,
     mewElecState: item.mewElecState,
     mewInspectionDate: item.mewInspectionDate,
+    electricityConnectionDate: item.electricityConnectionDate,
     version: item.version,
     createdAt: item.createdAt,
     updatedAt: item.updatedAt,

@@ -1,10 +1,11 @@
 import { useTranslation } from "react-i18next"
-import { BadgeCheck } from "lucide-react"
+import { BadgeCheck, PlugZap } from "lucide-react"
 import { VillaCell } from "@/shared/list/cells"
 import SortableHead from "@/shared/list/SortableHead"
 import { cn } from "@/shared/lib/cn"
 import { formatDate, formatDateTime } from "@/shared/lib/format"
 import Button from "@/shared/ui/Button"
+import { Input } from "@/shared/ui/input"
 import { TableBodySkeleton } from "@/shared/ui/loading-skeletons"
 import {
   Table,
@@ -19,7 +20,7 @@ import MewApprovalPill from "./MewApprovalPill"
 import MewReportCell from "./MewReportCell"
 import { daysSince } from "./mewFollowUpStage"
 
-const COLUMN_COUNT = 6
+const COLUMN_COUNT = 7
 
 type Props = {
   rows: VillaListItem[]
@@ -30,11 +31,14 @@ type Props = {
   busyId: string | null
   reportOf: (villaId: string) => MewReport | undefined
   onTakeBack: (row: VillaListItem) => void
+  /** Saves the electricity connection day (YYYY-MM-DD), or clears it with an empty value. */
+  onSaveConnectionDate: (row: VillaListItem, day: string) => void
 }
 
 /**
  * The villas that passed the MEW inspection: the villa with its owner and location, its two MEW approvals and inspection
- * day, when it passed (and who said so), its inspection report, and the button that sends it back to the inspection list.
+ * day, when it passed (and who said so), the day MEW connected its electricity, its inspection report, and the button that
+ * sends it back to the inspection list.
  */
 export default function MewPassedTable({
   rows,
@@ -45,6 +49,7 @@ export default function MewPassedTable({
   busyId,
   reportOf,
   onTakeBack,
+  onSaveConnectionDate,
 }: Props) {
   const { t } = useTranslation()
   const head = "px-4 py-2.5"
@@ -69,6 +74,9 @@ export default function MewPassedTable({
               </TableHead>
               <TableHead className={head}>
                 {t("mewInspectionPassed.passedOn")}
+              </TableHead>
+              <TableHead className={head}>
+                {t("mewInspectionPassed.connectionDate")}
               </TableHead>
               <TableHead className={head}>
                 {t("mewInspection.report.title")}
@@ -167,6 +175,43 @@ export default function MewPassedTable({
                         </span>
                       ) : (
                         <span className="text-muted-foreground">-</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="px-4 py-3">
+                      {canEdit ? (
+                        <div className="grid gap-1">
+                          <Input
+                            type="date"
+                            className="h-8 w-40 text-xs"
+                            aria-label={t(
+                              "mewInspectionPassed.connectionDateOf",
+                              { name: row.villaNumber },
+                            )}
+                            value={row.electricityConnectionDate ?? ""}
+                            disabled={busyId === row.id}
+                            onChange={(e) =>
+                              onSaveConnectionDate(row, e.target.value)
+                            }
+                          />
+                          {!row.electricityConnectionDate && (
+                            <span className="text-[11px] text-muted-foreground">
+                              {t("mewInspectionPassed.notConnected")}
+                            </span>
+                          )}
+                        </div>
+                      ) : row.electricityConnectionDate ? (
+                        <span className="inline-flex items-center gap-1.5 text-sm tabular-nums whitespace-nowrap">
+                          <PlugZap
+                            size={14}
+                            aria-hidden
+                            className="text-success"
+                          />
+                          {formatDate(row.electricityConnectionDate)}
+                        </span>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">
+                          {t("mewInspectionPassed.notConnected")}
+                        </span>
                       )}
                     </TableCell>
                     <TableCell className="px-4 py-3">

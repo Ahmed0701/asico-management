@@ -20,6 +20,10 @@ type SearchSelectProps = {
   disabled?: boolean
   loading?: boolean
   className?: string
+  /** Draws an option in the list (the label is still what is searched and what the field shows). */
+  renderOption?: (option: SearchOption) => React.ReactNode
+  /** The style of the field's text while it shows the chosen option (a color, for example). */
+  selectedStyle?: React.CSSProperties
 } & Omit<React.ComponentProps<"input">, "value" | "onChange" | "disabled" | "className" | "placeholder">
 
 /**
@@ -38,6 +42,8 @@ export const SearchSelect =
       disabled = false,
       loading = false,
       className,
+      renderOption,
+      selectedStyle,
       ...inputProps
     },
     ref,
@@ -122,6 +128,7 @@ export const SearchSelect =
           onClick={() => setOpen(true)}
           onBlur={close}
           onKeyDown={onKeyDown}
+          style={!open && selected ? selectedStyle : undefined}
           className={cn(
             fieldControlClassName,
             "flex h-9 w-full min-w-0 rounded-md py-1 ps-3 text-base md:text-sm",
@@ -177,7 +184,9 @@ export const SearchSelect =
                     choose(option)
                   }}
                 >
-                  <span className="truncate">{option.label}</span>
+                  <span className="truncate">
+                    {renderOption ? renderOption(option) : option.label}
+                  </span>
                   {option.value === value && (
                     <Icon
                       name="check"
@@ -201,12 +210,16 @@ export function SearchFilterSelect({
   onChange,
   options,
   className,
+  renderOption,
+  selectedStyle,
 }: {
   label: string
   value: string
   onChange: (value: string) => void
   options: SearchOption[]
   className?: string
+  renderOption?: (option: SearchOption) => React.ReactNode
+  selectedStyle?: React.CSSProperties
 }) {
   const { t } = useTranslation()
   const id = React.useId()
@@ -223,6 +236,8 @@ export function SearchFilterSelect({
         placeholder={t("common.all")}
         clearable
         className="bg-card"
+        renderOption={renderOption}
+        selectedStyle={selectedStyle}
       />
     </div>
   )

@@ -61,6 +61,22 @@ export default function VillaDetailMewCard({ villa }: { villa: VillaDetail }) {
               </span>
             )}
           </DetailField>
+          <DetailField boxed label={t("mewInspectionPassed.connectionDate")}>
+            {villa.electricityConnectionDate ? (
+              <time
+                dateTime={villa.electricityConnectionDate}
+                className="text-sm tabular-nums"
+              >
+                {formatCalendarDateUtc(
+                  `${villa.electricityConnectionDate}T00:00:00.000Z`,
+                )}
+              </time>
+            ) : (
+              <span className="text-sm text-muted-foreground">
+                {t("mewInspectionPassed.notConnected")}
+              </span>
+            )}
+          </DetailField>
           <DetailField boxed label={t("villas.mewFollowUpStep")}>
             <MewStep mark={villa.mewFollowUp} yes={t("villas.mewYes")} />
           </DetailField>

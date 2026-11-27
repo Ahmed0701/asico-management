@@ -55,7 +55,8 @@ export default function MewFollowUpPage() {
         path: "/villas/export",
         query: buildVillasQueryParams(params, { forExport: true }),
         format,
-        filenameStem: "villas",
+        // The server writes the MEW Follow Up columns for this filter.
+        filenameStem: "mew-follow-up",
         signal,
       })
     },

@@ -8,7 +8,7 @@ import { SIDEBAR_COUNT_KEY } from "./sidebarCountKey"
 /**
  * The counts shown next to some sidebar entries, each with the same filters as its page, so the number is what the page lists:
  * open works not done, small works still pending, every area, villas on MEW follow up, villas on MEW inspection that have not
- * passed, maintenance villas still open, owner notes and foreman missions still open, payments overdue.
+ * passed, maintenance villas still open, owner notes and foreman missions still open, store items low on stock, payments overdue.
  */
 const COUNTS = [
   {
@@ -59,6 +59,13 @@ const COUNTS = [
     permission: "foreman-missions:read",
     path: "/foreman-missions",
     params: { done: "false" },
+  },
+  {
+    key: "store",
+    permission: "store:read",
+    path: "/store/items",
+    // Active items at or below their minimum.
+    params: { low: "true" },
   },
   {
     key: "payments",

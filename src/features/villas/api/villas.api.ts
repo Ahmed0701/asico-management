@@ -221,6 +221,7 @@ export type MewStatesInput = {
   mewAcState?: MewState
   mewElecState?: MewState
   mewInspectionDate?: string | null
+  electricityConnectionDate?: string | null
 }
 
 export async function setVillaMewStates(

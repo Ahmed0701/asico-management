@@ -33,6 +33,8 @@ import MaterialItemsRoute from "@/features/materials/pages/MaterialItemsRoute"
 import VendorsRoute from "@/features/vendors/pages/VendorsRoute"
 import MaintenanceSolvedRoute from "@/features/maintenance/pages/MaintenanceSolvedRoute"
 import OwnerNotesRoute from "@/features/owner-notes/pages/OwnerNotesRoute"
+import StoreRoute from "@/features/store/pages/StoreRoute"
+import ItemReferenceRoute from "@/features/store/pages/ItemReferenceRoute"
 import MonthlyProgressRoute from "@/features/monthly-progress/pages/MonthlyProgressRoute"
 import ProjectBudgetsRoute from "@/features/project-budgets/pages/ProjectBudgetsRoute"
 import DepartmentOverheadRoute from "@/features/overhead/pages/DepartmentOverheadRoute"
@@ -98,6 +100,8 @@ export const router = createBrowserRouter([
                 Component: ForemanMissionsDoneRoute,
               },
               { path: "materials", Component: MaterialsRoute },
+              { path: "store", Component: StoreRoute },
+              { path: "item-reference", Component: ItemReferenceRoute },
               { path: "material-items", Component: MaterialItemsRoute },
               { path: "vendors", Component: VendorsRoute },
               {

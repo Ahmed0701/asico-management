@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useCallback, useState } from "react"
 import { useSearchParams, useNavigate } from "react-router"
 import { useTranslation } from "react-i18next"
 import { usePermissions } from "@/features/auth/api"
@@ -6,12 +6,16 @@ import { useDebouncedSearchParam } from "@/shared/hooks/useDebouncedSearchParam"
 import { normalizeSearchInput } from "@/shared/lib/phone/phoneNormalize"
 import { toast } from "@/shared/lib/toast"
 import PageHeader from "@/shared/ui/PageHeader"
+import ListPageHeaderActions from "@/shared/list/ListPageHeaderActions"
+import { downloadExport } from "@/shared/export/downloadExport"
 import Button from "@/shared/ui/Button"
 import { toApiError } from "@/shared/api/errors"
 import {
+  buildVillasQueryParams,
   useMewInspectionPassedListParams,
   useMewInspectionPassedListQuery,
   useMewReportsQuery,
+  useSetVillaMewStatesMutation,
   useVillaMewInspectionPassedMutation,
   type VillaListItem,
 } from "../api"
@@ -33,6 +37,20 @@ export default function MewInspectionPassedPage() {
   const canEdit = can("villas:inspection")
   const { params, setParam, setPage, setLimit } =
     useMewInspectionPassedListParams()
+  const canExport = can("villas:export")
+  // The passed villas of the current search: the server writes the MEW Inspection Passed columns for this filter.
+  const onExport = useCallback(
+    async (format: "xlsx" | "pdf", signal: AbortSignal) => {
+      await downloadExport({
+        path: "/villas/export",
+        query: buildVillasQueryParams(params, { forExport: true }),
+        format,
+        filenameStem: "mew-inspection-passed",
+        signal,
+      })
+    },
+    [params],
+  )
   const { data, isLoading, isError, error, refetch } =
     useMewInspectionPassedListQuery()
   const { searchDraft, setSearchDraft } = useDebouncedSearchParam(
@@ -41,6 +59,7 @@ export default function MewInspectionPassedPage() {
     normalizeSearchInput,
   )
   const passing = useVillaMewInspectionPassedMutation()
+  const setStates = useSetVillaMewStatesMutation()
   const [busyId, setBusyId] = useState<string | null>(null)
 
   const takeBack = async (row: VillaListItem) => {
@@ -54,6 +73,23 @@ export default function MewInspectionPassedPage() {
       toast.success(
         t("mewInspectionPassed.movedBack", { name: row.villaNumber }),
       )
+    } catch (err) {
+      toast.error(toApiError(err).message)
+      void refetch()
+    } finally {
+      setBusyId(null)
+    }
+  }
+
+  // The day MEW connected the villa's electricity, saved as soon as it is picked (or cleared).
+  const saveConnectionDate = async (row: VillaListItem, day: string) => {
+    setBusyId(row.id)
+    try {
+      await setStates.mutateAsync({
+        id: row.id,
+        input: { electricityConnectionDate: day || null },
+        write: { ifMatch: row.version },
+      })
     } catch (err) {
       toast.error(toApiError(err).message)
       void refetch()
@@ -81,14 +117,27 @@ export default function MewInspectionPassedPage() {
         title={t("mewInspectionPassed.title")}
         subtitle={t("mewInspectionPassed.subtitle")}
         actions={
-          <Button
-            type="button"
-            size="sm"
-            icon="chevronLeft"
-            onClick={() => navigate("/villas/mew-inspection")}
-          >
-            {t("mewInspectionPassed.backToInspection")}
-          </Button>
+          <>
+            <Button
+              type="button"
+              size="sm"
+              icon="chevronLeft"
+              onClick={() => navigate("/villas/mew-inspection")}
+            >
+              {t("mewInspectionPassed.backToInspection")}
+            </Button>
+            {canExport && (
+              <ListPageHeaderActions
+                showImport={false}
+                exportAction={{
+                  kind: "menu",
+                  total: meta?.total,
+                  listLoading: isLoading,
+                  onExport,
+                }}
+              />
+            )}
+          </>
         }
       />
       <MewPassedSummary
@@ -119,6 +168,7 @@ export default function MewInspectionPassedPage() {
         busyId={busyId}
         reportOf={reportOf}
         onTakeBack={(row) => void takeBack(row)}
+        onSaveConnectionDate={(row, day) => void saveConnectionDate(row, day)}
       />
       {meta && (
         <VillasListFooter
